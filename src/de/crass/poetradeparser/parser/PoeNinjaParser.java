@@ -1,5 +1,9 @@
-package de.crass.poetradeparser;
+package de.crass.poetradeparser.parser;
 
+import de.crass.poetradeparser.Main;
+import de.crass.poetradeparser.PropertyManager;
+import de.crass.poetradeparser.model.CurrencyID;
+import de.crass.poetradeparser.web.HttpManager;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -10,9 +14,9 @@ public class PoeNinjaParser {
     public static final String currencyURL = "http://poe.ninja/api/Data/GetCurrencyOverview";
 
     // Currency - (Pay<>Sell)
-    private HashMap<PoeTradeWebParser.CurrencyID, Float> currentRates = new HashMap<>();
+    private HashMap<CurrencyID, Float> currentRates = new HashMap<>();
 
-    PoeNinjaParser() {
+    public PoeNinjaParser() {
     }
 
     private void parseCurrency(String league) {
@@ -43,16 +47,16 @@ public class PoeNinjaParser {
             if(currencyObject instanceof JSONObject){
                 JSONObject currency = (JSONObject) currencyObject;
                 String currencyName = currency.getString("currencyTypeName");
-                PoeTradeWebParser.CurrencyID id = PoeTradeWebParser.CurrencyID.get(ninjaToTradeIdMap.get(currencyName));
+                CurrencyID id = CurrencyID.get(ninjaToTradeIdMap.get(currencyName));
                 float chaosValue = currency.getFloat("chaosEquivalent");
                 currentRates.put(id, chaosValue);
             }
         }
     }
 
-    public HashMap<PoeTradeWebParser.CurrencyID, Float> getCurrentRates() {
+    public HashMap<CurrencyID, Float> getCurrentRates() {
         if(currentRates == null || currentRates.isEmpty()){
-            parseCurrency(Main.currentLeague);
+            parseCurrency(PropertyManager.getInstance().getCurrentLeague());
             if(currentRates == null){
                 currentRates = new HashMap<>();
             }

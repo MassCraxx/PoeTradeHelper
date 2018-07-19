@@ -1,4 +1,4 @@
-package de.crass.poetradeparser;
+package de.crass.poetradeparser.web;
 
 import okhttp3.*;
 import org.json.JSONException;

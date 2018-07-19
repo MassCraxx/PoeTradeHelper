@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.shape.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="80.0" minWidth="-Infinity" prefHeight="80.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <HBox fx:id="hbox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="80.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <ImageView fx:id="currencyIcon" fitHeight="100.0" fitWidth="80.0" pickOnBounds="true" preserveRatio="true" HBox.hgrow="NEVER">
+               <image>
+                  <Image url="@../../../../../res/1.png" />
+               </image>
+            </ImageView>
+            <Rectangle height="78.0" stroke="BLACK" strokeType="INSIDE" width="2.0" />
+            <BorderPane prefHeight="200.0" prefWidth="200.0">
+               <bottom>
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Value" textAlignment="CENTER" wrappingWidth="61.13671875" BorderPane.alignment="CENTER">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font>
+                     <BorderPane.margin>
+                        <Insets bottom="10.0" />
+                     </BorderPane.margin>
+                  </Text>
+               </bottom>
+               <top>
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Offers" textAlignment="CENTER" wrappingWidth="61.13671875" BorderPane.alignment="CENTER">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font>
+                     <BorderPane.margin>
+                        <Insets top="10.0" />
+                     </BorderPane.margin>
+                  </Text>
+               </top>
+            </BorderPane>
+            <BorderPane prefHeight="200.0" prefWidth="200.0">
+               <bottom>
+                  <Text fx:id="chaosValue" strokeType="OUTSIDE" strokeWidth="0.0" text="0,32c" textAlignment="CENTER" wrappingWidth="61.13671875" BorderPane.alignment="CENTER">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                     <BorderPane.margin>
+                        <Insets bottom="10.0" />
+                     </BorderPane.margin>
+                  </Text>
+               </bottom>
+               <top>
+                  <Text fx:id="offersText" strokeType="OUTSIDE" strokeWidth="0.0" text="17 (20)" textAlignment="CENTER" wrappingWidth="61.13671875" BorderPane.alignment="CENTER">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                     <BorderPane.margin>
+                        <Insets top="10.0" />
+                     </BorderPane.margin>
+                  </Text>
+               </top>
+            </BorderPane>
+            <Rectangle stroke="BLACK" strokeType="INSIDE" width="2.0" />
+            <BorderPane prefHeight="200.0" prefWidth="200.0">
+               <bottom>
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Sell" textAlignment="CENTER" wrappingWidth="61.13671875" BorderPane.alignment="CENTER">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font>
+                     <BorderPane.margin>
+                        <Insets bottom="10.0" />
+                     </BorderPane.margin>
+                  </Text>
+               </bottom>
+               <top>
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Buy" textAlignment="CENTER" wrappingWidth="61.13671875" BorderPane.alignment="CENTER">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font>
+                     <BorderPane.margin>
+                        <Insets top="10.0" />
+                     </BorderPane.margin>
+                  </Text>
+               </top>
+            </BorderPane>
+            <BorderPane prefHeight="200.0" prefWidth="200.0">
+               <bottom>
+                  <Text fx:id="sellOffer" strokeType="OUTSIDE" strokeWidth="0.0" text="195" textAlignment="CENTER" wrappingWidth="61.13671875" BorderPane.alignment="CENTER">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                     <BorderPane.margin>
+                        <Insets bottom="10.0" />
+                     </BorderPane.margin>
+                  </Text>
+               </bottom>
+               <top>
+                  <Text fx:id="buyOffer" strokeType="OUTSIDE" strokeWidth="0.0" text="200" textAlignment="CENTER" wrappingWidth="61.13671875" BorderPane.alignment="CENTER">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                     <BorderPane.margin>
+                        <Insets top="10.0" />
+                     </BorderPane.margin>
+                  </Text>
+               </top>
+            </BorderPane>
+            <Rectangle height="78.0" stroke="BLACK" strokeType="INSIDE" width="2.0" />
+            <BorderPane prefHeight="200.0" prefWidth="200.0">
+               <bottom>
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Value" textAlignment="CENTER" wrappingWidth="61.13671875" BorderPane.alignment="CENTER">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font>
+                     <BorderPane.margin>
+                        <Insets bottom="10.0" />
+                     </BorderPane.margin>
+                  </Text>
+               </bottom>
+               <top>
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Diff" textAlignment="CENTER" wrappingWidth="61.13671875" BorderPane.alignment="CENTER">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font>
+                     <BorderPane.margin>
+                        <Insets top="10.0" />
+                     </BorderPane.margin>
+                  </Text>
+               </top>
+            </BorderPane>
+            <BorderPane prefHeight="200.0" prefWidth="200.0">
+               <bottom>
+                  <Text fx:id="diffValue" strokeType="OUTSIDE" strokeWidth="0.0" text="6,2c" textAlignment="CENTER" wrappingWidth="61.13671875" BorderPane.alignment="CENTER">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                     <BorderPane.margin>
+                        <Insets bottom="10.0" />
+                     </BorderPane.margin>
+                  </Text>
+               </bottom>
+               <top>
+                  <Text fx:id="diff" strokeType="OUTSIDE" strokeWidth="0.0" text="14" textAlignment="CENTER" wrappingWidth="61.13671875" BorderPane.alignment="CENTER">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                     <BorderPane.margin>
+                        <Insets top="10.0" />
+                     </BorderPane.margin>
+                  </Text>
+               </top>
+            </BorderPane>
+         </children>
+      </HBox>
+   </children>
+</AnchorPane>

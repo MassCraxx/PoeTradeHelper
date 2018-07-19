@@ -1,95 +1,115 @@
-package de.crass.poetradeparser;
+package de.crass.poetradeparser;/**
+ * Created by mcrass on 19.07.2018.
+ */
 
-import javax.swing.*;
-import java.util.Arrays;
-import java.util.List;
+import de.crass.poetradeparser.model.CurrencyDeal;
+import de.crass.poetradeparser.model.CurrencyID;
+import de.crass.poetradeparser.parser.TradeManager;
+import de.crass.poetradeparser.ui.CurrencyOfferCell;
+import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.text.Text;
+import javafx.stage.Stage;
+import javafx.util.Callback;
 
-import static de.crass.poetradeparser.PoeTradeWebParser.CurrencyID.*;
+public class Main extends Application {
 
-public class Main {
+    public static final String versionText = "0.2-SNAPSHOT";
 
-    public static final String version = "0.1";
+    @FXML
+    private TextField console;
 
-    private JPanel mainPanel;
-    private JButton updateButton;
-    private JTable currencyTable;
-    private JTabbedPane tabbedPane1;
-    private JComboBox<PoeTradeWebParser.CurrencyID> currencyComboBox;
-    private JList<PoeTradeWebParser.CurrencyID> currencyFilterList;
-    private DefaultListModel<PoeTradeWebParser.CurrencyID> filterListModel;
-    private JComboBox<PoeTradeWebParser.CurrencyID> currencyFilterCB;
-    private JButton currencyFilterAdd;
-    private JButton currencyFilterRem;
-    private final CurrencyTableModel currencyTableModel;
+    @FXML
+    private ComboBox<CurrencyID> primaryComboBox;
 
-    private final List<de.crass.poetradeparser.PoeTradeWebParser.CurrencyID> defaultCurrencyFilter = Arrays.asList(
-            ALCHEMY,
-            SCOURING,
-            ALTERATION,
-            REGAL,
-            CHROMATIC,
-            CHANCE);
+    @FXML
+    private ListView<CurrencyDeal> currencyList;
 
-    public static String currentLeague = "Incursion";
-    private PoeTradeWebParser.CurrencyID primaryCurrency = EXALTED;
+    @FXML
+    private Button updateButton;
+
+    @FXML
+    private Text version;
+
+//    private JPanel mainPanel;
+//    private JButton updateButton;
+//    private JTable currencyTable;
+//    private JTabbedPane tabbedPane1;
+//    private JComboBox<CurrencyID> currencyComboBox;
+//    private JList<CurrencyID> currencyFilterList;
+//    private DefaultListModel<CurrencyID> filterListModel;
+//    private JComboBox<CurrencyID> currencyFilterCB;
+//    private JButton currencyFilterAdd;
+//    private JButton currencyFilterRem;
+//    private CurrencyTableModel currencyTableModel;
+
+    private TradeManager tradeManager;
+
 
     public static void main(String[] args) {
-        Main app = new Main();
-        JFrame jFrame = new JFrame("PoeTradeParser");
-        jFrame.setContentPane(app.mainPanel);
-        jFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        jFrame.pack();
-        jFrame.setVisible(true);
+        launch(args);
     }
 
-    private Main() {
-        currencyTableModel = new CurrencyTableModel();
-        currencyTable.setModel(currencyTableModel);
-        currencyTable.setAutoCreateRowSorter(true);
-//        currencyTable.getColumnModel().getColumn(0).setPreferredWidth(200);
-//        TableRowSorter<SumTableModel> sorter = new TableRowSorter<>(sumTableModel);
-        updateButton.addActionListener(e -> update());
-
-        DefaultComboBoxModel<PoeTradeWebParser.CurrencyID> primaryCurrencyModel = new DefaultComboBoxModel<>(PoeTradeWebParser.CurrencyID.values());
-        currencyComboBox.setModel(primaryCurrencyModel);
-        currencyComboBox.setSelectedItem(primaryCurrency);
-        currencyComboBox.addActionListener(e -> {
-            primaryCurrency = (PoeTradeWebParser.CurrencyID) currencyComboBox.getSelectedItem();
-        });
-
-        DefaultComboBoxModel<PoeTradeWebParser.CurrencyID> filterCurrencyModel = new DefaultComboBoxModel<>(PoeTradeWebParser.CurrencyID.values());
-        currencyFilterCB.setModel(filterCurrencyModel);
-
-        filterListModel = new DefaultListModel<>();
-        for (PoeTradeWebParser.CurrencyID id : defaultCurrencyFilter) {
-            filterListModel.addElement(id);
-        }
-        currencyFilterList.setModel(filterListModel);
-
-        currencyFilterAdd.addActionListener(e -> {
-            PoeTradeWebParser.CurrencyID selectedItem = (PoeTradeWebParser.CurrencyID) currencyFilterCB.getSelectedItem();
-            if (!filterListModel.contains(selectedItem)) {
-                filterListModel.addElement(selectedItem);
-            }
-        });
-
-        currencyFilterRem.addActionListener(e -> {
-            PoeTradeWebParser.CurrencyID selectedItem = currencyFilterList.getSelectedValue();
-            if (filterListModel.contains(selectedItem)) {
-                filterListModel.removeElement(selectedItem);
-            }
-        });
+    @Override
+    public void start(Stage primaryStage) throws Exception{
+        Parent root = FXMLLoader.load(getClass().getResource("layout.fxml"));
+        primaryStage.setTitle("PoeTradeParser");
+        primaryStage.setScene(new Scene(root, 640, 480));
+        primaryStage.show();
     }
 
-    private void update() {
-        PoeTradeWebParser webParser = new PoeTradeWebParser();
-        for (Object secondary : filterListModel.toArray()) {
-            if (secondary != primaryCurrency) {
-                webParser.fetchCurrencyOffers(primaryCurrency, (PoeTradeWebParser.CurrencyID) secondary, currentLeague);
-            }
-        }
+    @FXML
+    void initialize() {
+        assert console != null : "fx:id=\"console\" was not injected: check your FXML file 'layout.fxml'.";
+        assert currencyList != null : "fx:id=\"currencyList\" was not injected: check your FXML file 'layout.fxml'.";
+        assert updateButton != null : "fx:id=\"updateButton\" was not injected: check your FXML file 'layout.fxml'.";
+        assert version != null : "fx:id=\"version\" was not injected: check your FXML file 'layout.fxml'.";
 
-        currencyTableModel.update(primaryCurrency, webParser.getCurrentOffers(), webParser.getPlayerOffers());
+        tradeManager = new TradeManager();
+        setupUI();
+    }
+
+    private void setupUI() {
+        version.setText(versionText);
+
+        currencyList.setEditable(false);
+        currencyList.setCellFactory(new Callback<ListView<CurrencyDeal>, ListCell<CurrencyDeal>>() {
+            @Override
+            public ListCell<CurrencyDeal> call(ListView<CurrencyDeal> studentListView) {
+                return new CurrencyOfferCell<>();
+            }
+        });
+
+        ObservableList<CurrencyDeal> currentDeals = tradeManager.getCurrentDeals();
+        currencyList.setItems(currentDeals);
+
+        updateButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                tradeManager.updateOffers();
+            }
+        });
+
+//        ObservableList<CurrencyID> currencyList = FXCollections.observableArrayList(CurrencyID.values());
+        ObservableList<CurrencyID> currencyList = FXCollections.observableArrayList(CurrencyID.EXALTED);
+        primaryComboBox.setItems(currencyList);
+        primaryComboBox.setValue(PropertyManager.getInstance().getPrimaryCurrency());
+        primaryComboBox.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                CurrencyID newValue = primaryComboBox.getValue();
+                PropertyManager.getInstance().setPrimaryCurrency(newValue);
+                tradeManager.parseDeals();
+            }
+        });
     }
 
     public static void log(Class clazz, String log) {

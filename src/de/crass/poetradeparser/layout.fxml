@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.layout.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.crass.poetradeparser.Main">
+   <center>
+      <TabPane prefHeight="480.0" prefWidth="640.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+        <tabs>
+          <Tab text="CurrencyOverview">
+               <content>
+                  <VBox prefHeight="200.0" prefWidth="100.0">
+                     <children>
+                        <ComboBox fx:id="primaryComboBox" maxWidth="1.7976931348623157E308" />
+                        <ListView fx:id="currencyList" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS" />
+                     </children>
+                  </VBox>
+               </content>
+          </Tab>
+          <Tab text="PlayerOverview">
+            <content>
+              <AnchorPane />
+            </content>
+          </Tab>
+            <Tab text="Offers">
+               <content>
+                  <BorderPane prefHeight="200.0" prefWidth="200.0">
+                     <top>
+                        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Not implemented" BorderPane.alignment="CENTER">
+                           <font>
+                              <Font size="39.0" />
+                           </font>
+                           <BorderPane.margin>
+                              <Insets top="100.0" />
+                           </BorderPane.margin>
+                        </Text>
+                     </top>
+                     <bottom>
+                        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="¯\_(ツ)_/¯" BorderPane.alignment="CENTER">
+                           <font>
+                              <Font size="94.0" />
+                           </font>
+                           <BorderPane.margin>
+                              <Insets bottom="100.0" />
+                           </BorderPane.margin>
+                        </Text>
+                     </bottom>
+                  </BorderPane>
+               </content>
+            </Tab>
+            <Tab text="Settings">
+               <content>
+                  <AnchorPane />
+               </content>
+            </Tab>
+        </tabs>
+      </TabPane>
+   </center>
+   <bottom>
+      <HBox BorderPane.alignment="CENTER">
+         <children>
+            <Button id="updateButton" fx:id="updateButton" defaultButton="true" mnemonicParsing="false" text="Update">
+               <HBox.margin>
+                  <Insets left="8.0" right="8.0" />
+               </HBox.margin>
+            </Button>
+            <TextField fx:id="console" alignment="CENTER_RIGHT" editable="false" text="Loading..." HBox.hgrow="SOMETIMES" />
+            <Text fx:id="version" nodeOrientation="RIGHT_TO_LEFT" strokeType="INSIDE" strokeWidth="0.0" text="v0.2-SNAPSHOT">
+               <HBox.margin>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </HBox.margin>
+            </Text>
+         </children>
+      </HBox>
+   </bottom>
+</BorderPane>

@@ -1,5 +1,6 @@
-package de.crass.poetradeparser;
+package de.crass.poetradeparser.parser;
 
+import de.crass.poetradeparser.web.HttpManager;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

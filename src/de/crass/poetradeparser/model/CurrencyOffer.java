@@ -1,15 +1,15 @@
-package de.crass.poetradeparser;
+package de.crass.poetradeparser.model;
 
 public class CurrencyOffer {
     private String playerName;
     private String accountName;
-    private PoeTradeWebParser.CurrencyID sellID;
+    private CurrencyID sellID;
     private float sellValue;
-    private PoeTradeWebParser.CurrencyID buyID;
+    private CurrencyID buyID;
     private float buyValue;
     private int stock;
 
-    public CurrencyOffer(String username, String accountName, PoeTradeWebParser.CurrencyID sellID, float sellValue, PoeTradeWebParser.CurrencyID buyID, float buyValue, int stock) {
+    public CurrencyOffer(String username, String accountName, CurrencyID sellID, float sellValue, CurrencyID buyID, float buyValue, int stock) {
         this.playerName = username;
         this.accountName = accountName;
         this.sellID = sellID;
@@ -27,7 +27,7 @@ public class CurrencyOffer {
         return accountName;
     }
 
-    public PoeTradeWebParser.CurrencyID getSellID() {
+    public CurrencyID getSellID() {
         return sellID;
     }
 
@@ -35,7 +35,7 @@ public class CurrencyOffer {
         return sellValue;
     }
 
-    public PoeTradeWebParser.CurrencyID getBuyID() {
+    public CurrencyID getBuyID() {
         return buyID;
     }
 

@@ -1,4 +1,4 @@
-package de.crass.poetradeparser;
+package de.crass.poetradeparser.model;
 
 import org.json.JSONObject;
 

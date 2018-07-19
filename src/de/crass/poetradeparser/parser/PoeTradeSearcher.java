@@ -1,5 +1,9 @@
-package de.crass.poetradeparser;
+package de.crass.poetradeparser.parser;
 
+import de.crass.poetradeparser.Main;
+import de.crass.poetradeparser.model.ItemOffer;
+import de.crass.poetradeparser.model.PoeTradeQuery;
+import de.crass.poetradeparser.web.HttpManager;
 import okhttp3.*;
 import org.json.JSONArray;
 import org.json.JSONObject;

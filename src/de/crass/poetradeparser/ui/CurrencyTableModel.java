@@ -1,5 +1,9 @@
-package de.crass.poetradeparser;
+package de.crass.poetradeparser.ui;
 
+import de.crass.poetradeparser.Main;
+import de.crass.poetradeparser.parser.PoeNinjaParser;
+import de.crass.poetradeparser.model.CurrencyID;
+import de.crass.poetradeparser.model.CurrencyOffer;
 import javafx.util.Pair;
 
 import javax.swing.table.DefaultTableModel;
@@ -58,12 +62,12 @@ public class CurrencyTableModel extends DefaultTableModel {
         }
     }
 
-    void update(PoeTradeWebParser.CurrencyID primaryCurrency,
-                HashMap<Pair<PoeTradeWebParser.CurrencyID, PoeTradeWebParser.CurrencyID>, List<CurrencyOffer>> offers,
-                HashMap<Pair<PoeTradeWebParser.CurrencyID, PoeTradeWebParser.CurrencyID>, List<CurrencyOffer>> playerOffers) {
+    public void update(CurrencyID primaryCurrency,
+                HashMap<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> offers,
+                HashMap<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> playerOffers) {
         setRowCount(0);
-        for (Map.Entry<Pair<PoeTradeWebParser.CurrencyID, PoeTradeWebParser.CurrencyID>, List<CurrencyOffer>> offerMap : offers.entrySet()) {
-            Pair<PoeTradeWebParser.CurrencyID, PoeTradeWebParser.CurrencyID> key = offerMap.getKey();
+        for (Map.Entry<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> offerMap : offers.entrySet()) {
+            Pair<CurrencyID, CurrencyID> key = offerMap.getKey();
             if (key.getValue() == primaryCurrency) {
                 CurrencyOffer bestOffer = null;
                 for (CurrencyOffer offer : offerMap.getValue()) {

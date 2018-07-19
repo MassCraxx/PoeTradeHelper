@@ -1,6 +1,11 @@
-package de.crass.poetradeparser;
+package de.crass.poetradeparser.parser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.crass.poetradeparser.Main;
+import de.crass.poetradeparser.PropertyManager;
+import de.crass.poetradeparser.model.CurrencyID;
+import de.crass.poetradeparser.model.CurrencyOffer;
+import de.crass.poetradeparser.web.HttpManager;
 import javafx.util.Pair;
 
 import java.io.File;
@@ -23,52 +28,6 @@ public class PoeTradeWebParser {
     private final static int fetchDelay = 800;
     private final static boolean offlineMode = true;
 
-    enum CurrencyID {
-        ALTERATION(1),
-        FUSING(2),
-        ALCHEMY(3),
-        CHAOS(4),
-        GCP(5),
-        EXALTED(6),
-        CHROMATIC(7),
-        JEWELLER(8),
-        CHANCE(9),
-        CHISEL(10),
-        SCOURING(11),
-        BLESSED(12),
-        REGRET(13),
-        REGAL(14),
-        DIVINE(15),
-        VAAL(16),
-        APPRENTICE(45),
-        JOURNEYMAN(46),
-        MASTER(47);
-
-        private final int id;
-
-        CurrencyID(int ID) {
-            id = ID;
-        }
-
-        public int getID() {
-            return id;
-        }
-
-        static PoeTradeWebParser.CurrencyID get(int ID) {
-            for (PoeTradeWebParser.CurrencyID id : values()) {
-                if (id.getID() == ID) {
-                    return id;
-                }
-            }
-            return null;
-        }
-
-        @Override
-        public String toString() {
-            return name().charAt(0) + name().substring(1).toLowerCase();
-        }
-    }
-
     // TODO: Settings
     private List<String> playerCharacterNames = Arrays.asList("SenorDingDong", "FlashZoomDead");
 
@@ -84,6 +43,8 @@ public class PoeTradeWebParser {
     private final static Pattern OFFER_PATTERN_STOCK = Pattern.compile(
             "data-stock=\"(.+)\"");
 
+    private ParseListener parseListener;
+
 
     public PoeTradeWebParser() {
         reset();
@@ -95,7 +56,24 @@ public class PoeTradeWebParser {
 //        currentValidStockOffers = new HashMap<>();
     }
 
-    void fetchCurrencyOffers(CurrencyID primary, CurrencyID secondary, String league) {
+    void update() {
+        Thread runThread = new Thread(() -> {
+            CurrencyID primaryCurrency = PropertyManager.getInstance().getPrimaryCurrency();
+            for (Object secondary : PropertyManager.getInstance().getFilterList().toArray()) {
+                if (secondary != primaryCurrency) {
+                    fetchCurrencyOffers(primaryCurrency, (CurrencyID) secondary, PropertyManager.getInstance().getCurrentLeague());
+                }
+            }
+            if(parseListener != null){
+                parseListener.onParsingFinished();
+            }
+        }, "PoeTradeWebParser");
+        runThread.setDaemon(true);
+
+        runThread.start();
+    }
+
+    public void fetchCurrencyOffers(CurrencyID primary, CurrencyID secondary, String league) {
         try {
             // BUY
             fetchOffers(primary, secondary, league);
@@ -216,5 +194,9 @@ public class PoeTradeWebParser {
 
     public HashMap<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> getPlayerOffers() {
         return playerOffers;
+    }
+
+    public void setParseListener(ParseListener parseListener) {
+        this.parseListener = parseListener;
     }
 }
