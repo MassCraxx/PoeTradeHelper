@@ -1,0 +1,220 @@
+package de.crass.poetradeparser;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import javafx.util.Pair;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class PoeTradeWebParser {
+
+    final static String poeTradeCurrencyURL = "http://currency.poe.trade/search";
+    private HashMap<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> currentOffers;
+    private HashMap<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> playerOffers;
+//    private HashMap<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> currentValidStockOffers;
+
+    private final static int parseStartIndex = 435845;
+    private final static int fetchDelay = 800;
+    private final static boolean offlineMode = true;
+
+    enum CurrencyID {
+        ALTERATION(1),
+        FUSING(2),
+        ALCHEMY(3),
+        CHAOS(4),
+        GCP(5),
+        EXALTED(6),
+        CHROMATIC(7),
+        JEWELLER(8),
+        CHANCE(9),
+        CHISEL(10),
+        SCOURING(11),
+        BLESSED(12),
+        REGRET(13),
+        REGAL(14),
+        DIVINE(15),
+        VAAL(16),
+        APPRENTICE(45),
+        JOURNEYMAN(46),
+        MASTER(47);
+
+        private final int id;
+
+        CurrencyID(int ID) {
+            id = ID;
+        }
+
+        public int getID() {
+            return id;
+        }
+
+        static PoeTradeWebParser.CurrencyID get(int ID) {
+            for (PoeTradeWebParser.CurrencyID id : values()) {
+                if (id.getID() == ID) {
+                    return id;
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public String toString() {
+            return name().charAt(0) + name().substring(1).toLowerCase();
+        }
+    }
+
+    // TODO: Settings
+    private List<String> playerCharacterNames = Arrays.asList("SenorDingDong", "FlashZoomDead");
+
+    private final static Pattern OFFER_PATTERN = Pattern.compile(
+            "class=\"displayoffer \" " +
+                    "data-username=\"(.+)\" " +
+                    "data-sellcurrency=\"(.+)\" " +
+                    "data-sellvalue=\"(.+)\" " +
+                    "data-buycurrency=\"(.+)\" " +
+                    "data-buyvalue=\"(.+)\" " +
+                    "data-ign=\"(.+?)\"(.+)>");
+
+    private final static Pattern OFFER_PATTERN_STOCK = Pattern.compile(
+            "data-stock=\"(.+)\"");
+
+
+    public PoeTradeWebParser() {
+        reset();
+    }
+
+    public void reset() {
+        currentOffers = new HashMap<>();
+        playerOffers = new HashMap<>();
+//        currentValidStockOffers = new HashMap<>();
+    }
+
+    void fetchCurrencyOffers(CurrencyID primary, CurrencyID secondary, String league) {
+        try {
+            // BUY
+            fetchOffers(primary, secondary, league);
+
+            // SELL
+            fetchOffers(secondary, primary, league);
+
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void fetchOffers(CurrencyID primary, CurrencyID secondary, String league) throws IOException, InterruptedException {
+        String buyResponseBody;
+        ObjectMapper objectMapper = new ObjectMapper();
+        File file = new File(primary.toString() + "-" + secondary.toString() + ".html");
+        if (!offlineMode) {
+            Main.log(getClass(), "Fetching " + secondary + " offers for " + primary);
+            String buyQuery = "?league=" + league + "&online=x&want=" + primary.getID() + "&have=" + secondary.getID();
+            buyResponseBody = HttpManager.getInstance().get(poeTradeCurrencyURL, buyQuery);
+
+            objectMapper.writeValue(file, buyResponseBody);
+        } else {
+            Main.log(getClass(), "Offline Fetching " + secondary + " offers for " + primary);
+            if (file.exists()) {
+                buyResponseBody = objectMapper.readValue(file, String.class);
+            } else {
+                Main.log(getClass(), "No file found for: " + primary + " - " + secondary);
+                return;
+            }
+        }
+        parseOffers(buyResponseBody);
+
+        Pair key = new Pair<>(secondary, primary);
+        List<CurrencyOffer> currentOffer = currentOffers.get(key);
+        if(currentOffer != null){
+            Main.log(getClass(), "Parsed Offers: " + currentOffer.size());
+        } else{
+            Main.log(getClass(), "No offers found for " + key);
+        }
+
+        if(!offlineMode)
+        Thread.sleep(fetchDelay);
+    }
+
+    private void parseOffers(String responseBody) {
+        Matcher offerMatcher = OFFER_PATTERN.matcher(responseBody);
+
+        if (!offerMatcher.find(parseStartIndex)) {
+            Main.log(getClass(), "No match found in Response: " + responseBody);
+        } else {
+            do {
+                if (offerMatcher.groupCount() >= 6) {
+                    String stockString = offerMatcher.group(7);
+                    int stock = -1;
+                    if (!stockString.isEmpty()) {
+                        Matcher stockMatcher = OFFER_PATTERN_STOCK.matcher(stockString);
+                        if (stockMatcher.find()) {
+                            stock = Integer.valueOf(stockMatcher.group(1));
+                        }
+                    }
+                    float sell = Float.valueOf(offerMatcher.group(3));
+                    float buy = Float.valueOf(offerMatcher.group(5));
+
+                    CurrencyOffer offer = new CurrencyOffer(
+                            offerMatcher.group(6),
+                            offerMatcher.group(1),
+                            CurrencyID.get(Integer.valueOf(offerMatcher.group(2))),
+                            sell,
+                            CurrencyID.get(Integer.valueOf(offerMatcher.group(4))),
+                            buy,
+                            stock);
+
+                    addOffer(offer);
+                } else {
+                    Main.log(getClass(), "Only found " + offerMatcher.groupCount() + " groups... Insufficient data!");
+                }
+            } while (offerMatcher.find());
+        }
+    }
+
+    private void addOffer(CurrencyOffer offer) {
+        Pair<CurrencyID, CurrencyID> key = new Pair<>(offer.getBuyID(), offer.getSellID());
+        if (playerCharacterNames.contains(offer.getPlayerName())) {
+            Main.log(getClass(), "Skipping player offer " + offer.getPlayerName());
+            List<CurrencyOffer> offers = playerOffers.get(key);
+            if (offers == null) {
+                offers = new LinkedList<>();
+            }
+            offers.add(offer);
+            playerOffers.put(key, offers);
+        } else {
+//            if (offer.getStock() > offer.getSellValue()) {
+//                List<CurrencyOffer> stockOffers = currentValidStockOffers.get(key);
+//                if (stockOffers == null) {
+//                    stockOffers = new LinkedList<>();
+//                }
+//                stockOffers.add(offer);
+//                currentValidStockOffers.put(key, stockOffers);
+//            }
+            List<CurrencyOffer> offers = currentOffers.get(key);
+            if (offers == null) {
+                offers = new LinkedList<>();
+            }
+            offers.add(offer);
+            currentOffers.put(key, offers);
+        }
+    }
+
+    public HashMap<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> getCurrentOffers() {
+        return currentOffers;
+    }
+
+    // FIXME
+    public CurrencyOffer getBestOffer() {
+        return null;
+    }
+
+    public HashMap<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> getPlayerOffers() {
+        return playerOffers;
+    }
+}
