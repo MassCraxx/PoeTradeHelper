@@ -57,6 +57,7 @@ public class PoeTradeWebParser {
     }
 
     void update() {
+        reset();
         Thread runThread = new Thread(() -> {
             CurrencyID primaryCurrency = PropertyManager.getInstance().getPrimaryCurrency();
             for (Object secondary : PropertyManager.getInstance().getFilterList().toArray()) {
@@ -70,7 +71,8 @@ public class PoeTradeWebParser {
         }, "PoeTradeWebParser");
         runThread.setDaemon(true);
 
-        runThread.start();
+        // FIXME: ASYNC
+        runThread.run();
     }
 
     public void fetchCurrencyOffers(CurrencyID primary, CurrencyID secondary, String league) {

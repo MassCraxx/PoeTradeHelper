@@ -11,6 +11,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
 import java.io.*;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 
 /**
  * Created by mcrass on 19.07.2018.
@@ -96,19 +98,31 @@ public class CurrencyOfferCell<T> extends javafx.scene.control.ListCell<Currency
 
             float buy = deal.getBuyAmount();
             float sell = deal.getSellAmount();
-            float diffF = buy - sell;
-            float diffV = diffF * deal.getcValue();
 
-            chaosValue.setText(String.valueOf(deal.getcValue()));
-            offersText.setText(String.valueOf(deal.getOffers()));
-            buyOffer.setText(String.valueOf(buy));
-            sellOffer.setText(String.valueOf(sell));
-            diff.setText(String.valueOf((diffF)));
-            diffValue.setText(String.valueOf((diffV)));
+            float diffF = 0;
+            float diffV = 0;
+            if(buy != 0 && sell != 0){
+                diffF = buy - sell;
+                diffV = diffF * deal.getcValue();
+            }
+
+            chaosValue.setText(prettyFloat(deal.getcValue()) + "c");
+            offersText.setText(prettyFloat(deal.getOffers()));
+            buyOffer.setText(prettyFloat(buy));
+            sellOffer.setText(prettyFloat(sell));
+            diff.setText(prettyFloat((diffF)));
+            diffValue.setText(prettyFloat((diffV)) + "c");
 
             setGraphic(root);
         }
 
+    }
+
+    String prettyFloat(float in){
+//        return String.format(Locale.ENGLISH, "%.2f", in);
+        DecimalFormat df = new DecimalFormat("#.#");
+        df.setRoundingMode(RoundingMode.CEILING);
+        return String.valueOf(df.format(in));
     }
 
 }
