@@ -1,7 +1,7 @@
 package de.crass.poetradeparser.parser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.crass.poetradeparser.Main;
+import de.crass.poetradeparser.LogManager;
 import de.crass.poetradeparser.PropertyManager;
 import de.crass.poetradeparser.model.CurrencyID;
 import de.crass.poetradeparser.model.CurrencyOffer;
@@ -10,7 +10,6 @@ import javafx.util.Pair;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,14 +21,10 @@ public class PoeTradeWebParser {
     final static String poeTradeCurrencyURL = "http://currency.poe.trade/search";
     private HashMap<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> currentOffers;
     private HashMap<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> playerOffers;
-//    private HashMap<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> currentValidStockOffers;
 
     private final static int parseStartIndex = 435845;
     private final static int fetchDelay = 800;
     private final static boolean offlineMode = true;
-
-    // TODO: Settings
-    private List<String> playerCharacterNames = Arrays.asList("SenorDingDong", "FlashZoomDead");
 
     private final static Pattern OFFER_PATTERN = Pattern.compile(
             "class=\"displayoffer \" " +
@@ -93,17 +88,17 @@ public class PoeTradeWebParser {
         ObjectMapper objectMapper = new ObjectMapper();
         File file = new File(primary.toString() + "-" + secondary.toString() + ".html");
         if (!offlineMode) {
-            Main.log(getClass(), "Fetching " + secondary + " offers for " + primary);
+            LogManager.getInstance().log(getClass(), "Fetching " + secondary + " offers for " + primary);
             String buyQuery = "?league=" + league + "&online=x&want=" + primary.getID() + "&have=" + secondary.getID();
             buyResponseBody = HttpManager.getInstance().get(poeTradeCurrencyURL, buyQuery);
 
             objectMapper.writeValue(file, buyResponseBody);
         } else {
-            Main.log(getClass(), "Offline Fetching " + secondary + " offers for " + primary);
+            LogManager.getInstance().log(getClass(), "Offline Fetching " + secondary + " offers for " + primary);
             if (file.exists()) {
                 buyResponseBody = objectMapper.readValue(file, String.class);
             } else {
-                Main.log(getClass(), "No file found for: " + primary + " - " + secondary);
+                LogManager.getInstance().log(getClass(), "No file found for: " + primary + " - " + secondary);
                 return;
             }
         }
@@ -112,9 +107,9 @@ public class PoeTradeWebParser {
         Pair key = new Pair<>(secondary, primary);
         List<CurrencyOffer> currentOffer = currentOffers.get(key);
         if(currentOffer != null){
-            Main.log(getClass(), "Parsed Offers: " + currentOffer.size());
+            LogManager.getInstance().log(getClass(), "Parsed Offers: " + currentOffer.size());
         } else{
-            Main.log(getClass(), "No offers found for " + key);
+            LogManager.getInstance().log(getClass(), "No offers found for " + key);
         }
 
         if(!offlineMode)
@@ -125,7 +120,7 @@ public class PoeTradeWebParser {
         Matcher offerMatcher = OFFER_PATTERN.matcher(responseBody);
 
         if (!offerMatcher.find(parseStartIndex)) {
-            Main.log(getClass(), "No match found in Response: " + responseBody);
+            LogManager.getInstance().log(getClass(), "No match found in Response: " + responseBody);
         } else {
             do {
                 if (offerMatcher.groupCount() >= 6) {
@@ -151,7 +146,7 @@ public class PoeTradeWebParser {
 
                     addOffer(offer);
                 } else {
-                    Main.log(getClass(), "Only found " + offerMatcher.groupCount() + " groups... Insufficient data!");
+                    LogManager.getInstance().log(getClass(), "Only found " + offerMatcher.groupCount() + " groups... Insufficient data!");
                 }
             } while (offerMatcher.find());
         }
@@ -159,8 +154,8 @@ public class PoeTradeWebParser {
 
     private void addOffer(CurrencyOffer offer) {
         Pair<CurrencyID, CurrencyID> key = new Pair<>(offer.getBuyID(), offer.getSellID());
-        if (playerCharacterNames.contains(offer.getPlayerName())) {
-            Main.log(getClass(), "Skipping player offer " + offer.getPlayerName());
+        if (PropertyManager.getInstance().getPlayerList().contains(offer.getPlayerName())) {
+            LogManager.getInstance().log(getClass(), "Skipping player offer " + offer.getPlayerName());
             List<CurrencyOffer> offers = playerOffers.get(key);
             if (offers == null) {
                 offers = new LinkedList<>();
@@ -192,6 +187,18 @@ public class PoeTradeWebParser {
     // FIXME
     public CurrencyOffer getBestOffer() {
         return null;
+    }
+
+    public CurrencyOffer getBestOfferForKey(List<CurrencyOffer> list, boolean filterStockOffers, boolean filterValidStockOffers){
+        CurrencyOffer bestOffer = null;
+        for (CurrencyOffer offer : list) {
+            if (!filterStockOffers || (!filterValidStockOffers && offer.getStock() >= 0) ||
+                    filterValidStockOffers && offer.getStock() > offer.getSellValue()) {
+                bestOffer = offer;
+                break;
+            }
+        }
+        return bestOffer;
     }
 
     public HashMap<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> getPlayerOffers() {

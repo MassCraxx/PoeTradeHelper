@@ -1,9 +1,9 @@
 package de.crass.poetradeparser.ui;
 
-import de.crass.poetradeparser.Main;
-import de.crass.poetradeparser.parser.PoeNinjaParser;
+import de.crass.poetradeparser.LogManager;
 import de.crass.poetradeparser.model.CurrencyID;
 import de.crass.poetradeparser.model.CurrencyOffer;
+import de.crass.poetradeparser.parser.PoeNinjaParser;
 import javafx.util.Pair;
 
 import javax.swing.table.DefaultTableModel;
@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+// AWT Swing UI
+@Deprecated
 public class CurrencyTableModel extends DefaultTableModel {
 
     private final PoeNinjaParser poeNinjaParser;
@@ -82,19 +84,19 @@ public class CurrencyTableModel extends DefaultTableModel {
 
                 float buy = 0;
                 if (bestOffer == null) {
-                    Main.log(getClass(), "All buy offers filtered for " + currency);
+                    LogManager.getInstance().log(getClass(), "All buy offers filtered for " + currency);
 
                 } else {
                     buy = bestOffer.getBuyValue();
                     if (bestOffer.getSellValue() != 1) {
-                        Main.log(getClass(), "Currency rate for " + currency + " was not normalized!");
+                        LogManager.getInstance().log(getClass(), "Currency rate for " + currency + " was not normalized!");
                         buy /= bestOffer.getSellValue();
                     }
                 }
 
                 Float cValue = poeNinjaParser.getCurrentRates().get(key.getKey());
                 if (cValue == null) {
-                    Main.log(getClass(), "Could not get rate for " + currency);
+                    LogManager.getInstance().log(getClass(), "Could not get rate for " + currency);
                     cValue = 0f;
                 }
 
@@ -111,12 +113,12 @@ public class CurrencyTableModel extends DefaultTableModel {
 
                 float sell = 0;
                 if (bestInvertedOffer == null) {
-                    Main.log(getClass(), "All sell offers filtered for " + currency);
+                    LogManager.getInstance().log(getClass(), "All sell offers filtered for " + currency);
                 } else {
 
                     sell = bestInvertedOffer.getSellValue();
                     if (bestInvertedOffer.getBuyValue() != 1) {
-                        Main.log(getClass(), "Currency rate for " + currency + " was not normalized!");
+                        LogManager.getInstance().log(getClass(), "Currency rate for " + currency + " was not normalized!");
                         sell /= bestInvertedOffer.getBuyValue();
                     }
                 }

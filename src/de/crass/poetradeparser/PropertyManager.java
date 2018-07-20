@@ -1,6 +1,8 @@
 package de.crass.poetradeparser;
 
 import de.crass.poetradeparser.model.CurrencyID;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,6 +25,8 @@ public class PropertyManager {
             REGAL,
             CHROMATIC,
             CHANCE);
+
+    private ObservableList<String> playerCharacterNames =  FXCollections.observableArrayList("SenorDingDong", "FlashZoomDead");
 
     //TODO: Filter
     private List<CurrencyID> filterList = defaultCurrencyFilter;
@@ -48,5 +52,16 @@ public class PropertyManager {
 
     public void setPrimaryCurrency(CurrencyID primaryCurrency) {
         this.primaryCurrency = primaryCurrency;
+    }
+
+    public ObservableList<String> getPlayerList() {
+        return playerCharacterNames;
+    }
+
+    public void addPlayer(String characterName){
+        playerCharacterNames.add(characterName);
+    }
+    public void removePlayer(String characterName){
+        playerCharacterNames.remove(characterName);
     }
 }

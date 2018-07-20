@@ -1,10 +1,10 @@
 package de.crass.poetradeparser.parser;
 
-import de.crass.poetradeparser.Main;
+import de.crass.poetradeparser.LogManager;
 import de.crass.poetradeparser.model.ItemOffer;
 import de.crass.poetradeparser.model.PoeTradeQuery;
 import de.crass.poetradeparser.web.HttpManager;
-import okhttp3.*;
+import okhttp3.MediaType;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -28,13 +28,13 @@ public class PoeTradeSearcher {
 
 
     public List<String> searchForItemType(String league, String type) {
-        Main.log(getClass(), "Searching for " + type + " in " + league + " League");
+        LogManager.getInstance().log(getClass(), "Searching for " + type + " in " + league + " League");
         String url = poeTradeApiURL.replace(LEAGUE_KEY, league);
         String query = new PoeTradeQuery(null, type).getQuery();
         try {
             JSONObject response = HttpManager.getInstance().postJSON(url, query);
             if (!response.has("result")) {
-                Main.log(getClass(), "Invalid Response! " + response);
+                LogManager.getInstance().log(getClass(), "Invalid Response! " + response);
                 return null;
             }
             String searchID = response.getString("id");
@@ -47,13 +47,13 @@ public class PoeTradeSearcher {
     }
 
     public List<String> searchForItem(String league, String name, String type, int results) {
-        Main.log(getClass(), "Searching for " + name + " in " + league + " League");
+        LogManager.getInstance().log(getClass(), "Searching for " + name + " in " + league + " League");
         String url = poeTradeApiURL.replace(LEAGUE_KEY, league);
         String query = new PoeTradeQuery(name, type).getQuery();
         try {
             JSONObject response = HttpManager.getInstance().postJSON(url, query);
             if (!response.has("result")) {
-                Main.log(getClass(), "Invalid Response! " + response);
+                LogManager.getInstance().log(getClass(), "Invalid Response! " + response);
                 return null;
             }
             String searchID = response.getString("id");
@@ -75,7 +75,7 @@ public class PoeTradeSearcher {
             try {
                 JSONObject response = HttpManager.getInstance().getJson(fetchURL, offerID + "?query=" + searchID);
                 if (!response.has("result")) {
-                    Main.log(getClass(), "Fetching ItemOffer failed! " + response.toString());
+                    LogManager.getInstance().log(getClass(), "Fetching ItemOffer failed! " + response.toString());
                     return result;
                 }
                 result.add(response.toString());

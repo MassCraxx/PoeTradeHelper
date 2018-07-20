@@ -7,8 +7,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane fx:id="root" maxHeight="Infinity" maxWidth="Infinity" minHeight="80.0" minWidth="-Infinity"
-            prefHeight="80.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane fx:id="root" maxHeight="Infinity" maxWidth="Infinity" minHeight="80.0" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <HBox fx:id="hbox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="80.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
@@ -17,7 +16,7 @@
                   <Image url="@../../../../../res/1.png" />
                </image>
             </ImageView>
-            <Rectangle height="78.0" stroke="BLACK" strokeType="INSIDE" width="2.0" />
+            <Rectangle height="80.0" stroke="BLACK" strokeType="INSIDE" width="2.0" />
             <BorderPane prefHeight="200.0" HBox.hgrow="ALWAYS">
                <bottom>
                   <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Value" textAlignment="CENTER" wrappingWidth="61.13671875" BorderPane.alignment="CENTER">
@@ -107,7 +106,7 @@
                   </Text>
                </top>
             </BorderPane>
-            <Rectangle height="78.0" stroke="BLACK" strokeType="INSIDE" width="2.0" />
+            <Rectangle height="80.0" stroke="BLACK" strokeType="INSIDE" width="2.0" />
             <BorderPane prefHeight="200.0" HBox.hgrow="ALWAYS">
                <bottom>
                   <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Value" textAlignment="CENTER" wrappingWidth="61.13671875" BorderPane.alignment="CENTER">

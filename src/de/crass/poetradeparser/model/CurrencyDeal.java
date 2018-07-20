@@ -13,12 +13,26 @@ public class CurrencyDeal {
     private final float buyAmount;
     private final float sellAmount;
 
+    private final float playerBuyAmount;
+    private final float playerSellAmount;
+
     public CurrencyDeal(CurrencyID primaryCurrencyID,
-                 CurrencyID secondaryCurrencyID,
-                 float cValue,
-                 int offers,
-                 float buyAmount,
-                 float sellAmount){
+                        CurrencyID secondaryCurrencyID,
+                        float cValue,
+                        int offers,
+                        float buyAmount,
+                        float sellAmount) {
+        this(primaryCurrencyID, secondaryCurrencyID, cValue, offers, buyAmount, sellAmount, 0, 0);
+    }
+
+    public CurrencyDeal(CurrencyID primaryCurrencyID,
+                        CurrencyID secondaryCurrencyID,
+                        float cValue,
+                        int offers,
+                        float buyAmount,
+                        float sellAmount,
+                        float playerBuyAmount,
+                        float playerSellAmount) {
 
         this.primaryCurrencyID = primaryCurrencyID;
         this.secondaryCurrencyID = secondaryCurrencyID;
@@ -26,6 +40,8 @@ public class CurrencyDeal {
         this.offers = offers;
         this.buyAmount = buyAmount;
         this.sellAmount = sellAmount;
+        this.playerBuyAmount = playerBuyAmount;
+        this.playerSellAmount = playerSellAmount;
     }
 
     public CurrencyID getPrimaryCurrencyID() {
@@ -50,5 +66,13 @@ public class CurrencyDeal {
 
     public float getSellAmount() {
         return sellAmount;
+    }
+
+    public float getPlayerBuyAmount() {
+        return playerBuyAmount;
+    }
+
+    public float getPlayerSellAmount() {
+        return playerSellAmount;
     }
 }

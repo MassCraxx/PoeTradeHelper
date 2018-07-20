@@ -10,196 +10,175 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-
-<HBox maxHeight="80.0" maxWidth="-Infinity" minHeight="80.0" minWidth="-Infinity" prefHeight="80.0" prefWidth="640.0" scaleShape="false" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane fx:id="root" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <ImageView fx:id="currencyIcon" fitHeight="100.0" fitWidth="80.0" pickOnBounds="true" preserveRatio="true" HBox.hgrow="NEVER">
-         <image>
-            <Image url="@../../../../res/1.png" />
-         </image>
-      </ImageView>
-      <Rectangle arcHeight="5.0" arcWidth="5.0" height="80.0" stroke="BLACK" strokeType="INSIDE" width="2.0" />
-      <BorderPane>
-         <center>
-            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Buy" textAlignment="CENTER" wrappingWidth="40.0" BorderPane.alignment="CENTER">
-               <font>
-                  <Font name="System Bold" size="18.0" />
-               </font>
-               <BorderPane.margin>
-                  <Insets />
-               </BorderPane.margin>
-            </Text>
-         </center>
-      </BorderPane>
-      <BorderPane prefHeight="200.0" prefWidth="200.0">
-         <bottom>
-            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Market" textAlignment="CENTER" wrappingWidth="61.13671875" BorderPane.alignment="CENTER">
-               <font>
-                  <Font name="System Bold" size="18.0" />
-               </font>
-               <BorderPane.margin>
-                  <Insets bottom="10.0" />
-               </BorderPane.margin>
-            </Text>
-         </bottom>
-         <top>
-            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Player" textAlignment="CENTER" wrappingWidth="61.13671875" BorderPane.alignment="CENTER">
-               <font>
-                  <Font name="System Bold" size="18.0" />
-               </font>
-               <BorderPane.margin>
-                  <Insets top="10.0" />
-               </BorderPane.margin>
-            </Text>
-         </top>
-      </BorderPane>
-      <BorderPane>
-         <bottom>
-            <Text fx:id="sellOffer" strokeType="OUTSIDE" strokeWidth="0.0" text="1100" textAlignment="CENTER" underline="true" wrappingWidth="55.0" BorderPane.alignment="CENTER">
-               <font>
-                  <Font size="18.0" />
-               </font>
-               <BorderPane.margin>
-                  <Insets bottom="10.0" />
-               </BorderPane.margin>
-            </Text>
-         </bottom>
-         <top>
-            <Text fx:id="buyOffer" strokeType="OUTSIDE" strokeWidth="0.0" text="1095" textAlignment="CENTER" underline="true" wrappingWidth="55.0" BorderPane.alignment="CENTER">
-               <font>
-                  <Font size="18.0" />
-               </font>
-               <BorderPane.margin>
-                  <Insets top="10.0" />
-               </BorderPane.margin>
-            </Text>
-         </top>
-      </BorderPane>
-      <AnchorPane>
+      <HBox maxWidth="1.7976931348623157E308" prefHeight="80.0" scaleShape="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
-            <ImageView fitHeight="40.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="20.0">
+            <ImageView fx:id="currencyIcon" fitHeight="80.0" fitWidth="80.0" pickOnBounds="true" preserveRatio="true" HBox.hgrow="NEVER">
                <image>
-                  <Image url="@../../../../res/arrow.png" />
-               </image>
-               <effect>
-                  <ColorAdjust saturation="1.0" />
-               </effect>
-            </ImageView>
-         </children>
-      </AnchorPane>
-      <Rectangle arcHeight="5.0" arcWidth="5.0" height="80.0" stroke="BLACK" strokeType="INSIDE" width="2.0" />
-      <BorderPane>
-         <center>
-            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Sell" textAlignment="CENTER" wrappingWidth="40.0" BorderPane.alignment="CENTER">
-               <font>
-                  <Font name="System Bold" size="18.0" />
-               </font>
-               <BorderPane.margin>
-                  <Insets />
-               </BorderPane.margin>
-            </Text>
-         </center>
-      </BorderPane>
-      <BorderPane prefHeight="200.0" prefWidth="200.0">
-         <bottom>
-            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Market" textAlignment="CENTER" wrappingWidth="61.13671875" BorderPane.alignment="CENTER">
-               <font>
-                  <Font name="System Bold" size="18.0" />
-               </font>
-               <BorderPane.margin>
-                  <Insets bottom="10.0" />
-               </BorderPane.margin>
-            </Text>
-         </bottom>
-         <top>
-            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Player" textAlignment="CENTER" wrappingWidth="61.13671875" BorderPane.alignment="CENTER">
-               <font>
-                  <Font name="System Bold" size="18.0" />
-               </font>
-               <BorderPane.margin>
-                  <Insets top="10.0" />
-               </BorderPane.margin>
-            </Text>
-         </top>
-      </BorderPane>
-      <BorderPane>
-         <bottom>
-            <Text fx:id="diffValue" strokeType="OUTSIDE" strokeWidth="0.0" text="180" textAlignment="CENTER" underline="true" wrappingWidth="55.0" BorderPane.alignment="CENTER">
-               <font>
-                  <Font size="18.0" />
-               </font>
-               <BorderPane.margin>
-                  <Insets bottom="10.0" />
-               </BorderPane.margin>
-            </Text>
-         </bottom>
-         <top>
-            <Text fx:id="diff" strokeType="OUTSIDE" strokeWidth="0.0" text="181" textAlignment="CENTER" underline="true" wrappingWidth="55.0" BorderPane.alignment="CENTER">
-               <font>
-                  <Font size="18.0" />
-               </font>
-               <BorderPane.margin>
-                  <Insets top="10.0" />
-               </BorderPane.margin>
-            </Text>
-         </top>
-      </BorderPane>
-      <AnchorPane>
-         <children>
-            <ImageView fitHeight="40.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="20.0">
-               <effect>
-                  <ColorAdjust saturation="1.0" />
-               </effect>
-               <image>
-                  <Image url="@../../../../res/arrow.png" />
+                  <Image url="@../../../../res/1.png" />
                </image>
             </ImageView>
+            <Rectangle arcHeight="5.0" arcWidth="5.0" height="80.0" stroke="BLACK" strokeType="INSIDE" width="2.0" />
+            <BorderPane HBox.hgrow="ALWAYS">
+               <center>
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Buy" textAlignment="CENTER" wrappingWidth="40.0" BorderPane.alignment="CENTER">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font>
+                     <BorderPane.margin>
+                        <Insets />
+                     </BorderPane.margin>
+                  </Text>
+               </center>
+            </BorderPane>
+            <BorderPane HBox.hgrow="ALWAYS">
+               <bottom>
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Market" textAlignment="CENTER" wrappingWidth="61.13671875" BorderPane.alignment="CENTER">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font>
+                     <BorderPane.margin>
+                        <Insets bottom="10.0" />
+                     </BorderPane.margin>
+                  </Text>
+               </bottom>
+               <top>
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Player" textAlignment="CENTER" wrappingWidth="61.13671875" BorderPane.alignment="CENTER">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font>
+                     <BorderPane.margin>
+                        <Insets top="10.0" />
+                     </BorderPane.margin>
+                  </Text>
+               </top>
+            </BorderPane>
+            <BorderPane HBox.hgrow="ALWAYS">
+               <bottom>
+                  <Text fx:id="marketBuy" strokeType="OUTSIDE" strokeWidth="0.0" text="1100" textAlignment="CENTER" wrappingWidth="55.0" BorderPane.alignment="CENTER">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                     <BorderPane.margin>
+                        <Insets bottom="10.0" />
+                     </BorderPane.margin>
+                  </Text>
+               </bottom>
+               <top>
+                  <Text fx:id="playerBuy" strokeType="OUTSIDE" strokeWidth="0.0" text="1095" textAlignment="CENTER" wrappingWidth="55.0" BorderPane.alignment="CENTER">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                     <BorderPane.margin>
+                        <Insets top="10.0" />
+                     </BorderPane.margin>
+                  </Text>
+               </top>
+            </BorderPane>
+            <Rectangle arcHeight="5.0" arcWidth="5.0" height="80.0" stroke="BLACK" strokeType="INSIDE" width="2.0" />
+            <BorderPane HBox.hgrow="ALWAYS">
+               <center>
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Sell" textAlignment="CENTER" wrappingWidth="40.0" BorderPane.alignment="CENTER">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font>
+                     <BorderPane.margin>
+                        <Insets />
+                     </BorderPane.margin>
+                  </Text>
+               </center>
+            </BorderPane>
+            <BorderPane HBox.hgrow="ALWAYS">
+               <bottom>
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Market" textAlignment="CENTER" wrappingWidth="61.13671875" BorderPane.alignment="CENTER">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font>
+                     <BorderPane.margin>
+                        <Insets bottom="10.0" />
+                     </BorderPane.margin>
+                  </Text>
+               </bottom>
+               <top>
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Player" textAlignment="CENTER" wrappingWidth="61.13671875" BorderPane.alignment="CENTER">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font>
+                     <BorderPane.margin>
+                        <Insets top="10.0" />
+                     </BorderPane.margin>
+                  </Text>
+               </top>
+            </BorderPane>
+            <BorderPane HBox.hgrow="ALWAYS">
+               <bottom>
+                  <Text fx:id="marketSell" strokeType="OUTSIDE" strokeWidth="0.0" text="180" textAlignment="CENTER" wrappingWidth="55.0" BorderPane.alignment="CENTER">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                     <BorderPane.margin>
+                        <Insets bottom="10.0" />
+                     </BorderPane.margin>
+                  </Text>
+               </bottom>
+               <top>
+                  <Text fx:id="playerSell" strokeType="OUTSIDE" strokeWidth="0.0" text="181" textAlignment="CENTER" wrappingWidth="55.0" BorderPane.alignment="CENTER">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                     <BorderPane.margin>
+                        <Insets top="10.0" />
+                     </BorderPane.margin>
+                  </Text>
+               </top>
+            </BorderPane>
+            <Rectangle arcHeight="5.0" arcWidth="5.0" height="80.0" stroke="BLACK" strokeType="INSIDE" width="2.0" />
+            <BorderPane HBox.hgrow="ALWAYS">
+               <bottom>
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Profit" textAlignment="CENTER" wrappingWidth="61.13671875" BorderPane.alignment="CENTER">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font>
+                     <BorderPane.margin>
+                        <Insets bottom="10.0" />
+                     </BorderPane.margin>
+                  </Text>
+               </bottom>
+               <top>
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Diff" textAlignment="CENTER" wrappingWidth="61.13671875" BorderPane.alignment="CENTER">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font>
+                     <BorderPane.margin>
+                        <Insets top="10.0" />
+                     </BorderPane.margin>
+                  </Text>
+               </top>
+            </BorderPane>
+            <BorderPane HBox.hgrow="ALWAYS">
+               <bottom>
+                  <Text fx:id="diffValue" strokeType="OUTSIDE" strokeWidth="0.0" text="180" textAlignment="CENTER" wrappingWidth="55.0" BorderPane.alignment="CENTER">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                     <BorderPane.margin>
+                        <Insets bottom="10.0" />
+                     </BorderPane.margin>
+                  </Text>
+               </bottom>
+               <top>
+                  <Text fx:id="diff" strokeType="OUTSIDE" strokeWidth="0.0" text="181" textAlignment="CENTER" wrappingWidth="55.0" BorderPane.alignment="CENTER">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                     <BorderPane.margin>
+                        <Insets top="10.0" />
+                     </BorderPane.margin>
+                  </Text>
+               </top>
+            </BorderPane>
          </children>
-      </AnchorPane>
-      <Rectangle arcHeight="5.0" arcWidth="5.0" height="80.0" stroke="BLACK" strokeType="INSIDE" width="2.0" />
-      <BorderPane prefHeight="200.0" prefWidth="200.0">
-         <bottom>
-            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Profit" textAlignment="CENTER" wrappingWidth="61.13671875" BorderPane.alignment="CENTER">
-               <font>
-                  <Font name="System Bold" size="18.0" />
-               </font>
-               <BorderPane.margin>
-                  <Insets bottom="10.0" />
-               </BorderPane.margin>
-            </Text>
-         </bottom>
-         <top>
-            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Diff" textAlignment="CENTER" wrappingWidth="61.13671875" BorderPane.alignment="CENTER">
-               <font>
-                  <Font name="System Bold" size="18.0" />
-               </font>
-               <BorderPane.margin>
-                  <Insets top="10.0" />
-               </BorderPane.margin>
-            </Text>
-         </top>
-      </BorderPane>
-      <BorderPane>
-         <bottom>
-            <Text fx:id="diffValue1" strokeType="OUTSIDE" strokeWidth="0.0" text="180" textAlignment="CENTER" underline="true" wrappingWidth="55.0" BorderPane.alignment="CENTER">
-               <font>
-                  <Font size="18.0" />
-               </font>
-               <BorderPane.margin>
-                  <Insets bottom="10.0" />
-               </BorderPane.margin>
-            </Text>
-         </bottom>
-         <top>
-            <Text fx:id="diff1" strokeType="OUTSIDE" strokeWidth="0.0" text="181" textAlignment="CENTER" underline="true" wrappingWidth="55.0" BorderPane.alignment="CENTER">
-               <font>
-                  <Font size="18.0" />
-               </font>
-               <BorderPane.margin>
-                  <Insets top="10.0" />
-               </BorderPane.margin>
-            </Text>
-         </top>
-      </BorderPane>
+      </HBox>
    </children>
-</HBox>
+</AnchorPane>

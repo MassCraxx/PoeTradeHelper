@@ -23,9 +23,20 @@
                </content>
           </Tab>
           <Tab text="PlayerOverview">
-            <content>
-              <AnchorPane />
-            </content>
+               <content>
+                  <VBox prefHeight="200.0" prefWidth="100.0">
+                     <children>
+                        <HBox prefHeight="25.0" prefWidth="640.0">
+                           <children>
+                              <ComboBox fx:id="playerComboBox" maxWidth="1.7976931348623157E308" prefHeight="25.0" HBox.hgrow="ALWAYS" />
+                              <Button fx:id="addPlayerButton" mnemonicParsing="false" prefWidth="50.0" text="+" />
+                              <Button fx:id="removePlayerButton" mnemonicParsing="false" prefWidth="50.0" text="-" />
+                           </children>
+                        </HBox>
+                        <ListView fx:id="playerList" VBox.vgrow="ALWAYS" />
+                     </children>
+                  </VBox>
+               </content>
           </Tab>
             <Tab text="Offers">
                <content>
@@ -55,26 +66,33 @@
             </Tab>
             <Tab text="Settings">
                <content>
-                  <AnchorPane />
+                  <AnchorPane>
+                     <children>
+                        <ScrollPane layoutX="99.0" layoutY="126.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                          <content>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0" />
+                          </content>
+                        </ScrollPane>
+                     </children></AnchorPane>
                </content>
             </Tab>
         </tabs>
       </TabPane>
    </center>
    <bottom>
-      <HBox BorderPane.alignment="CENTER">
+      <HBox prefHeight="40.0" prefWidth="640.0" BorderPane.alignment="CENTER">
          <children>
-            <Button id="updateButton" fx:id="updateButton" defaultButton="true" mnemonicParsing="false" text="Update">
+            <Button id="updateButton" fx:id="updateButton" defaultButton="true" minWidth="55.0" mnemonicParsing="false" prefHeight="73.0" prefWidth="55.0" text="Update">
                <HBox.margin>
                   <Insets left="8.0" right="8.0" />
                </HBox.margin>
             </Button>
-            <TextField fx:id="console" alignment="CENTER_RIGHT" editable="false" text="Loading..." HBox.hgrow="SOMETIMES" />
-            <Text fx:id="version" nodeOrientation="RIGHT_TO_LEFT" strokeType="INSIDE" strokeWidth="0.0" text="v0.2-SNAPSHOT">
+            <TextArea fx:id="console" editable="false" maxWidth="1.7976931348623157E308" nodeOrientation="LEFT_TO_RIGHT" prefHeight="0.0" promptText="Status console" text="Loading..." wrapText="true" HBox.hgrow="ALWAYS" />
+            <Label fx:id="version" alignment="CENTER" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" text="Version" textAlignment="CENTER" textOverrun="CLIP">
                <HBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>
-            </Text>
+            </Label>
          </children>
       </HBox>
    </bottom>

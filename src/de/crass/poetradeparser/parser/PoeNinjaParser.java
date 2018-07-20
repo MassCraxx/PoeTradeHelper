@@ -1,6 +1,7 @@
 package de.crass.poetradeparser.parser;
 
-import de.crass.poetradeparser.Main;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import de.crass.poetradeparser.LogManager;
 import de.crass.poetradeparser.PropertyManager;
 import de.crass.poetradeparser.model.CurrencyID;
 import de.crass.poetradeparser.web.HttpManager;
@@ -20,16 +21,16 @@ public class PoeNinjaParser {
     }
 
     private void parseCurrency(String league) {
-        Main.log(getClass(), "Fetching current currency values from poe.ninja.");
+        LogManager.getInstance().log(getClass(), "Fetching current currency values from poe.ninja.");
         JSONObject json = null;
         try {
             json = HttpManager.getInstance().getJson(currencyURL, "?league=" + league);
         } catch (IOException e) {
-            Main.log(getClass(), "IOException!\n" + e);
+            LogManager.getInstance().log(getClass(), "IOException!\n" + e);
         }
 
         if(json == null || json.length() == 0){
-            Main.log(getClass(), "Invalid response");
+            LogManager.getInstance().log(getClass(), "Invalid response");
             return;
         }
 

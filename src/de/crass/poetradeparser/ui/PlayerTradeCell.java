@@ -17,36 +17,33 @@ import java.text.DecimalFormat;
 /**
  * Created by mcrass on 19.07.2018.
  */
-public class CurrencyOfferCell<T> extends javafx.scene.control.ListCell<CurrencyDeal> {
+public class PlayerTradeCell<T> extends javafx.scene.control.ListCell<CurrencyDeal> {
 
     private FXMLLoader mLLoader;
-
-    @FXML
-    private Text sellOffer;
-
-    @FXML
-    private Text chaosValue;
 
     @FXML
     private AnchorPane root;
 
     @FXML
-    private HBox hBox;
+    private Text playerSell;
 
     @FXML
-    private Text diffValue;
-
-    @FXML
-    private Text buyOffer;
-
-    @FXML
-    private Text offersText;
+    private Text marketSell;
 
     @FXML
     private Text diff;
 
     @FXML
     private ImageView currencyIcon;
+
+    @FXML
+    private Text marketBuy;
+
+    @FXML
+    private Text diffValue;
+
+    @FXML
+    private Text playerBuy;
 
     @Override
     protected void updateItem(CurrencyDeal deal, boolean empty) {
@@ -59,7 +56,7 @@ public class CurrencyOfferCell<T> extends javafx.scene.control.ListCell<Currency
 
         } else {
             if (mLLoader == null) {
-                mLLoader = new FXMLLoader(getClass().getResource("currency_cell.fxml"));
+                mLLoader = new FXMLLoader(getClass().getResource("player_cell.fxml"));
                 mLLoader.setController(this);
 
                 try {
@@ -99,18 +96,37 @@ public class CurrencyOfferCell<T> extends javafx.scene.control.ListCell<Currency
             float buy = deal.getBuyAmount();
             float sell = deal.getSellAmount();
 
+            float pBuy = deal.getPlayerBuyAmount();
+            float pSell = deal.getPlayerSellAmount();
+
             float diffF = 0;
+
             float diffV = 0;
-            if(buy != 0 && sell != 0){
-                diffF = buy - sell;
+            if(pBuy != 0 && pSell != 0){
+                diffF = pBuy - pSell;
                 diffV = diffF * deal.getcValue();
             }
 
-            chaosValue.setText(prettyFloat(deal.getcValue()) + "c");
-            offersText.setText(prettyFloat(deal.getOffers()));
-            buyOffer.setText(prettyFloat(buy));
-            sellOffer.setText(prettyFloat(sell));
+            if(pBuy > 0 && pBuy > buy){
+//                playerBuy.setStyle("-fx-text-fill: red;");
+                playerBuy.setFill(Color.RED);
+            } else{
+                playerBuy.setFill(Color.BLACK);
+            }
+
+            if(pSell > 0 && pSell < sell){
+                playerSell.setFill(Color.RED);
+            }else{
+                playerSell.setFill(Color.BLACK);
+            }
+
+            marketBuy.setText(prettyFloat(buy));
+            marketSell.setText(prettyFloat(sell));
             diff.setText(prettyFloat((diffF)));
+
+            playerBuy.setText(prettyFloat(pBuy));
+            playerSell.setText(prettyFloat(pSell));
+
             diffValue.setText(prettyFloat((diffV)) + "c");
 
             setGraphic(root);
@@ -120,6 +136,9 @@ public class CurrencyOfferCell<T> extends javafx.scene.control.ListCell<Currency
 
     String prettyFloat(float in){
 //        return String.format(Locale.ENGLISH, "%.2f", in);
+        if(in == 0){
+            return "---";
+        }
         DecimalFormat df = new DecimalFormat("#.#");
         df.setRoundingMode(RoundingMode.CEILING);
         return String.valueOf(df.format(in));
