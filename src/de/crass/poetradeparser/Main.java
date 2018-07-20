@@ -76,6 +76,8 @@ public class Main extends Application {
         tradeManager = new TradeManager();
         LogManager.getInstance().setConsole(console);
         setupUI();
+
+        LogManager.getInstance().log(getClass(), "Started");
     }
 
     private void setupUI() {
@@ -104,7 +106,16 @@ public class Main extends Application {
 
         playerComboBox.setItems(PropertyManager.getInstance().getPlayerList());
 
-        ObservableList<CurrencyID> currencyList = FXCollections.observableArrayList(CurrencyID.EXALTED);
+        updateButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                tradeManager.updateOffers();
+            }
+        });
+
+
+        ObservableList<CurrencyID> currencyList = FXCollections.observableArrayList(CurrencyID.values());
+//        ObservableList<CurrencyID> currencyList = FXCollections.observableArrayList(CurrencyID.EXALTED);
         primaryComboBox.setItems(currencyList);
         primaryComboBox.setValue(PropertyManager.getInstance().getPrimaryCurrency());
         primaryComboBox.setOnAction(new EventHandler<ActionEvent>() {
@@ -112,7 +123,7 @@ public class Main extends Application {
             public void handle(ActionEvent event) {
                 CurrencyID newValue = primaryComboBox.getValue();
                 PropertyManager.getInstance().setPrimaryCurrency(newValue);
-                tradeManager.parseDeals();
+
             }
         });
     }

@@ -75,4 +75,19 @@ public class CurrencyDeal {
     public float getPlayerSellAmount() {
         return playerSellAmount;
     }
+
+    public float getDiff(){
+        if(buyAmount != 0 && sellAmount != 0){
+            return buyAmount - sellAmount;
+        }
+        return 0;
+    }
+
+    public float getDiffValue() {
+        float diff = getDiff();
+        if (diff > 0) {
+            return diff * getcValue();
+        }
+        return 0;
+    }
 }

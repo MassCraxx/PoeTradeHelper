@@ -99,19 +99,12 @@ public class CurrencyOfferCell<T> extends javafx.scene.control.ListCell<Currency
             float buy = deal.getBuyAmount();
             float sell = deal.getSellAmount();
 
-            float diffF = 0;
-            float diffV = 0;
-            if(buy != 0 && sell != 0){
-                diffF = buy - sell;
-                diffV = diffF * deal.getcValue();
-            }
-
             chaosValue.setText(prettyFloat(deal.getcValue()) + "c");
             offersText.setText(prettyFloat(deal.getOffers()));
             buyOffer.setText(prettyFloat(buy));
             sellOffer.setText(prettyFloat(sell));
-            diff.setText(prettyFloat((diffF)));
-            diffValue.setText(prettyFloat((diffV)) + "c");
+            diff.setText(prettyFloat((deal.getDiff())));
+            diffValue.setText(prettyFloat((deal.getDiffValue())) + "c");
 
             setGraphic(root);
         }
@@ -120,8 +113,8 @@ public class CurrencyOfferCell<T> extends javafx.scene.control.ListCell<Currency
 
     String prettyFloat(float in){
 //        return String.format(Locale.ENGLISH, "%.2f", in);
-        DecimalFormat df = new DecimalFormat("#.#");
-        df.setRoundingMode(RoundingMode.CEILING);
+        DecimalFormat df = new DecimalFormat("#.##");
+        df.setRoundingMode(RoundingMode.HALF_UP);
         return String.valueOf(df.format(in));
     }
 

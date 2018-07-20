@@ -76,7 +76,7 @@
                   </Text>
                </top>
             </BorderPane>
-            <Rectangle arcHeight="5.0" arcWidth="5.0" height="80.0" stroke="BLACK" strokeType="INSIDE" width="2.0" />
+            <Rectangle arcHeight="5.0" arcWidth="5.0" stroke="BLACK" strokeType="INSIDE" width="2.0" />
             <BorderPane HBox.hgrow="ALWAYS">
                <center>
                   <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Sell" textAlignment="CENTER" wrappingWidth="40.0" BorderPane.alignment="CENTER">

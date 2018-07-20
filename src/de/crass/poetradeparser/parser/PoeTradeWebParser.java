@@ -18,13 +18,13 @@ import java.util.regex.Pattern;
 
 public class PoeTradeWebParser {
 
-    final static String poeTradeCurrencyURL = "http://currency.poe.trade/search";
+    private final static String poeTradeCurrencyURL = "http://currency.poe.trade/search";
     private HashMap<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> currentOffers;
     private HashMap<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> playerOffers;
 
     private final static int parseStartIndex = 435845;
     private final static int fetchDelay = 800;
-    private final static boolean offlineMode = true;
+    private final static boolean offlineMode = false;
 
     private final static Pattern OFFER_PATTERN = Pattern.compile(
             "class=\"displayoffer \" " +
@@ -106,9 +106,7 @@ public class PoeTradeWebParser {
 
         Pair key = new Pair<>(secondary, primary);
         List<CurrencyOffer> currentOffer = currentOffers.get(key);
-        if(currentOffer != null){
-            LogManager.getInstance().log(getClass(), "Parsed Offers: " + currentOffer.size());
-        } else{
+        if(currentOffer == null){
             LogManager.getInstance().log(getClass(), "No offers found for " + key);
         }
 
@@ -155,7 +153,7 @@ public class PoeTradeWebParser {
     private void addOffer(CurrencyOffer offer) {
         Pair<CurrencyID, CurrencyID> key = new Pair<>(offer.getBuyID(), offer.getSellID());
         if (PropertyManager.getInstance().getPlayerList().contains(offer.getPlayerName())) {
-            LogManager.getInstance().log(getClass(), "Skipping player offer " + offer.getPlayerName());
+            LogManager.getInstance().log(getClass(), "Found player offer " + offer.getPlayerName());
             List<CurrencyOffer> offers = playerOffers.get(key);
             if (offers == null) {
                 offers = new LinkedList<>();

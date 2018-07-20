@@ -22,10 +22,11 @@ public class LogManager {
     }
 
     public void log(Class clazz, String log) {
-        String timestamp = "";
-//                '>' + String.valueOf(System.currentTimeMillis()) + '<';
-        String msg = timestamp + '[' + clazz.getSimpleName() + ']' + ' ' + log;
-        System.out.println(msg);
+        String timestamp = '>' + String.valueOf(System.currentTimeMillis()) + '<';
+        String consoleLog = timestamp + ' ' + '[' + clazz.getSimpleName() + ']' + ' ' + log;
+        System.out.println(consoleLog);
+
+        String msg = timestamp + ' ' + log;
 
         if (console != null) {
             String text = console.getText();

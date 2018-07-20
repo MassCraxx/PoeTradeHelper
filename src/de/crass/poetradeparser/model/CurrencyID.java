@@ -19,7 +19,8 @@ public enum CurrencyID {
     VAAL(16),
     APPRENTICE(45),
     JOURNEYMAN(46),
-    MASTER(47);
+    MASTER(47),
+    NOT_SUPPORTED(-1);
 
     private final int id;
 
@@ -37,7 +38,7 @@ public enum CurrencyID {
                 return id;
             }
         }
-        return null;
+        return NOT_SUPPORTED;
     }
 
     @Override

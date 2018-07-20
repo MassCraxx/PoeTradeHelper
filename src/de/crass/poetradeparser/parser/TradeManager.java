@@ -21,6 +21,18 @@ public class TradeManager implements ParseListener {
     private boolean filterStockOffers = true;
     private boolean filterValidStockOffers = true;
     private PoeNinjaParser poeNinjaParser;
+    private Comparator<? super CurrencyDeal> diffValueSorter = new Comparator<CurrencyDeal>() {
+        @Override
+        public int compare(CurrencyDeal o1, CurrencyDeal o2) {
+            float o1Value = o1.getDiffValue();
+            float o2Value = o2.getDiffValue();
+
+            if(o1Value == o2Value){
+                return 0;
+            }
+            return o1Value > o2Value ? -1 : 1;
+        }
+    };
 
     public TradeManager() {
         webParser = new PoeTradeWebParser();
@@ -103,6 +115,7 @@ public class TradeManager implements ParseListener {
 
             currentDeals.add(new CurrencyDeal(primaryCurrency, key.getKey(), cValue, totalOffers, buy, sell));
         }
+        currentDeals.sort(diffValueSorter);
 
         // Parse Players
 
@@ -184,6 +197,8 @@ public class TradeManager implements ParseListener {
                 LogManager.getInstance().log(getClass(), "Player offer didnt contain shit!");
             }
         }
+        playerDeals.sort(diffValueSorter);
+        LogManager.getInstance().log(getClass(), "Finished");
     }
 
     public ObservableList<CurrencyDeal> getCurrentDeals() {
