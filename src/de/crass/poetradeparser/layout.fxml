@@ -14,16 +14,21 @@
         <tabs>
           <Tab text="CurrencyOverview">
                <content>
-                  <ListView fx:id="currencyList" maxWidth="1.7976931348623157E308" styleClass="deal-list" />
+                  <AnchorPane>
+                     <children>
+                        <Label layoutX="194.0" layoutY="208.0" text="Press Update to Update">
+                           <font>
+                              <Font size="24.0" />
+                           </font>
+                        </Label>
+                        <ListView fx:id="currencyList" styleClass="deal-list" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                     </children>
+                  </AnchorPane>
                </content>
           </Tab>
           <Tab text="PlayerOverview">
                <content>
-                  <VBox prefHeight="200.0" prefWidth="100.0">
-                     <children>
-                        <ListView fx:id="playerDealList" styleClass="deal-list" VBox.vgrow="ALWAYS" />
-                     </children>
-                  </VBox>
+                  <ListView fx:id="playerDealList" styleClass="deal-list" />
                </content>
           </Tab>
             <Tab text="Offers">
@@ -80,16 +85,19 @@
          <children>
             <Button id="updateButton" fx:id="updateButton" defaultButton="true" minWidth="100.0" mnemonicParsing="false" prefHeight="73.0" prefWidth="70.0" text="Update">
                <HBox.margin>
-                  <Insets left="8.0" right="8.0" />
+                  <Insets left="5.0" right="5.0" />
                </HBox.margin>
             </Button>
-            <TextArea fx:id="console" editable="false" maxWidth="1.7976931348623157E308" nodeOrientation="LEFT_TO_RIGHT" prefHeight="0.0" promptText="Status console" text="Loading..." wrapText="true" HBox.hgrow="ALWAYS" />
+            <TextArea fx:id="console" editable="false" maxWidth="1.7976931348623157E308" nodeOrientation="LEFT_TO_RIGHT" prefHeight="0.0" promptText="Status console" wrapText="true" HBox.hgrow="ALWAYS" />
             <Label fx:id="version" alignment="CENTER" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" minWidth="50.0" text="Version" textAlignment="CENTER" textOverrun="CLIP">
                <HBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>
             </Label>
          </children>
+         <BorderPane.margin>
+            <Insets bottom="5.0" top="5.0" />
+         </BorderPane.margin>
       </HBox>
    </bottom>
    <top>

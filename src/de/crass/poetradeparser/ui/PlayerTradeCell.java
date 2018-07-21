@@ -3,7 +3,6 @@ package de.crass.poetradeparser.ui;
 import de.crass.poetradeparser.model.CurrencyDeal;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.ImageView;
@@ -61,7 +60,6 @@ public class PlayerTradeCell<T> extends javafx.scene.control.ListCell<CurrencyDe
         if (empty || deal == null) {
 
             setText(null);
-            setGraphic(null);
 
         } else {
             if (mLLoader == null) {
@@ -114,7 +112,6 @@ public class PlayerTradeCell<T> extends javafx.scene.control.ListCell<CurrencyDe
             } else {
                 playerSell.setFill(marketBuy.getFill());
             }
-            CheckBox box;
 
             if (pBuy > 0 && pBuy >= buy) {
                 setImage(pBuy == buy ? "neut.png" : "nok.png", buyTendency);

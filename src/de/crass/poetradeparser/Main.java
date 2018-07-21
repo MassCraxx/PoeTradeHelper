@@ -4,6 +4,7 @@ package de.crass.poetradeparser;/**
 
 import de.crass.poetradeparser.model.CurrencyDeal;
 import de.crass.poetradeparser.model.CurrencyID;
+import de.crass.poetradeparser.parser.ParseListener;
 import de.crass.poetradeparser.parser.TradeManager;
 import de.crass.poetradeparser.ui.CurrencyOfferCell;
 import de.crass.poetradeparser.ui.PlayerTradeCell;
@@ -22,7 +23,7 @@ import javafx.util.Callback;
 
 import java.util.List;
 
-public class Main extends Application {
+public class Main extends Application implements ParseListener {
 
     public static final String versionText = "v0.2-SNAPSHOT";
 
@@ -99,6 +100,8 @@ public class Main extends Application {
         assert version != null : "fx:id=\"version\" was not injected: check your FXML file 'layout.fxml'.";
 
         tradeManager = new TradeManager();
+        tradeManager.registerListener(this);
+
         LogManager.getInstance().setConsole(console);
         setupUI();
 
@@ -115,6 +118,7 @@ public class Main extends Application {
                 return new CurrencyOfferCell<>();
             }
         });
+        currencyList.setPlaceholder(new Label("No deals to show."));
         currencyList.setItems(tradeManager.getCurrentDeals());
 
         playerDealList.setEditable(false);
@@ -124,13 +128,21 @@ public class Main extends Application {
                 return new PlayerTradeCell<>();
             }
         });
-
+        playerDealList.setPlaceholder(new Label("No deals to show."));
         playerDealList.setItems(tradeManager.getPlayerDeals());
 
         updateButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                tradeManager.updateOffers();
+                if (!tradeManager.isUpdating()) {
+                    tradeManager.updateOffers();
+                    currencyList.setPlaceholder(new Label("Updating..."));
+                    playerDealList.setPlaceholder(new Label("Updating..."));
+                    updateButton.setText("Cancel");
+                } else{
+                    tradeManager.cancelUpdate();
+                    updateButton.setDisable(true);
+                }
             }
         });
 
@@ -206,5 +218,12 @@ public class Main extends Application {
         });
     }
 
+    @Override
+    public void onParsingFinished() {
+        currencyList.setPlaceholder(new Label("No deals to show."));
+        playerDealList.setPlaceholder(new Label("No deals to show."));
 
+        updateButton.setText("Update");
+        updateButton.setDisable(false);
+    }
 }

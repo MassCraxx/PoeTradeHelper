@@ -31,6 +31,7 @@ public class TradeManager implements ParseListener {
             return o1Value > o2Value ? -1 : 1;
         }
     };
+    private ParseListener listener;
 
     public TradeManager() {
         webParser = new PoeTradeWebParser();
@@ -91,11 +92,13 @@ public class TradeManager implements ParseListener {
             Pair invertedKey = new Pair<>(key.getValue(), key.getKey());
             List<CurrencyOffer> invertedOfferMap = marketOffers.get(invertedKey);
             CurrencyOffer bestInvertedOffer = null;
-            for (CurrencyOffer offer : invertedOfferMap) {
-                if (!filterStockOffers || (!filterValidStockOffers && offer.getStock() >= 0) ||
-                        filterValidStockOffers && offer.getStock() > offer.getSellValue()) {
-                    bestInvertedOffer = offer;
-                    break;
+            if(invertedOfferMap != null) {
+                for (CurrencyOffer offer : invertedOfferMap) {
+                    if (!filterStockOffers || (!filterValidStockOffers && offer.getStock() >= 0) ||
+                            filterValidStockOffers && offer.getStock() > offer.getSellValue()) {
+                        bestInvertedOffer = offer;
+                        break;
+                    }
                 }
             }
 
@@ -103,7 +106,6 @@ public class TradeManager implements ParseListener {
             if (bestInvertedOffer == null) {
                 LogManager.getInstance().log(getClass(), "All sell offers filtered for " + currency);
             } else {
-
                 sell = bestInvertedOffer.getSellValue();
                 if (bestInvertedOffer.getBuyValue() != 1) {
                     LogManager.getInstance().log(getClass(), "Currency rate for " + currency + " was not normalized!");
@@ -112,7 +114,7 @@ public class TradeManager implements ParseListener {
             }
 
 
-            int totalOffers = offerMap.getValue().size() + invertedOfferMap.size();
+            int totalOffers = offerMap.getValue().size() + (invertedOfferMap == null ? 0 : invertedOfferMap.size());
 
             currentDeals.add(new CurrencyDeal(primaryCurrency, key.getKey(), cValue, totalOffers, buy, sell));
         }
@@ -216,5 +218,20 @@ public class TradeManager implements ParseListener {
     @Override
     public void onParsingFinished() {
         parseDeals();
+        if(listener != null){
+            listener.onParsingFinished();
+        }
+    }
+
+    public boolean isUpdating() {
+        return webParser.isUpdating();
+    }
+
+    public void registerListener(ParseListener listener) {
+        this.listener = listener;
+    }
+
+    public void cancelUpdate(){
+        webParser.cancel();
     }
 }

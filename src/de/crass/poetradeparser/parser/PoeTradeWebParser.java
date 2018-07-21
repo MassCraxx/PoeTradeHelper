@@ -26,7 +26,7 @@ public class PoeTradeWebParser {
     private HashMap<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> playerOffers;
 
     private final static int parseStartIndex = 435845;
-    private final static int fetchDelay = 800;
+    private final static int fetchDelay = 500;
 
     private final static Pattern OFFER_PATTERN = Pattern.compile(
             "class=\"displayoffer \" " +
@@ -41,6 +41,8 @@ public class PoeTradeWebParser {
             "data-stock=\"(.+)\"");
 
     private ParseListener parseListener;
+    private boolean updating = false;
+    private boolean cancel = false;
 
 
     public PoeTradeWebParser() {
@@ -56,6 +58,7 @@ public class PoeTradeWebParser {
     void update() {
         reset();
         Thread runThread = new Thread(() -> {
+            updating = true;
             CurrencyID primaryCurrency = PropertyManager.getInstance().getPrimaryCurrency();
             for (Object secondary : PropertyManager.getInstance().getFilterList().toArray()) {
                 if (secondary != primaryCurrency) {
@@ -70,9 +73,11 @@ public class PoeTradeWebParser {
                     }
                 });
             }
+            cancel = false;
+            updating = false;
         }, "PoeTradeWebParser");
-        runThread.setDaemon(true);
 
+        runThread.setDaemon(true);
         runThread.start();
     }
 
@@ -90,6 +95,9 @@ public class PoeTradeWebParser {
     }
 
     private void fetchOffers(CurrencyID primary, CurrencyID secondary, String league) throws IOException, InterruptedException {
+        if(cancel){
+            return;
+        }
         String buyResponseBody;
         ObjectMapper objectMapper = new ObjectMapper();
         File file = new File(primary.toString() + "-" + secondary.toString() + ".html");
@@ -211,5 +219,13 @@ public class PoeTradeWebParser {
 
     public void setParseListener(ParseListener parseListener) {
         this.parseListener = parseListener;
+    }
+
+    public boolean isUpdating() {
+        return updating;
+    }
+
+    public void cancel(){
+        cancel = true;
     }
 }

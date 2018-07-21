@@ -18,7 +18,7 @@ public class PropertyManager {
 
     private String currentLeague = "Incursion";
     private CurrencyID primaryCurrency = EXALTED;
-    public final static boolean offlineMode = true;
+    public final static boolean offlineMode = false;
     public static boolean filterStockOffers = true;
     public static boolean filterValidStockOffers = true;
 
