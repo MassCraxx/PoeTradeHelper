@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static de.crass.poetradeparser.PropertyManager.offlineMode;
+
 public class PoeTradeWebParser {
 
     private final static String poeTradeCurrencyURL = "http://currency.poe.trade/search";
@@ -24,7 +26,6 @@ public class PoeTradeWebParser {
 
     private final static int parseStartIndex = 435845;
     private final static int fetchDelay = 800;
-    private final static boolean offlineMode = false;
 
     private final static Pattern OFFER_PATTERN = Pattern.compile(
             "class=\"displayoffer \" " +

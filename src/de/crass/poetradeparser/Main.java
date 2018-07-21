@@ -20,36 +20,59 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
+import java.util.List;
+
 public class Main extends Application {
 
     public static final String versionText = "v0.2-SNAPSHOT";
 
     @FXML
-    private Button addPlayerButton;
+    private ListView<CurrencyDeal> playerDealList;
 
     @FXML
     private TextArea console;
 
     @FXML
-    private Button removePlayerButton;
-
-    @FXML
-    private ListView<CurrencyDeal> playerList;
+    private Button removeCurrencyFilterBtn;
 
     @FXML
     private ListView<CurrencyDeal> currencyList;
 
     @FXML
-    private Button updateButton;
+    private CheckBox filterWithoutAPI;
 
     @FXML
-    private ComboBox<String> playerComboBox;
+    private ListView<CurrencyID> currencyFilterList;
 
     @FXML
     private ComboBox<CurrencyID> primaryComboBox;
 
     @FXML
     private Label version;
+
+    @FXML
+    private ComboBox<CurrencyID> currencyFilterCB;
+
+    @FXML
+    private Button addPlayerButton;
+
+    @FXML
+    private Button removePlayerBtn;
+
+    @FXML
+    private TextField playerField;
+
+    @FXML
+    private Button updateButton;
+
+    @FXML
+    private CheckBox filterInvalid;
+
+    @FXML
+    private ListView<String> playerListView;
+
+    @FXML
+    private Button addCurrencyFilterBtn;
 
     private TradeManager tradeManager;
 
@@ -59,10 +82,12 @@ public class Main extends Application {
     }
 
     @Override
-    public void start(Stage primaryStage) throws Exception{
+    public void start(Stage primaryStage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("layout.fxml"));
         primaryStage.setTitle("PoeTradeParser");
-        primaryStage.setScene(new Scene(root, 600, 650));
+        Scene scene = new Scene(root, 600, 650);
+        scene.getStylesheets().add(getClass().getResource("stylesheet.css").toExternalForm());
+        primaryStage.setScene(scene);
         primaryStage.show();
     }
 
@@ -90,21 +115,17 @@ public class Main extends Application {
                 return new CurrencyOfferCell<>();
             }
         });
+        currencyList.setItems(tradeManager.getCurrentDeals());
 
-        playerList.setEditable(false);
-        playerList.setCellFactory(new Callback<ListView<CurrencyDeal>, ListCell<CurrencyDeal>>() {
+        playerDealList.setEditable(false);
+        playerDealList.setCellFactory(new Callback<ListView<CurrencyDeal>, ListCell<CurrencyDeal>>() {
             @Override
             public ListCell<CurrencyDeal> call(ListView<CurrencyDeal> studentListView) {
                 return new PlayerTradeCell<>();
             }
         });
 
-        ObservableList<CurrencyDeal> currentDeals = tradeManager.getCurrentDeals();
-        ObservableList<CurrencyDeal> playerDeals = tradeManager.getPlayerDeals();
-        currencyList.setItems(currentDeals);
-        playerList.setItems(playerDeals);
-
-        playerComboBox.setItems(PropertyManager.getInstance().getPlayerList());
+        playerDealList.setItems(tradeManager.getPlayerDeals());
 
         updateButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -124,6 +145,63 @@ public class Main extends Application {
                 CurrencyID newValue = primaryComboBox.getValue();
                 PropertyManager.getInstance().setPrimaryCurrency(newValue);
 
+            }
+        });
+
+        // SETTINGS
+        filterInvalid.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                PropertyManager.filterStockOffers = filterInvalid.isSelected();
+                tradeManager.parseDeals();
+            }
+        });
+
+        filterWithoutAPI.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                PropertyManager.filterStockOffers = filterWithoutAPI.isSelected();
+                tradeManager.parseDeals();
+            }
+        });
+
+        currencyFilterList.setItems(PropertyManager.getInstance().getFilterList());
+
+        currencyFilterCB.setItems(FXCollections.observableArrayList(CurrencyID.values()));
+
+        addCurrencyFilterBtn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                CurrencyID newCurrency = currencyFilterCB.getValue();
+                List<CurrencyID> filterList = PropertyManager.getInstance().getFilterList();
+                if (!filterList.contains(newCurrency)) {
+                    filterList.add(newCurrency);
+                }
+            }
+        });
+
+        removeCurrencyFilterBtn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                PropertyManager.getInstance().getFilterList().remove(currencyFilterList.getFocusModel().getFocusedItem());
+            }
+        });
+
+        ObservableList<String> playerList = PropertyManager.getInstance().getPlayerList();
+        playerListView.setItems(playerList);
+        addPlayerButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                String newPlayer = playerField.getText();
+                if (!newPlayer.isEmpty() && !playerList.contains(newPlayer))
+                    playerList.add(newPlayer);
+            }
+        });
+
+        removePlayerBtn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                playerList.remove(playerListView.getFocusModel().getFocusedItem());
             }
         });
     }

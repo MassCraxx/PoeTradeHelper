@@ -15,6 +15,8 @@ public class CurrencyDeal {
 
     private final float playerBuyAmount;
     private final float playerSellAmount;
+    private int playerBuyStock;
+    private int playerSellStock;
 
     public CurrencyDeal(CurrencyID primaryCurrencyID,
                         CurrencyID secondaryCurrencyID,
@@ -22,7 +24,7 @@ public class CurrencyDeal {
                         int offers,
                         float buyAmount,
                         float sellAmount) {
-        this(primaryCurrencyID, secondaryCurrencyID, cValue, offers, buyAmount, sellAmount, 0, 0);
+        this(primaryCurrencyID, secondaryCurrencyID, cValue, offers, buyAmount, sellAmount, 0, 0, 0, 0);
     }
 
     public CurrencyDeal(CurrencyID primaryCurrencyID,
@@ -32,7 +34,9 @@ public class CurrencyDeal {
                         float buyAmount,
                         float sellAmount,
                         float playerBuyAmount,
-                        float playerSellAmount) {
+                        float playerSellAmount,
+                        int playerBuyStock,
+                        int playerSellStock) {
 
         this.primaryCurrencyID = primaryCurrencyID;
         this.secondaryCurrencyID = secondaryCurrencyID;
@@ -42,6 +46,8 @@ public class CurrencyDeal {
         this.sellAmount = sellAmount;
         this.playerBuyAmount = playerBuyAmount;
         this.playerSellAmount = playerSellAmount;
+        this.playerBuyStock = playerBuyStock;
+        this.playerSellStock = playerSellStock;
     }
 
     public CurrencyID getPrimaryCurrencyID() {
@@ -76,8 +82,8 @@ public class CurrencyDeal {
         return playerSellAmount;
     }
 
-    public float getDiff(){
-        if(buyAmount != 0 && sellAmount != 0){
+    public float getDiff() {
+        if (buyAmount != 0 && sellAmount != 0) {
             return buyAmount - sellAmount;
         }
         return 0;
@@ -89,5 +95,13 @@ public class CurrencyDeal {
             return diff * getcValue();
         }
         return 0;
+    }
+
+    public int getPlayerBuyStock() {
+        return playerBuyStock;
+    }
+
+    public int getPlayerSellStock() {
+        return playerSellStock;
     }
 }

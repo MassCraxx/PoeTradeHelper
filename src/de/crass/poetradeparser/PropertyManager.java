@@ -3,9 +3,10 @@ package de.crass.poetradeparser;
 import de.crass.poetradeparser.model.CurrencyID;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
-import java.util.Arrays;
-import java.util.List;
+import java.io.*;
 
 import static de.crass.poetradeparser.model.CurrencyID.*;
 
@@ -17,8 +18,12 @@ public class PropertyManager {
 
     private String currentLeague = "Incursion";
     private CurrencyID primaryCurrency = EXALTED;
+    public final static boolean offlineMode = true;
+    public static boolean filterStockOffers = true;
+    public static boolean filterValidStockOffers = true;
 
-    private final List<CurrencyID> defaultCurrencyFilter = Arrays.asList(
+
+    private final ObservableList<CurrencyID>  defaultCurrencyFilter = FXCollections.observableArrayList(
             ALCHEMY,
             SCOURING,
             ALTERATION,
@@ -28,8 +33,7 @@ public class PropertyManager {
 
     private ObservableList<String> playerCharacterNames =  FXCollections.observableArrayList("SenorDingDong", "FlashZoomDead");
 
-    //TODO: Filter
-    private List<CurrencyID> filterList = defaultCurrencyFilter;
+    private ObservableList<CurrencyID> filterList = defaultCurrencyFilter;
 
     public static PropertyManager getInstance() {
         if (instance == null) {
@@ -46,7 +50,7 @@ public class PropertyManager {
         return currentLeague;
     }
 
-    public List<CurrencyID> getFilterList() {
+    public ObservableList<CurrencyID> getFilterList() {
         return filterList;
     }
 
@@ -63,5 +67,37 @@ public class PropertyManager {
     }
     public void removePlayer(String characterName){
         playerCharacterNames.remove(characterName);
+    }
+
+    public boolean isFilterStockOffers() {
+        return filterStockOffers;
+    }
+
+    public boolean isFilterValidStockOffers() {
+        return filterValidStockOffers;
+    }
+
+    public static void setImage(String name, ImageView view){
+        String url = "./res/" + name;
+        File iconFile = new File(url);
+        InputStream fs = null;
+        if (iconFile.exists()) {
+            try {
+                fs = new FileInputStream(iconFile);
+                view.setImage(new Image(fs));
+            } catch (FileNotFoundException | IllegalArgumentException e) {
+                LogManager.getInstance().log(PropertyManager.class, "Exception on loading image! " + e);
+            } finally {
+                if(fs != null){
+                    try {
+                        fs.close();
+                    } catch (IOException e) {
+                        LogManager.getInstance().log(PropertyManager.class, "Exception on loading image! " + e);
+                    }
+                }
+            }
+        } else {
+            LogManager.getInstance().log(PropertyManager.class, "Image " + url + " not found!");
+        }
     }
 }

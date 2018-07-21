@@ -14,26 +14,14 @@
         <tabs>
           <Tab text="CurrencyOverview">
                <content>
-                  <VBox prefHeight="200.0" prefWidth="100.0">
-                     <children>
-                        <ComboBox fx:id="primaryComboBox" maxWidth="1.7976931348623157E308" />
-                        <ListView fx:id="currencyList" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS" />
-                     </children>
-                  </VBox>
+                  <ListView fx:id="currencyList" maxWidth="1.7976931348623157E308" styleClass="deal-list" />
                </content>
           </Tab>
           <Tab text="PlayerOverview">
                <content>
                   <VBox prefHeight="200.0" prefWidth="100.0">
                      <children>
-                        <HBox prefHeight="25.0" prefWidth="640.0">
-                           <children>
-                              <ComboBox fx:id="playerComboBox" maxWidth="1.7976931348623157E308" prefHeight="25.0" HBox.hgrow="ALWAYS" />
-                              <Button fx:id="addPlayerButton" mnemonicParsing="false" prefWidth="50.0" text="+" />
-                              <Button fx:id="removePlayerButton" mnemonicParsing="false" prefWidth="50.0" text="-" />
-                           </children>
-                        </HBox>
-                        <ListView fx:id="playerList" VBox.vgrow="ALWAYS" />
+                        <ListView fx:id="playerDealList" styleClass="deal-list" VBox.vgrow="ALWAYS" />
                      </children>
                   </VBox>
                </content>
@@ -42,7 +30,7 @@
                <content>
                   <BorderPane prefHeight="200.0" prefWidth="200.0">
                      <top>
-                        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Not implemented" BorderPane.alignment="CENTER">
+                        <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Not implemented" BorderPane.alignment="CENTER">
                            <font>
                               <Font size="39.0" />
                            </font>
@@ -52,7 +40,7 @@
                         </Text>
                      </top>
                      <bottom>
-                        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="¯\_(ツ)_/¯" BorderPane.alignment="CENTER">
+                        <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="¯\_(ツ)_/¯" BorderPane.alignment="CENTER">
                            <font>
                               <Font size="94.0" />
                            </font>
@@ -66,14 +54,22 @@
             </Tab>
             <Tab text="Settings">
                <content>
-                  <AnchorPane>
+                  <AnchorPane prefHeight="200.0" prefWidth="200.0">
                      <children>
-                        <ScrollPane layoutX="99.0" layoutY="126.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                          <content>
-                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0" />
-                          </content>
-                        </ScrollPane>
-                     </children></AnchorPane>
+                        <CheckBox fx:id="filterWithoutAPI" layoutX="37.0" layoutY="52.0" mnemonicParsing="false" selected="true" text="Filter Offers without API" />
+                        <Label layoutX="355.0" layoutY="25.0" text="Player Settings" />
+                        <CheckBox fx:id="filterInvalid" layoutX="37.0" layoutY="82.0" mnemonicParsing="false" selected="true" text="Filter Offers with insufficient stock" />
+                        <ComboBox fx:id="currencyFilterCB" layoutX="37.0" layoutY="114.0" prefHeight="37.0" prefWidth="132.0" />
+                        <ListView fx:id="currencyFilterList" layoutX="37.0" layoutY="157.0" prefHeight="210.0" prefWidth="200.0" />
+                        <Button fx:id="removeCurrencyFilterBtn" layoutX="37.0" layoutY="384.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="201.0" text="Remove" />
+                        <Button fx:id="addPlayerButton" layoutX="493.0" layoutY="61.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="62.0" text="+" />
+                        <ListView fx:id="playerListView" layoutX="355.0" layoutY="113.0" prefHeight="127.0" prefWidth="200.0" />
+                        <TextField fx:id="playerField" layoutX="355.0" layoutY="61.0" prefHeight="36.0" prefWidth="131.0" />
+                        <Button fx:id="addCurrencyFilterBtn" layoutX="178.0" layoutY="114.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="59.0" text="+" />
+                        <Label layoutX="37.0" layoutY="25.0" text="Filter Settings" />
+                        <Button fx:id="removePlayerBtn" layoutX="355.0" layoutY="262.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="201.0" text="Remove" />
+                     </children>
+                  </AnchorPane>
                </content>
             </Tab>
         </tabs>
@@ -82,13 +78,13 @@
    <bottom>
       <HBox prefHeight="40.0" prefWidth="640.0" BorderPane.alignment="CENTER">
          <children>
-            <Button id="updateButton" fx:id="updateButton" defaultButton="true" minWidth="55.0" mnemonicParsing="false" prefHeight="73.0" prefWidth="55.0" text="Update">
+            <Button id="updateButton" fx:id="updateButton" defaultButton="true" minWidth="100.0" mnemonicParsing="false" prefHeight="73.0" prefWidth="70.0" text="Update">
                <HBox.margin>
                   <Insets left="8.0" right="8.0" />
                </HBox.margin>
             </Button>
             <TextArea fx:id="console" editable="false" maxWidth="1.7976931348623157E308" nodeOrientation="LEFT_TO_RIGHT" prefHeight="0.0" promptText="Status console" text="Loading..." wrapText="true" HBox.hgrow="ALWAYS" />
-            <Label fx:id="version" alignment="CENTER" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" text="Version" textAlignment="CENTER" textOverrun="CLIP">
+            <Label fx:id="version" alignment="CENTER" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" minWidth="50.0" text="Version" textAlignment="CENTER" textOverrun="CLIP">
                <HBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>
@@ -96,4 +92,7 @@
          </children>
       </HBox>
    </bottom>
+   <top>
+      <ComboBox fx:id="primaryComboBox" maxWidth="1.7976931348623157E308" BorderPane.alignment="CENTER" />
+   </top>
 </BorderPane>

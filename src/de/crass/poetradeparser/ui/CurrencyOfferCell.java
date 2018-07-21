@@ -1,16 +1,15 @@
 package de.crass.poetradeparser.ui;
 
-import de.crass.poetradeparser.LogManager;
+import de.crass.poetradeparser.PropertyManager;
 import de.crass.poetradeparser.model.CurrencyDeal;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 
-import java.io.*;
+import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
@@ -70,31 +69,11 @@ public class CurrencyOfferCell<T> extends javafx.scene.control.ListCell<Currency
 
             }
 
-            root.setBorder(new Border(new BorderStroke(Color.BLACK,
-                    BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(2))));
+//            root.setBorder(new Border(new BorderStroke(Color.BLACK,
+//                    BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(2))));
 
-            String url = "./res/" + deal.getSecondaryCurrencyID().getID() + ".png";
-            File iconFile = new File(url);
-            InputStream fs = null;
-            if (iconFile.exists()) {
-                try {
-                    fs = new FileInputStream(iconFile);
-                    currencyIcon.setImage(new Image(fs));
-                } catch (FileNotFoundException | IllegalArgumentException e) {
-                    LogManager.getInstance().log(getClass(), "Exception on loading image! " + e);
-                } finally {
-                    if(fs != null){
-                        try {
-                            fs.close();
-                        } catch (IOException e) {
-                            LogManager.getInstance().log(getClass(), "Exception on loading image! " + e);
-                        }
-                    }
-                }
-            } else {
-                LogManager.getInstance().log(getClass(), "Image " + url + " for currency " + deal.getSecondaryCurrencyID().toString() +
-                        " not found!");
-            }
+            String url = deal.getSecondaryCurrencyID().getID() + ".png";
+            PropertyManager.setImage(url,currencyIcon);
 
             float buy = deal.getBuyAmount();
             float sell = deal.getSellAmount();
@@ -118,4 +97,8 @@ public class CurrencyOfferCell<T> extends javafx.scene.control.ListCell<Currency
         return String.valueOf(df.format(in));
     }
 
+    @Override
+    public void updateSelected(boolean selected) {
+//        super.updateSelected(selected);
+    }
 }

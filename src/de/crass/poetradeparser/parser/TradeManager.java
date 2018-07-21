@@ -18,8 +18,6 @@ public class TradeManager implements ParseListener {
     private PoeTradeWebParser webParser;
     private ObservableList<CurrencyDeal> currentDeals;
     private ObservableList<CurrencyDeal> playerDeals;
-    private boolean filterStockOffers = true;
-    private boolean filterValidStockOffers = true;
     private PoeNinjaParser poeNinjaParser;
     private Comparator<? super CurrencyDeal> diffValueSorter = new Comparator<CurrencyDeal>() {
         @Override
@@ -58,6 +56,9 @@ public class TradeManager implements ParseListener {
             return;
         }
         LogManager.getInstance().log(getClass(), "Parsing offers...");
+
+        boolean filterStockOffers = PropertyManager.filterStockOffers;
+        boolean filterValidStockOffers = PropertyManager.filterValidStockOffers;
 
         HashSet<Pair<CurrencyID, CurrencyID>> processedKeys = new HashSet<>();
         for (Map.Entry<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> offerMap : marketOffers.entrySet()) {
@@ -166,6 +167,8 @@ public class TradeManager implements ParseListener {
 
             float playerSellPrice = 0;
             float playerBuyPrice = 0;
+            int playerSellStock = 0;
+            int playerBuyStock = 0;
             float marketSellPrice = 0;
             float marketBuyPrice = 0;
 
@@ -179,10 +182,12 @@ public class TradeManager implements ParseListener {
 
             if (playerSellOffer != null) {
                 playerSellPrice = playerSellOffer.getSellValue();
+                playerSellStock = playerSellOffer.getStock();
             }
 
             if (playerBuyOffer != null) {
                 playerBuyPrice = playerBuyOffer.getBuyValue();
+                playerBuyStock = playerBuyOffer.getStock();
             }
 
             float cValue = poeNinjaParser.getCurrentRates().get(key.getKey());
@@ -190,8 +195,7 @@ public class TradeManager implements ParseListener {
 
             if (playerBuyPrice > 0 || playerSellPrice > 0) {
                 playerDeals.add(new CurrencyDeal(primaryCurrency, secondaryCurrency, cValue, totalOffers, marketBuyPrice,
-                        marketSellPrice,
-                        playerBuyPrice, playerSellPrice));
+                        marketSellPrice, playerBuyPrice, playerSellPrice, playerBuyStock, playerSellStock));
                 processedPlayerKeys.add(key);
             } else {
                 LogManager.getInstance().log(getClass(), "Player offer didnt contain shit!");

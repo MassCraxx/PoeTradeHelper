@@ -1,18 +1,21 @@
 package de.crass.poetradeparser.ui;
 
-import de.crass.poetradeparser.LogManager;
 import de.crass.poetradeparser.model.CurrencyDeal;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.image.Image;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.*;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
-import java.io.*;
+import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+
+import static de.crass.poetradeparser.PropertyManager.setImage;
 
 /**
  * Created by mcrass on 19.07.2018.
@@ -45,6 +48,12 @@ public class PlayerTradeCell<T> extends javafx.scene.control.ListCell<CurrencyDe
     @FXML
     private Text playerBuy;
 
+    @FXML
+    private ImageView buyTendency;
+
+    @FXML
+    private ImageView sellTendency;
+
     @Override
     protected void updateItem(CurrencyDeal deal, boolean empty) {
         super.updateItem(deal, empty);
@@ -67,31 +76,15 @@ public class PlayerTradeCell<T> extends javafx.scene.control.ListCell<CurrencyDe
 
             }
 
-            root.setBorder(new Border(new BorderStroke(Color.BLACK,
-                    BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(2))));
+//            root.setBorder(new Border(new BorderStroke(Color.BLACK,
+//                    BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(2))));
 
-            String url = "./res/" + deal.getSecondaryCurrencyID().getID() + ".png";
-            File iconFile = new File(url);
-            InputStream fs = null;
-            if (iconFile.exists()) {
-                try {
-                    fs = new FileInputStream(iconFile);
-                    currencyIcon.setImage(new Image(fs));
-                } catch (FileNotFoundException | IllegalArgumentException e) {
-                    LogManager.getInstance().log(getClass(), "Exception on loading image! " + e);
-                } finally {
-                    if(fs != null){
-                        try {
-                            fs.close();
-                        } catch (IOException e) {
-                            LogManager.getInstance().log(getClass(), "Exception on loading image! " + e);
-                        }
-                    }
-                }
-            } else {
-                LogManager.getInstance().log(getClass(), "Image " + url + " for currency " + deal.getSecondaryCurrencyID().toString() +
-                        " not found!");
-            }
+            setImage(deal.getSecondaryCurrencyID().getID() + ".png", currencyIcon);
+
+            Label test = new Label();
+            test.setTooltip(new Tooltip("aaaw yeee"));
+
+            test.setGraphic(currencyIcon);
 
             float buy = deal.getBuyAmount();
             float sell = deal.getSellAmount();
@@ -102,22 +95,37 @@ public class PlayerTradeCell<T> extends javafx.scene.control.ListCell<CurrencyDe
             float diffF = 0;
 
             float diffV = 0;
-            if(pBuy != 0 && pSell != 0){
+            if (pBuy != 0 && pSell != 0) {
                 diffF = pBuy - pSell;
                 diffV = diffF * deal.getcValue();
             }
 
-            if(pBuy > 0 && pBuy > buy){
-//                playerBuy.setStyle("-fx-text-fill: red;");
-                playerBuy.setFill(Color.RED);
-            } else{
-                playerBuy.setFill(Color.BLACK);
+            float playerBuyStock = deal.getPlayerBuyStock();
+            // buystock is primary, but buy is secondary
+            if (playerBuyStock > 0 && playerBuyStock < 1) {
+                playerBuy.setFill(Color.GRAY);
+            } else {
+                playerBuy.setFill(marketBuy.getFill());
             }
 
-            if(pSell > 0 && pSell < sell){
-                playerSell.setFill(Color.RED);
-            }else{
-                playerSell.setFill(Color.BLACK);
+            float playerSellStock = deal.getPlayerSellStock();
+            if (playerSellStock > 0 && playerSellStock < pSell) {
+                playerSell.setFill(Color.GRAY);
+            } else {
+                playerSell.setFill(marketBuy.getFill());
+            }
+            CheckBox box;
+
+            if (pBuy > 0 && pBuy >= buy) {
+                setImage(pBuy == buy ? "neut.png" : "nok.png", buyTendency);
+            } else if(pBuy > 0) {
+                setImage("ok.png", buyTendency);
+            }
+
+            if (pSell > 0 && pSell <= sell) {
+                setImage(pSell == sell ? "neut.png" : "nok.png", sellTendency);
+            } else if(pSell > 0) {
+                setImage("ok.png", sellTendency);
             }
 
             marketBuy.setText(prettyFloat(buy));
@@ -134,9 +142,10 @@ public class PlayerTradeCell<T> extends javafx.scene.control.ListCell<CurrencyDe
 
     }
 
-    String prettyFloat(float in){
+
+    String prettyFloat(float in) {
 //        return String.format(Locale.ENGLISH, "%.2f", in);
-        if(in == 0){
+        if (in == 0) {
             return "---";
         }
         DecimalFormat df = new DecimalFormat("#.#");
@@ -144,4 +153,8 @@ public class PlayerTradeCell<T> extends javafx.scene.control.ListCell<CurrencyDe
         return String.valueOf(df.format(in));
     }
 
+    @Override
+    public void updateSelected(boolean selected) {
+//        super.updateSelected(selected);
+    }
 }
