@@ -135,6 +135,8 @@ public class TradeManager implements ParseListener {
                 continue;
             }
 
+            processedPlayerKeys.add(key);
+
             CurrencyOffer bestMarketSellOffer;
             CurrencyOffer bestMarketBuyOffer;
             CurrencyOffer playerSellOffer = null;
@@ -184,21 +186,24 @@ public class TradeManager implements ParseListener {
 
             if (playerSellOffer != null) {
                 playerSellPrice = playerSellOffer.getSellValue();
+                playerSellPrice /= playerSellOffer.getBuyValue();
+
                 playerSellStock = playerSellOffer.getStock();
             }
 
             if (playerBuyOffer != null) {
                 playerBuyPrice = playerBuyOffer.getBuyValue();
+                playerBuyPrice /= playerBuyOffer.getSellValue();
+
                 playerBuyStock = playerBuyOffer.getStock();
             }
 
-            float cValue = poeNinjaParser.getCurrentRates().get(key.getKey());
+            float cValue = poeNinjaParser.getCurrentRates().get(key.getValue());
             int totalOffers = -1;
 
             if (playerBuyPrice > 0 || playerSellPrice > 0) {
                 playerDeals.add(new CurrencyDeal(primaryCurrency, secondaryCurrency, cValue, totalOffers, marketBuyPrice,
                         marketSellPrice, playerBuyPrice, playerSellPrice, playerBuyStock, playerSellStock));
-                processedPlayerKeys.add(key);
             } else {
                 LogManager.getInstance().log(getClass(), "Player offer didnt contain shit!");
             }
