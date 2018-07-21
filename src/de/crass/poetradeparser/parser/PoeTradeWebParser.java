@@ -6,6 +6,7 @@ import de.crass.poetradeparser.PropertyManager;
 import de.crass.poetradeparser.model.CurrencyID;
 import de.crass.poetradeparser.model.CurrencyOffer;
 import de.crass.poetradeparser.web.HttpManager;
+import javafx.application.Platform;
 import javafx.util.Pair;
 
 import java.io.File;
@@ -62,13 +63,17 @@ public class PoeTradeWebParser {
                 }
             }
             if(parseListener != null){
-                parseListener.onParsingFinished();
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        parseListener.onParsingFinished();
+                    }
+                });
             }
         }, "PoeTradeWebParser");
         runThread.setDaemon(true);
 
-        // FIXME: ASYNC
-        runThread.run();
+        runThread.start();
     }
 
     public void fetchCurrencyOffers(CurrencyID primary, CurrencyID secondary, String league) {
