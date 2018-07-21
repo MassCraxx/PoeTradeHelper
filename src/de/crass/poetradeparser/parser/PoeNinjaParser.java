@@ -27,8 +27,9 @@ public class PoeNinjaParser {
         objectMapper = new ObjectMapper();
     }
 
-    private void parseCurrency(String league) {
-        if (useOfflineCache && file.exists() && file.lastModified() + updateDelay > System.currentTimeMillis()) {
+    private void parseCurrency(String league, boolean forceUpdate) {
+        if (!forceUpdate && (useOfflineCache && file.exists() &&
+                file.lastModified() + updateDelay > System.currentTimeMillis())) {
             TypeReference<HashMap<CurrencyID, Float>> typeRef = new TypeReference<HashMap<CurrencyID, Float>>() {};
             try {
                 LogManager.getInstance().log(getClass(), "Loading poe.ninja currency values from cache..");
@@ -85,11 +86,20 @@ public class PoeNinjaParser {
 
     public HashMap<CurrencyID, Float> getCurrentRates() {
         if (currentRates == null || currentRates.isEmpty()) {
-            parseCurrency(PropertyManager.getInstance().getCurrentLeague());
+            parseCurrency(PropertyManager.getInstance().getCurrentLeague(), false);
             if (currentRates == null) {
                 currentRates = new HashMap<>();
             }
         }
         return currentRates;
+    }
+
+    public Float getCurrentValueFor(CurrencyID id) {
+        Float value = getCurrentRates().get(id);
+        if(value == null){
+            parseCurrency(PropertyManager.getInstance().getCurrentLeague(), true);
+            value = getCurrentRates().get(id);
+        }
+        return value == null ? 0 : value;
     }
 }

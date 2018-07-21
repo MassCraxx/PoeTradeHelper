@@ -27,6 +27,7 @@ public class PoeTradeWebParser {
 
     private final static int parseStartIndex = 435845;
     private final static int fetchDelay = 500;
+    private final static boolean writeCache = false;
 
     private final static Pattern OFFER_PATTERN = Pattern.compile(
             "class=\"displayoffer \" " +
@@ -106,7 +107,9 @@ public class PoeTradeWebParser {
             String buyQuery = "?league=" + league + "&online=x&want=" + primary.getID() + "&have=" + secondary.getID();
             buyResponseBody = HttpManager.getInstance().get(poeTradeCurrencyURL, buyQuery);
 
-            objectMapper.writeValue(file, buyResponseBody);
+            if(writeCache) {
+                objectMapper.writeValue(file, buyResponseBody);
+            }
         } else {
             LogManager.getInstance().log(getClass(), "Offline Fetching " + secondary + " offers for " + primary);
             if (file.exists()) {
@@ -116,11 +119,9 @@ public class PoeTradeWebParser {
                 return;
             }
         }
-        parseOffers(buyResponseBody);
 
         Pair key = new Pair<>(secondary, primary);
-        List<CurrencyOffer> currentOffer = currentOffers.get(key);
-        if(currentOffer == null){
+        if(!parseOffers(buyResponseBody)){
             LogManager.getInstance().log(getClass(), "No offers found for " + key);
         }
 
@@ -128,11 +129,11 @@ public class PoeTradeWebParser {
         Thread.sleep(fetchDelay);
     }
 
-    private void parseOffers(String responseBody) {
+    private boolean parseOffers(String responseBody) {
         Matcher offerMatcher = OFFER_PATTERN.matcher(responseBody);
 
         if (!offerMatcher.find(parseStartIndex)) {
-            LogManager.getInstance().log(getClass(), "No match found in Response: " + responseBody);
+            return false;
         } else {
             do {
                 if (offerMatcher.groupCount() >= 6) {
@@ -162,12 +163,13 @@ public class PoeTradeWebParser {
                 }
             } while (offerMatcher.find());
         }
+        return true;
     }
 
     private void addOffer(CurrencyOffer offer) {
         Pair<CurrencyID, CurrencyID> key = new Pair<>(offer.getBuyID(), offer.getSellID());
         if (PropertyManager.getInstance().getPlayerList().contains(offer.getPlayerName())) {
-            LogManager.getInstance().log(getClass(), "Found player offer " + offer.getPlayerName());
+            //LogManager.getInstance().log(getClass(), "Found player offer " + offer.getPlayerName());
             List<CurrencyOffer> offers = playerOffers.get(key);
             if (offers == null) {
                 offers = new LinkedList<>();

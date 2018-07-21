@@ -60,6 +60,7 @@ public class PlayerTradeCell<T> extends javafx.scene.control.ListCell<CurrencyDe
         if (empty || deal == null) {
 
             setText(null);
+            setGraphic(null);
 
         } else {
             if (mLLoader == null) {
@@ -115,14 +116,18 @@ public class PlayerTradeCell<T> extends javafx.scene.control.ListCell<CurrencyDe
 
             if (pBuy > 0 && pBuy >= buy) {
                 setImage(pBuy == buy ? "neut.png" : "nok.png", buyTendency);
-            } else if(pBuy > 0) {
+            } else if (pBuy > 0) {
                 setImage("ok.png", buyTendency);
+            } else {
+                buyTendency.setImage(null);
             }
 
             if (pSell > 0 && pSell <= sell) {
                 setImage(pSell == sell ? "neut.png" : "nok.png", sellTendency);
-            } else if(pSell > 0) {
+            } else if (pSell > 0) {
                 setImage("ok.png", sellTendency);
+            } else {
+                sellTendency.setImage(null);
             }
 
             marketBuy.setText(prettyFloat(buy));

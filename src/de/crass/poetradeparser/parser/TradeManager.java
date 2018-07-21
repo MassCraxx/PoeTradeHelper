@@ -31,6 +31,18 @@ public class TradeManager implements ParseListener {
             return o1Value > o2Value ? -1 : 1;
         }
     };
+    private Comparator<? super CurrencyDeal> playerDiffValueSorter = new Comparator<CurrencyDeal>() {
+        @Override
+        public int compare(CurrencyDeal o1, CurrencyDeal o2) {
+            float o1Value = o1.getPlayerDiffValue();
+            float o2Value = o2.getPlayerDiffValue();
+
+            if(o1Value == o2Value){
+                return 0;
+            }
+            return o1Value > o2Value ? -1 : 1;
+        }
+    };
     private ParseListener listener;
 
     public TradeManager() {
@@ -50,6 +62,7 @@ public class TradeManager implements ParseListener {
         CurrencyID primaryCurrency = PropertyManager.getInstance().getPrimaryCurrency();
         currentDeals.clear();
         playerDeals.clear();
+
         HashMap<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> marketOffers = webParser.getCurrentOffers();
 
         if (marketOffers == null || marketOffers.isEmpty()) {
@@ -83,7 +96,7 @@ public class TradeManager implements ParseListener {
                 }
             }
 
-            Float cValue = poeNinjaParser.getCurrentRates().get(key.getKey());
+            Float cValue = poeNinjaParser.getCurrentValueFor(key.getKey());
             if (cValue == null) {
                 LogManager.getInstance().log(getClass(), "Could not get rate for " + currency);
                 cValue = 0f;
@@ -178,10 +191,12 @@ public class TradeManager implements ParseListener {
 
             if (bestMarketSellOffer != null) {
                 marketSellPrice = bestMarketSellOffer.getSellValue();
+                marketSellPrice /= bestMarketSellOffer.getBuyValue();
             }
 
             if (bestMarketBuyOffer != null) {
                 marketBuyPrice = bestMarketBuyOffer.getBuyValue();
+                marketBuyPrice /= bestMarketBuyOffer.getSellValue();
             }
 
             if (playerSellOffer != null) {
@@ -198,7 +213,7 @@ public class TradeManager implements ParseListener {
                 playerBuyStock = playerBuyOffer.getStock();
             }
 
-            float cValue = poeNinjaParser.getCurrentRates().get(key.getValue());
+            float cValue = poeNinjaParser.getCurrentValueFor(key.getValue());
             int totalOffers = -1;
 
             if (playerBuyPrice > 0 || playerSellPrice > 0) {
@@ -208,7 +223,7 @@ public class TradeManager implements ParseListener {
                 LogManager.getInstance().log(getClass(), "Player offer didnt contain shit!");
             }
         }
-        playerDeals.sort(diffValueSorter);
+        playerDeals.sort(playerDiffValueSorter);
         LogManager.getInstance().log(getClass(), "Finished");
     }
 

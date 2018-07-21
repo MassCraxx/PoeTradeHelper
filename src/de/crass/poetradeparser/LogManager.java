@@ -2,6 +2,11 @@ package de.crass.poetradeparser;
 
 import javafx.scene.control.TextArea;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
+
 /**
  * Created by mcrass on 20.07.2018.
  */
@@ -22,7 +27,7 @@ public class LogManager {
     }
 
     public void log(Class clazz, String log) {
-        String timestamp = '>' + String.valueOf(System.currentTimeMillis()) + '<';
+        String timestamp = '>' + getTime() + '<';
         String consoleLog = timestamp + ' ' + '[' + clazz.getSimpleName() + ']' + ' ' + log;
         System.out.println(consoleLog);
 
@@ -32,5 +37,12 @@ public class LogManager {
             String text = console.getText();
             console.setText(msg + '\n' + text);
         }
+    }
+
+    public String getTime(){
+        Date date = new Date(System.currentTimeMillis());
+        DateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+        formatter.setTimeZone(TimeZone.getTimeZone("UTC+1"));
+        return formatter.format(date);
     }
 }

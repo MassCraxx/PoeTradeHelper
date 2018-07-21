@@ -17,6 +17,7 @@ public enum CurrencyID {
     REGAL(14),
     DIVINE(15),
     VAAL(16),
+    SILVER(35),
     APPRENTICE(45),
     JOURNEYMAN(46),
     MASTER(47),

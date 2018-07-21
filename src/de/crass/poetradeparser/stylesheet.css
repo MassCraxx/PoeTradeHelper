@@ -1,4 +1,6 @@
 /*
+ * https://github.com/joffrey-bion/javafx-themes
+ *
  * This is an adjustment of the original modena.css for a consistent dark theme.
  * Original modena.css here: https://gist.github.com/maxd/63691840fc372f22f470.
  */
@@ -84,6 +86,9 @@
     -fx-background-color: -fx-mark-highlight-color, rgb(255, 255, 255);
 }
 
+/**
+  ' From metro design: https://github.com/JFXtras/jfxtras-styles/blob/master/jmetro/src/main/resources/jfxtras/styles
+  */
 .button {
     -fx-padding: 5 22 5 22;
 
