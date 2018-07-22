@@ -5,7 +5,6 @@ import javafx.scene.control.TextArea;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.TimeZone;
 
 /**
  * Created by mcrass on 20.07.2018.
@@ -40,9 +39,9 @@ public class LogManager {
     }
 
     public String getTime(){
-        Date date = new Date(System.currentTimeMillis());
+        Date date = new Date();
         DateFormat formatter = new SimpleDateFormat("HH:mm:ss");
-        formatter.setTimeZone(TimeZone.getTimeZone("UTC+1"));
+//        formatter.setTimeZone(TimeZone.getTimeZone("UTC+1"));
         return formatter.format(date);
     }
 }
