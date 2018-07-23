@@ -25,6 +25,7 @@ import java.util.List;
 
 public class Main extends Application implements ParseListener {
 
+    public static final String versionText = "v0.2.2-SNAPSHOT";
     public static final String versionText = "v0.2.1";
 
     @FXML

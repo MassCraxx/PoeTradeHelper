@@ -29,7 +29,8 @@ public class PropertyManager {
             ALTERATION,
             REGAL,
             CHROMATIC,
-            CHANCE);
+            CHANCE,
+            GCP);
 
     private ObservableList<String> playerCharacterNames =  FXCollections.observableArrayList("SenorDingDong", "FlashZoomDead");
 
