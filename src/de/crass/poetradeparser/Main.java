@@ -25,7 +25,7 @@ import java.util.List;
 
 public class Main extends Application implements ParseListener {
 
-    public static final String versionText = "v0.2.2-SNAPSHOT";
+    public static final String versionText = "v0.2.3-SNAPSHOT";
 
     @FXML
     private ListView<CurrencyDeal> playerDealList;
@@ -62,6 +62,9 @@ public class Main extends Application implements ParseListener {
 
     @FXML
     private TextField playerField;
+
+    @FXML
+    private TextField leagueField;
 
     @FXML
     private Button updateButton;
@@ -214,6 +217,15 @@ public class Main extends Application implements ParseListener {
             @Override
             public void handle(ActionEvent event) {
                 playerList.remove(playerListView.getFocusModel().getFocusedItem());
+            }
+        });
+
+        leagueField.setText(PropertyManager.getInstance().getCurrentLeague());
+
+        leagueField.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                PropertyManager.getInstance().setLeague(leagueField.getText());
             }
         });
     }
