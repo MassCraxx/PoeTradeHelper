@@ -11,6 +11,8 @@ import javafx.util.Pair;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -103,8 +105,14 @@ public class PoeTradeWebParser {
         ObjectMapper objectMapper = new ObjectMapper();
         File file = new File(primary.toString() + "-" + secondary.toString() + ".html");
         if (!offlineMode) {
+            String leagueParam = league;
+            try {
+                leagueParam = URLEncoder.encode(league, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                LogManager.getInstance().log(getClass(), "Error encoding league: " + leagueParam);
+            }
             LogManager.getInstance().log(getClass(), "Fetching " + secondary + " offers for " + primary);
-            String buyQuery = "?league=" + league + "&online=x&want=" + primary.getID() + "&have=" + secondary.getID();
+            String buyQuery = "?league=" + leagueParam + "&online=x&want=" + primary.getID() + "&have=" + secondary.getID();
             buyResponseBody = HttpManager.getInstance().get(poeTradeCurrencyURL, buyQuery);
 
             if(writeCache) {

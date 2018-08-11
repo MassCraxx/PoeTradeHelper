@@ -71,8 +71,9 @@
                         <ListView fx:id="playerListView" layoutX="355.0" layoutY="113.0" prefHeight="127.0" prefWidth="200.0" />
                         <TextField fx:id="playerField" layoutX="355.0" layoutY="61.0" prefHeight="36.0" prefWidth="131.0" />
                         <Button fx:id="addCurrencyFilterBtn" layoutX="178.0" layoutY="114.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="59.0" text="+" />
-                        <Label layoutX="37.0" layoutY="25.0" text="Filter Settings" />
+                        <Label layoutX="355.0" layoutY="308.0" text="League" />
                         <Button fx:id="removePlayerBtn" layoutX="355.0" layoutY="262.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="201.0" text="Remove" />
+                        <TextField fx:id="leagueField" layoutX="355.0" layoutY="335.0" />
                      </children>
                   </AnchorPane>
                </content>

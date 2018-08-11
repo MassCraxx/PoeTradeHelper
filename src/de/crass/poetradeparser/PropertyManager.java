@@ -101,4 +101,8 @@ public class PropertyManager {
             LogManager.getInstance().log(PropertyManager.class, "Image " + url + " not found!");
         }
     }
+
+    public void setLeague(String league) {
+        currentLeague = league;
+    }
 }
