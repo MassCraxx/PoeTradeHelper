@@ -15,6 +15,7 @@ import java.util.*;
  * Created by mcrass on 19.07.2018.
  */
 public class TradeManager implements ParseListener {
+    private PoeApiParser poeApiParser;
     private PoeTradeWebParser webParser;
     private ObservableList<CurrencyDeal> currentDeals;
     private ObservableList<CurrencyDeal> playerDeals;
@@ -49,6 +50,7 @@ public class TradeManager implements ParseListener {
         webParser = new PoeTradeWebParser();
         webParser.setParseListener(this);
         poeNinjaParser = new PoeNinjaParser();
+        poeApiParser = new PoeApiParser();
 
         currentDeals = FXCollections.observableArrayList();
         playerDeals = FXCollections.observableArrayList();
@@ -253,5 +255,9 @@ public class TradeManager implements ParseListener {
 
     public void cancelUpdate(){
         webParser.cancel();
+    }
+
+    public ObservableList<String> getLeagueList() {
+        return poeApiParser.getCurrentLeagues();
     }
 }

@@ -68,7 +68,7 @@ public class PoeTradeWebParser {
                     fetchCurrencyOffers(primaryCurrency, (CurrencyID) secondary, PropertyManager.getInstance().getCurrentLeague());
                 }
             }
-            if(parseListener != null){
+            if (parseListener != null) {
                 Platform.runLater(new Runnable() {
                     @Override
                     public void run() {
@@ -98,7 +98,7 @@ public class PoeTradeWebParser {
     }
 
     private void fetchOffers(CurrencyID primary, CurrencyID secondary, String league) throws IOException, InterruptedException {
-        if(cancel){
+        if (cancel) {
             return;
         }
         String buyResponseBody;
@@ -115,7 +115,7 @@ public class PoeTradeWebParser {
             String buyQuery = "?league=" + leagueParam + "&online=x&want=" + primary.getID() + "&have=" + secondary.getID();
             buyResponseBody = HttpManager.getInstance().get(poeTradeCurrencyURL, buyQuery);
 
-            if(writeCache) {
+            if (writeCache) {
                 objectMapper.writeValue(file, buyResponseBody);
             }
         } else {
@@ -129,18 +129,20 @@ public class PoeTradeWebParser {
         }
 
         Pair key = new Pair<>(secondary, primary);
-        if(!parseOffers(buyResponseBody)){
+        if (!parseOffers(buyResponseBody)) {
             LogManager.getInstance().log(getClass(), "No offers found for " + key);
         }
 
-        if(!offlineMode)
-        Thread.sleep(fetchDelay);
+        if (!offlineMode)
+            Thread.sleep(fetchDelay);
     }
 
     private boolean parseOffers(String responseBody) {
         Matcher offerMatcher = OFFER_PATTERN.matcher(responseBody);
 
-        if (!offerMatcher.find(parseStartIndex)) {
+        if (responseBody.length() < parseStartIndex) {
+            LogManager.getInstance().log(getClass(), "Response invalid!");
+        } else if (!offerMatcher.find(parseStartIndex)) {
             return false;
         } else {
             do {
@@ -211,7 +213,7 @@ public class PoeTradeWebParser {
         return null;
     }
 
-    public CurrencyOffer getBestOfferForKey(List<CurrencyOffer> list, boolean filterStockOffers, boolean filterValidStockOffers){
+    public CurrencyOffer getBestOfferForKey(List<CurrencyOffer> list, boolean filterStockOffers, boolean filterValidStockOffers) {
         CurrencyOffer bestOffer = null;
         for (CurrencyOffer offer : list) {
             if (!filterStockOffers || (!filterValidStockOffers && offer.getStock() >= 0) ||
@@ -235,7 +237,7 @@ public class PoeTradeWebParser {
         return updating;
     }
 
-    public void cancel(){
+    public void cancel() {
         cancel = true;
     }
 }

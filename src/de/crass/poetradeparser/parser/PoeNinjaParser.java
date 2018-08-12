@@ -41,7 +41,7 @@ public class PoeNinjaParser {
             return;
         }
 
-        LogManager.getInstance().log(getClass(), "Fetching current currency values from poe.ninja.");
+        LogManager.getInstance().log(getClass(), "Fetching new currency values from poe.ninja.");
         JSONObject json = null;
         try {
             json = HttpManager.getInstance().getJson(currencyURL, "?league=" + league);

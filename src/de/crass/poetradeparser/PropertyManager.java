@@ -103,6 +103,7 @@ public class PropertyManager {
     }
 
     public void setLeague(String league) {
+        LogManager.getInstance().log(getClass(), "Setting " + league + " as new league.");
         currentLeague = league;
     }
 }
