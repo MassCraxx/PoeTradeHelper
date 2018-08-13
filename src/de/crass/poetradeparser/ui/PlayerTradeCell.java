@@ -84,11 +84,6 @@ public class PlayerTradeCell extends javafx.scene.control.ListCell<CurrencyDeal>
 
             setImage(deal.getSecondaryCurrencyID().getID() + ".png", currencyIcon);
 
-//            Label test = new Label();
-//            test.setTooltip(new Tooltip("aaaw yeee"));
-//
-//            test.setGraphic(currencyIcon);
-
             float buy = deal.getBuyAmount();
             float sell = deal.getSellAmount();
 
@@ -121,7 +116,7 @@ public class PlayerTradeCell extends javafx.scene.control.ListCell<CurrencyDeal>
             }
 
             // Set icons
-            if (buy > 0) {
+            if (buy > 0 && pBuy > 0) {
                 if (pBuy > 0 && pBuy >= buy) {
                     setImage(pBuy == buy ? "neut.png" : "nok.png", buyTendency);
                 } else if (pBuy > 0) {
@@ -132,13 +127,15 @@ public class PlayerTradeCell extends javafx.scene.control.ListCell<CurrencyDeal>
                     buyTendency.setEffect(getColorEffect(Color.RED));
                     buyTendency.setCache(true);
                     buyTendency.setCacheHint(CacheHint.SPEED);
+                } else{
+                    buyTendency.setEffect(null);
                 }
             } else {
                 buyTendency.setImage(null);
                 buyTendency.setEffect(null);
             }
 
-            if (sell > 0) {
+            if (sell > 0 && pSell > 0) {
                 if (pSell > 0 && pSell <= sell) {
                     setImage(pSell == sell ? "neut.png" : "nok.png", sellTendency);
                 } else if (pSell > 0) {
@@ -150,11 +147,13 @@ public class PlayerTradeCell extends javafx.scene.control.ListCell<CurrencyDeal>
                     sellTendency.setEffect(getColorEffect(Color.RED));
                     sellTendency.setCache(true);
                     sellTendency.setCacheHint(CacheHint.SPEED);
+                } else{
+                    sellTendency.setEffect(null);
                 }
 
             } else {
                 sellTendency.setImage(null);
-                buyTendency.setEffect(null);
+                sellTendency.setEffect(null);
             }
 
             marketBuy.setText(prettyFloat(buy));
