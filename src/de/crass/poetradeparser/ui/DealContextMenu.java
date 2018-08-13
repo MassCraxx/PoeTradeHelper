@@ -7,6 +7,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 
 /**
  * Created by mcrass on 13.08.2018.
@@ -36,6 +37,8 @@ public class DealContextMenu extends ContextMenu {
         MenuItem buyValueItem = new MenuItem("Market Buy Value: " + deal.getcValue() * deal.getBuyAmount());
         MenuItem sellValueItem = new MenuItem("Market Sell Value: " + deal.getcValue() * deal.getSellAmount());
 
-        getItems().addAll(buyItem, sellItem, buyValueItem, sellValueItem);
+        SeparatorMenuItem seperator = new SeparatorMenuItem();
+
+        getItems().addAll(buyValueItem, sellValueItem, seperator, buyItem, sellItem);
     }
 }

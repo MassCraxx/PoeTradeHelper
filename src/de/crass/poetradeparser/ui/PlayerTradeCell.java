@@ -3,6 +3,7 @@ package de.crass.poetradeparser.ui;
 import de.crass.poetradeparser.model.CurrencyDeal;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.CacheHint;
 import javafx.scene.effect.Effect;
 import javafx.scene.effect.Light;
 import javafx.scene.effect.Lighting;
@@ -54,7 +55,6 @@ public class PlayerTradeCell extends javafx.scene.control.ListCell<CurrencyDeal>
 
     @FXML
     private ImageView sellTendency;
-    private static Effect redEffect;
 
     @Override
     protected void updateItem(CurrencyDeal deal, boolean empty) {
@@ -107,6 +107,7 @@ public class PlayerTradeCell extends javafx.scene.control.ListCell<CurrencyDeal>
             // buystock is primary, but buy is secondary
             if (playerBuyStock > 0 && playerBuyStock < 1) {
                 playerBuy.setFill(Color.GRAY);
+                buyTendency.setEffect(getColorEffect(Color.GRAY));
             } else {
                 playerBuy.setFill(marketBuy.getFill());
             }
@@ -114,6 +115,7 @@ public class PlayerTradeCell extends javafx.scene.control.ListCell<CurrencyDeal>
             float playerSellStock = deal.getPlayerSellStock();
             if (playerSellStock > 0 && playerSellStock < pSell) {
                 playerSell.setFill(Color.GRAY);
+                sellTendency.setEffect(getColorEffect(Color.GRAY));
             } else {
                 playerSell.setFill(marketBuy.getFill());
             }
@@ -126,11 +128,11 @@ public class PlayerTradeCell extends javafx.scene.control.ListCell<CurrencyDeal>
                     setImage("ok.png", buyTendency);
                 }
                 // Check if player offer is too far from the market offers
-//                if (Math.abs(pBuy - buy) * deal.getcValue() > WARNING_DIFF_THRESHOLD) {
-//                    buyTendency.setEffect(getRedEffect());
-//                    buyTendency.setCache(true);
-//                    buyTendency.setCacheHint(CacheHint.SPEED);
-//                }
+                if (Math.abs(pBuy - buy) * deal.getcValue() > WARNING_DIFF_THRESHOLD) {
+                    buyTendency.setEffect(getColorEffect(Color.RED));
+                    buyTendency.setCache(true);
+                    buyTendency.setCacheHint(CacheHint.SPEED);
+                }
             } else {
                 buyTendency.setImage(null);
                 buyTendency.setEffect(null);
@@ -142,12 +144,13 @@ public class PlayerTradeCell extends javafx.scene.control.ListCell<CurrencyDeal>
                 } else if (pSell > 0) {
                     setImage("ok.png", sellTendency);
                 }
+                // Check if player offer is too far from the market offers
 
-//                if (Math.abs(pSell - sell) * deal.getcValue() > WARNING_DIFF_THRESHOLD) {
-//                    sellTendency.setEffect(getRedEffect());
-//                    sellTendency.setCache(true);
-//                    sellTendency.setCacheHint(CacheHint.SPEED);
-//                }
+                if (Math.abs(pSell - sell) * deal.getcValue() > WARNING_DIFF_THRESHOLD) {
+                    sellTendency.setEffect(getColorEffect(Color.RED));
+                    sellTendency.setCache(true);
+                    sellTendency.setCacheHint(CacheHint.SPEED);
+                }
 
             } else {
                 sellTendency.setImage(null);
@@ -174,16 +177,13 @@ public class PlayerTradeCell extends javafx.scene.control.ListCell<CurrencyDeal>
 //        super.updateSelected(selected);
     }
 
-    private static Effect getRedEffect() {
-        if (redEffect == null) {
+    private static Effect getColorEffect(Color color) {
             Lighting lighting = new Lighting();
             lighting.setDiffuseConstant(1.0);
             lighting.setSpecularConstant(0.0);
             lighting.setSurfaceScale(0.0);
-            lighting.setLight(new Light.Distant(45, 45, Color.RED));
+            lighting.setLight(new Light.Distant(45, 45, color));
 
-            redEffect = lighting;
-        }
-        return redEffect;
+           return lighting;
     }
 }
