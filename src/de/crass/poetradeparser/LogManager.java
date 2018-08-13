@@ -1,5 +1,6 @@
 package de.crass.poetradeparser;
 
+import javafx.application.Platform;
 import javafx.scene.control.TextArea;
 
 import java.text.DateFormat;
@@ -33,8 +34,13 @@ public class LogManager {
         String msg = timestamp + ' ' + log;
 
         if (console != null) {
-            String text = console.getText();
-            console.setText(msg + '\n' + text);
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    String text = console.getText();
+                    console.setText(msg + '\n' + text);
+                }
+            });
         }
     }
 

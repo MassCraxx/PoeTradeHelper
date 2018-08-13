@@ -9,9 +9,11 @@ import de.crass.poetradeparser.web.HttpManager;
 import javafx.application.Platform;
 import javafx.util.Pair;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -68,7 +70,7 @@ public class PoeTradeWebParser {
                     fetchCurrencyOffers(primaryCurrency, (CurrencyID) secondary, PropertyManager.getInstance().getCurrentLeague());
                 }
             }
-            if(parseListener != null){
+            if (parseListener != null) {
                 Platform.runLater(new Runnable() {
                     @Override
                     public void run() {
@@ -98,24 +100,18 @@ public class PoeTradeWebParser {
     }
 
     private void fetchOffers(CurrencyID primary, CurrencyID secondary, String league) throws IOException, InterruptedException {
-        if(cancel){
+        if (cancel) {
             return;
         }
         String buyResponseBody;
         ObjectMapper objectMapper = new ObjectMapper();
         File file = new File(primary.toString() + "-" + secondary.toString() + ".html");
         if (!offlineMode) {
-            String leagueParam = league;
-            try {
-                leagueParam = URLEncoder.encode(league, "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                LogManager.getInstance().log(getClass(), "Error encoding league: " + leagueParam);
-            }
             LogManager.getInstance().log(getClass(), "Fetching " + secondary + " offers for " + primary);
-            String buyQuery = "?league=" + leagueParam + "&online=x&want=" + primary.getID() + "&have=" + secondary.getID();
-            buyResponseBody = HttpManager.getInstance().get(poeTradeCurrencyURL, buyQuery);
 
-            if(writeCache) {
+            buyResponseBody = HttpManager.getInstance().get(poeTradeCurrencyURL, getBuyQuery(league, primary, secondary));
+
+            if (writeCache) {
                 objectMapper.writeValue(file, buyResponseBody);
             }
         } else {
@@ -129,18 +125,30 @@ public class PoeTradeWebParser {
         }
 
         Pair key = new Pair<>(secondary, primary);
-        if(!parseOffers(buyResponseBody)){
+        if (!parseOffers(buyResponseBody)) {
             LogManager.getInstance().log(getClass(), "No offers found for " + key);
         }
 
-        if(!offlineMode)
-        Thread.sleep(fetchDelay);
+        if (!offlineMode)
+            Thread.sleep(fetchDelay);
+    }
+
+    private static String getBuyQuery(String league, CurrencyID want, CurrencyID have) {
+        String leagueParam = league;
+        try {
+            leagueParam = URLEncoder.encode(league, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            LogManager.getInstance().log(PoeTradeWebParser.class, "Error encoding league: " + leagueParam);
+        }
+        return "?league=" + leagueParam + "&online=x&want=" + want.getID() + "&have=" + have.getID();
     }
 
     private boolean parseOffers(String responseBody) {
         Matcher offerMatcher = OFFER_PATTERN.matcher(responseBody);
 
-        if (!offerMatcher.find(parseStartIndex)) {
+        if (responseBody.length() < parseStartIndex) {
+            LogManager.getInstance().log(getClass(), "Response invalid!");
+        } else if (!offerMatcher.find(parseStartIndex)) {
             return false;
         } else {
             do {
@@ -206,15 +214,15 @@ public class PoeTradeWebParser {
         return currentOffers;
     }
 
-    // FIXME
-    public CurrencyOffer getBestOffer() {
-        return null;
-    }
-
-    public CurrencyOffer getBestOfferForKey(List<CurrencyOffer> list, boolean filterStockOffers, boolean filterValidStockOffers){
+    public CurrencyOffer getBestOffer(List<CurrencyOffer> list, boolean filterStockOffers, boolean filterValidStockOffers) {
         CurrencyOffer bestOffer = null;
+        if(list == null){
+            return null;
+        }
         for (CurrencyOffer offer : list) {
-            if (!filterStockOffers || (!filterValidStockOffers && offer.getStock() >= 0) ||
+            // Return most top offer that meets filter requirements
+            if (!filterStockOffers ||
+                    (!filterValidStockOffers && offer.getStock() >= 0) ||
                     filterValidStockOffers && offer.getStock() > offer.getSellValue()) {
                 bestOffer = offer;
                 break;
@@ -235,7 +243,19 @@ public class PoeTradeWebParser {
         return updating;
     }
 
-    public void cancel(){
+    public void cancel() {
         cancel = true;
+    }
+
+    public static String getPoeTradeURL(String league, CurrencyID want, CurrencyID have){
+        return poeTradeCurrencyURL + getBuyQuery(league, want, have);
+    }
+
+    public static void openInBrowser(String league, CurrencyID want, CurrencyID have){
+        try {
+            Desktop.getDesktop().browse(URI.create(PoeTradeWebParser.getPoeTradeURL(league, want, have)));
+        } catch (Exception e) {
+            LogManager.getInstance().log(PoeTradeWebParser.class, "Error opening browser. "+ e);
+        }
     }
 }

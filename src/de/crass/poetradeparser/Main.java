@@ -25,7 +25,8 @@ import java.util.List;
 
 public class Main extends Application implements ParseListener {
 
-    public static final String versionText = "v0.2.3";
+    public static final String title = "PoeTradeParser";
+    public static final String versionText = "v0.2.4";
 
     @FXML
     private ListView<CurrencyDeal> playerDealList;
@@ -64,6 +65,9 @@ public class Main extends Application implements ParseListener {
     private TextField playerField;
 
     @FXML
+    private ComboBox<String> leagueCB;
+
+    @FXML
     private Button updateButton;
 
     @FXML
@@ -76,6 +80,7 @@ public class Main extends Application implements ParseListener {
     private Button addCurrencyFilterBtn;
 
     private TradeManager tradeManager;
+    private Stage currentStage;
 
 
     public static void main(String[] args) {
@@ -85,11 +90,13 @@ public class Main extends Application implements ParseListener {
     @Override
     public void start(Stage primaryStage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("layout.fxml"));
-        primaryStage.setTitle("PoeTradeParser");
         Scene scene = new Scene(root, 600, 650);
         scene.getStylesheets().add(getClass().getResource("stylesheet.css").toExternalForm());
         primaryStage.setScene(scene);
         primaryStage.show();
+
+        currentStage = primaryStage;
+        updateTitle();
     }
 
     @FXML
@@ -125,11 +132,14 @@ public class Main extends Application implements ParseListener {
         playerDealList.setCellFactory(new Callback<ListView<CurrencyDeal>, ListCell<CurrencyDeal>>() {
             @Override
             public ListCell<CurrencyDeal> call(ListView<CurrencyDeal> studentListView) {
-                return new PlayerTradeCell<>();
+                return new PlayerTradeCell();
             }
         });
         playerDealList.setPlaceholder(new Label("No deals to show."));
         playerDealList.setItems(tradeManager.getPlayerDeals());
+
+        currencyList.setPlaceholder(new Label("No deals to show."));
+        playerDealList.setPlaceholder(new Label("No deals to show."));
 
         updateButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -139,7 +149,7 @@ public class Main extends Application implements ParseListener {
                     currencyList.setPlaceholder(new Label("Updating..."));
                     playerDealList.setPlaceholder(new Label("Updating..."));
                     updateButton.setText("Cancel");
-                } else{
+                } else {
                     tradeManager.cancelUpdate();
                     updateButton.setDisable(true);
                 }
@@ -165,7 +175,7 @@ public class Main extends Application implements ParseListener {
             @Override
             public void handle(ActionEvent event) {
                 PropertyManager.filterStockOffers = filterInvalid.isSelected();
-                tradeManager.parseDeals();
+                tradeManager.parseDeals(true);
             }
         });
 
@@ -173,7 +183,7 @@ public class Main extends Application implements ParseListener {
             @Override
             public void handle(ActionEvent event) {
                 PropertyManager.filterStockOffers = filterWithoutAPI.isSelected();
-                tradeManager.parseDeals();
+                tradeManager.parseDeals(true);
             }
         });
 
@@ -216,13 +226,25 @@ public class Main extends Application implements ParseListener {
                 playerList.remove(playerListView.getFocusModel().getFocusedItem());
             }
         });
+
+        leagueCB.setItems(tradeManager.getLeagueList());
+        leagueCB.setValue(PropertyManager.getInstance().getCurrentLeague());
+
+        leagueCB.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                PropertyManager.getInstance().setLeague(leagueCB.getValue());
+                updateTitle();
+            }
+        });
+    }
+
+    private void updateTitle(){
+        currentStage.setTitle(title + " - " + PropertyManager.getInstance().getCurrentLeague() + " League");
     }
 
     @Override
     public void onParsingFinished() {
-        currencyList.setPlaceholder(new Label("No deals to show."));
-        playerDealList.setPlaceholder(new Label("No deals to show."));
-
         updateButton.setText("Update");
         updateButton.setDisable(false);
     }

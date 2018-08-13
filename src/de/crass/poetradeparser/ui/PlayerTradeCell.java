@@ -3,23 +3,25 @@ package de.crass.poetradeparser.ui;
 import de.crass.poetradeparser.model.CurrencyDeal;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.Label;
-import javafx.scene.control.Tooltip;
+import javafx.scene.effect.Effect;
+import javafx.scene.effect.Light;
+import javafx.scene.effect.Lighting;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
 import java.io.IOException;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
 
+import static de.crass.poetradeparser.PropertyManager.prettyFloat;
 import static de.crass.poetradeparser.PropertyManager.setImage;
 
 /**
  * Created by mcrass on 19.07.2018.
  */
-public class PlayerTradeCell<T> extends javafx.scene.control.ListCell<CurrencyDeal> {
+public class PlayerTradeCell extends javafx.scene.control.ListCell<CurrencyDeal> {
+
+    private static final float WARNING_DIFF_THRESHOLD = 10;
 
     private FXMLLoader mLLoader;
 
@@ -52,6 +54,7 @@ public class PlayerTradeCell<T> extends javafx.scene.control.ListCell<CurrencyDe
 
     @FXML
     private ImageView sellTendency;
+    private static Effect redEffect;
 
     @Override
     protected void updateItem(CurrencyDeal deal, boolean empty) {
@@ -61,6 +64,7 @@ public class PlayerTradeCell<T> extends javafx.scene.control.ListCell<CurrencyDe
 
             setText(null);
             setGraphic(null);
+            setOnContextMenuRequested(null);
 
         } else {
             if (mLLoader == null) {
@@ -80,10 +84,10 @@ public class PlayerTradeCell<T> extends javafx.scene.control.ListCell<CurrencyDe
 
             setImage(deal.getSecondaryCurrencyID().getID() + ".png", currencyIcon);
 
-            Label test = new Label();
-            test.setTooltip(new Tooltip("aaaw yeee"));
-
-            test.setGraphic(currencyIcon);
+//            Label test = new Label();
+//            test.setTooltip(new Tooltip("aaaw yeee"));
+//
+//            test.setGraphic(currencyIcon);
 
             float buy = deal.getBuyAmount();
             float sell = deal.getSellAmount();
@@ -114,20 +118,40 @@ public class PlayerTradeCell<T> extends javafx.scene.control.ListCell<CurrencyDe
                 playerSell.setFill(marketBuy.getFill());
             }
 
-            if (pBuy > 0 && pBuy >= buy) {
-                setImage(pBuy == buy ? "neut.png" : "nok.png", buyTendency);
-            } else if (pBuy > 0) {
-                setImage("ok.png", buyTendency);
+            // Set icons
+            if (buy > 0) {
+                if (pBuy > 0 && pBuy >= buy) {
+                    setImage(pBuy == buy ? "neut.png" : "nok.png", buyTendency);
+                } else if (pBuy > 0) {
+                    setImage("ok.png", buyTendency);
+                }
+                // Check if player offer is too far from the market offers
+//                if (Math.abs(pBuy - buy) * deal.getcValue() > WARNING_DIFF_THRESHOLD) {
+//                    buyTendency.setEffect(getRedEffect());
+//                    buyTendency.setCache(true);
+//                    buyTendency.setCacheHint(CacheHint.SPEED);
+//                }
             } else {
                 buyTendency.setImage(null);
+                buyTendency.setEffect(null);
             }
 
-            if (pSell > 0 && pSell <= sell) {
-                setImage(pSell == sell ? "neut.png" : "nok.png", sellTendency);
-            } else if (pSell > 0) {
-                setImage("ok.png", sellTendency);
+            if (sell > 0) {
+                if (pSell > 0 && pSell <= sell) {
+                    setImage(pSell == sell ? "neut.png" : "nok.png", sellTendency);
+                } else if (pSell > 0) {
+                    setImage("ok.png", sellTendency);
+                }
+
+//                if (Math.abs(pSell - sell) * deal.getcValue() > WARNING_DIFF_THRESHOLD) {
+//                    sellTendency.setEffect(getRedEffect());
+//                    sellTendency.setCache(true);
+//                    sellTendency.setCacheHint(CacheHint.SPEED);
+//                }
+
             } else {
                 sellTendency.setImage(null);
+                buyTendency.setEffect(null);
             }
 
             marketBuy.setText(prettyFloat(buy));
@@ -140,23 +164,26 @@ public class PlayerTradeCell<T> extends javafx.scene.control.ListCell<CurrencyDe
             diffValue.setText(prettyFloat((diffV)) + "c");
 
             setGraphic(root);
+
+            setContextMenu(new DealContextMenu(deal));
         }
-
-    }
-
-
-    String prettyFloat(float in) {
-//        return String.format(Locale.ENGLISH, "%.2f", in);
-        if (in == 0) {
-            return "---";
-        }
-        DecimalFormat df = new DecimalFormat("#.#");
-        df.setRoundingMode(RoundingMode.CEILING);
-        return String.valueOf(df.format(in));
     }
 
     @Override
     public void updateSelected(boolean selected) {
 //        super.updateSelected(selected);
+    }
+
+    private static Effect getRedEffect() {
+        if (redEffect == null) {
+            Lighting lighting = new Lighting();
+            lighting.setDiffuseConstant(1.0);
+            lighting.setSpecularConstant(0.0);
+            lighting.setSurfaceScale(0.0);
+            lighting.setLight(new Light.Distant(45, 45, Color.RED));
+
+            redEffect = lighting;
+        }
+        return redEffect;
     }
 }
