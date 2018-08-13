@@ -79,9 +79,6 @@ public class TradeManager implements ParseListener {
         currentDeals.clear();
         playerDeals.clear();
 
-        boolean filterStockOffers = PropertyManager.filterStockOffers;
-        boolean filterValidStockOffers = PropertyManager.filterValidStockOffers;
-
         HashMap<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> marketOffers = webParser.getCurrentOffers();
         HashSet<Pair<CurrencyID, CurrencyID>> processedKeys = new HashSet<>();
 
@@ -116,13 +113,9 @@ public class TradeManager implements ParseListener {
             CurrencyID secondaryCurrency = key.getValue();
             float cValue = poeNinjaParser.getCurrentValueFor(secondaryCurrency);
 
-            bestMarketSellOffer = webParser.getBestOffer(marketOffers.get(key),
-                    filterStockOffers,
-                    filterValidStockOffers);
+            bestMarketSellOffer = webParser.getBestOffer(marketOffers.get(key));
 
-            bestMarketBuyOffer = webParser.getBestOffer(marketOffers.get(invertedKey),
-                    filterStockOffers,
-                    filterValidStockOffers);
+            bestMarketBuyOffer = webParser.getBestOffer(marketOffers.get(invertedKey));
 
             int totalOffers = (marketOffers.get(key) == null ? 0 : marketOffers.get(key).size())
                     + (marketOffers.get(invertedKey) == null ? 0 : marketOffers.get(invertedKey).size());
@@ -182,14 +175,9 @@ public class TradeManager implements ParseListener {
 
             }
 
-            bestMarketSellOffer = webParser.getBestOffer(marketOffers.get(key),
-                    filterStockOffers,
-                    filterValidStockOffers);
+            bestMarketSellOffer = webParser.getBestOffer(marketOffers.get(key));
 
-
-            bestMarketBuyOffer = webParser.getBestOffer(marketOffers.get(invertedKey),
-                    filterStockOffers,
-                    filterValidStockOffers);
+            bestMarketBuyOffer = webParser.getBestOffer(marketOffers.get(invertedKey));
 
             float playerSellPrice = 0;
             float playerBuyPrice = 0;

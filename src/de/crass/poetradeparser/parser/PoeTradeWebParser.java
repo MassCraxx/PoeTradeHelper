@@ -214,6 +214,10 @@ public class PoeTradeWebParser {
         return currentOffers;
     }
 
+    public CurrencyOffer getBestOffer(List<CurrencyOffer> list){
+        return getBestOffer(list, PropertyManager.filterStockOffers, PropertyManager.filterValidStockOffers);
+    }
+
     public CurrencyOffer getBestOffer(List<CurrencyOffer> list, boolean filterStockOffers, boolean filterValidStockOffers) {
         CurrencyOffer bestOffer = null;
         if(list == null){
@@ -223,7 +227,7 @@ public class PoeTradeWebParser {
             // Return most top offer that meets filter requirements
             if (!filterStockOffers ||
                     (!filterValidStockOffers && offer.getStock() >= 0) ||
-                    filterValidStockOffers && offer.getStock() > offer.getSellValue()) {
+                    filterValidStockOffers && (offer.getStock() < 0 || offer.getStock() > offer.getSellValue())) {
                 bestOffer = offer;
                 break;
             }

@@ -89,7 +89,7 @@ public class CurrencyDeal {
         return 0;
     }
 
-    public float getPlayerDiff(){
+    public float getPlayerDiff() {
         if (playerBuyAmount != 0 && playerSellAmount != 0) {
             return playerBuyAmount - playerSellAmount;
         }
@@ -98,13 +98,10 @@ public class CurrencyDeal {
 
     public float getDiffValue() {
         float diff = getDiff();
-        if (diff > 0) {
-            return diff * getcValue();
-        }
-        return 0;
+        return diff * getcValue();
     }
 
-    public float getPlayerDiffValue(){
+    public float getPlayerDiffValue() {
         float diff = getPlayerDiff();
         if (diff > 0) {
             return diff * getcValue();
