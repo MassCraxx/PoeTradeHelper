@@ -10,8 +10,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 
 import java.io.IOException;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
+
+import static de.crass.poetradeparser.PropertyManager.prettyFloat;
 
 /**
  * Created by mcrass on 19.07.2018.
@@ -86,15 +86,10 @@ public class CurrencyOfferCell<T> extends javafx.scene.control.ListCell<Currency
             diffValue.setText(prettyFloat((deal.getDiffValue())) + "c");
 
             setGraphic(root);
+
+            setContextMenu(new DealContextMenu(deal));
         }
 
-    }
-
-    String prettyFloat(float in){
-//        return String.format(Locale.ENGLISH, "%.2f", in);
-        DecimalFormat df = new DecimalFormat("#.##");
-        df.setRoundingMode(RoundingMode.HALF_UP);
-        return String.valueOf(df.format(in));
     }
 
     @Override

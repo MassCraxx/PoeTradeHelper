@@ -1,12 +1,15 @@
 package de.crass.poetradeparser;
 
 import de.crass.poetradeparser.model.CurrencyID;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 import java.io.*;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 
 import static de.crass.poetradeparser.model.CurrencyID.*;
 
@@ -20,19 +23,21 @@ public class PropertyManager {
     private CurrencyID primaryCurrency = EXALTED;
     public final static boolean offlineMode = false;
     public static boolean filterStockOffers = true;
+
     public static boolean filterValidStockOffers = true;
 
-
-    private final ObservableList<CurrencyID>  defaultCurrencyFilter = FXCollections.observableArrayList(
+    private final ObservableList<CurrencyID> defaultCurrencyFilter = FXCollections.observableArrayList(
             ALCHEMY,
             SCOURING,
             ALTERATION,
             REGAL,
             CHROMATIC,
             CHANCE,
-            GCP);
+            GCP,
+            CHISEL,
+            JEWELLER);
 
-    private ObservableList<String> playerCharacterNames =  FXCollections.observableArrayList("SenorDingDong", "FlashZoomDead");
+    private ObservableList<String> playerCharacterNames = FXCollections.observableArrayList("SenorDingDong", "FlashZoomDead");
 
     private ObservableList<CurrencyID> filterList = defaultCurrencyFilter;
 
@@ -63,10 +68,11 @@ public class PropertyManager {
         return playerCharacterNames;
     }
 
-    public void addPlayer(String characterName){
+    public void addPlayer(String characterName) {
         playerCharacterNames.add(characterName);
     }
-    public void removePlayer(String characterName){
+
+    public void removePlayer(String characterName) {
         playerCharacterNames.remove(characterName);
     }
 
@@ -78,25 +84,17 @@ public class PropertyManager {
         return filterValidStockOffers;
     }
 
-    public static void setImage(String name, ImageView view){
+    public static void setImage(String name, ImageView view) {
         String url = "./res/" + name;
         File iconFile = new File(url);
-        InputStream fs = null;
         if (iconFile.exists()) {
-            try {
-                fs = new FileInputStream(iconFile);
-                view.setImage(new Image(fs));
-            } catch (FileNotFoundException | IllegalArgumentException e) {
-                LogManager.getInstance().log(PropertyManager.class, "Exception on loading image! " + e);
-            } finally {
-                if(fs != null){
-                    try {
-                        fs.close();
-                    } catch (IOException e) {
-                        LogManager.getInstance().log(PropertyManager.class, "Exception on loading image! " + e);
-                    }
+            Image image = new Image(iconFile.toURI().toString());
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    view.setImage(image);
                 }
-            }
+            });
         } else {
             LogManager.getInstance().log(PropertyManager.class, "Image " + url + " not found!");
         }
@@ -105,5 +103,14 @@ public class PropertyManager {
     public void setLeague(String league) {
         LogManager.getInstance().log(getClass(), "Setting " + league + " as new league.");
         currentLeague = league;
+    }
+
+    public static String prettyFloat(float in) {
+        if (in == 0) {
+            return "---";
+        }
+        DecimalFormat df = new DecimalFormat("#.#");
+        df.setRoundingMode(RoundingMode.HALF_UP);
+        return String.valueOf(df.format(in));
     }
 }
