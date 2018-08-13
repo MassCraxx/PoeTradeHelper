@@ -26,7 +26,7 @@ import java.util.List;
 public class Main extends Application implements ParseListener {
 
     public static final String title = "PoeTradeParser";
-    public static final String versionText = "v0.2.6";
+    public static final String versionText = "v0.2.7-SNAPSHOT";
 
     @FXML
     private ListView<CurrencyDeal> playerDealList;
@@ -125,7 +125,6 @@ public class Main extends Application implements ParseListener {
                 return new CurrencyOfferCell<>();
             }
         });
-        currencyList.setPlaceholder(new Label("No deals to show."));
         currencyList.setItems(tradeManager.getCurrentDeals());
 
         playerDealList.setEditable(false);
@@ -137,8 +136,8 @@ public class Main extends Application implements ParseListener {
         });
         playerDealList.setItems(tradeManager.getPlayerDeals());
 
-        currencyList.setPlaceholder(new Label("No deals to show."));
-        playerDealList.setPlaceholder(new Label("No deals to show."));
+        currencyList.setPlaceholder(new Label("Update to fill lists."));
+        playerDealList.setPlaceholder(new Label("Update to fill lists."));
 
         updateButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -239,13 +238,17 @@ public class Main extends Application implements ParseListener {
     }
 
     private void updateTitle(){
+        if(currentStage == null){
+            LogManager.getInstance().log(getClass(), "Error setting title.");
+            return;
+        }
         currentStage.setTitle(title + " - " + PropertyManager.getInstance().getCurrentLeague() + " League");
     }
 
     @Override
     public void onParsingFinished() {
         currencyList.setPlaceholder(new Label("No deals to show."));
-        playerDealList.setPlaceholder(new Label("No deals to show."));
+        playerDealList.setPlaceholder(new Label("No deals to show. Is your player set in settings?"));
 
         updateButton.setText("Update");
         updateButton.setDisable(false);

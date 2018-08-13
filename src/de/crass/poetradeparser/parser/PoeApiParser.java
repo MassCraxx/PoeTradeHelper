@@ -18,11 +18,11 @@ public class PoeApiParser {
 
     private ObservableList<String> currentLeagues = FXCollections.observableArrayList();
 
-    PoeApiParser(){
+    PoeApiParser() {
         updateLeagues();
     }
 
-    public void updateLeagues(){
+    public void updateLeagues() {
         Thread runThread = new Thread(() -> {
             try {
                 currentLeagues.clear();
@@ -38,7 +38,10 @@ public class PoeApiParser {
                 for (Object object : jsonArray) {
                     if (object instanceof JSONObject) {
                         JSONObject json = (JSONObject) object;
-                        currentLeagues.add(json.getString("id"));
+                        String league = json.getString("id");
+                        if (!league.contains("SSF")) {
+                            currentLeagues.add(league);
+                        }
                     }
                 }
 

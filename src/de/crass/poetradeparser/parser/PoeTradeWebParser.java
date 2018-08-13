@@ -193,14 +193,6 @@ public class PoeTradeWebParser {
             offers.add(offer);
             playerOffers.put(key, offers);
         } else {
-//            if (offer.getStock() > offer.getSellValue()) {
-//                List<CurrencyOffer> stockOffers = currentValidStockOffers.get(key);
-//                if (stockOffers == null) {
-//                    stockOffers = new LinkedList<>();
-//                }
-//                stockOffers.add(offer);
-//                currentValidStockOffers.put(key, stockOffers);
-//            }
             List<CurrencyOffer> offers = currentOffers.get(key);
             if (offers == null) {
                 offers = new LinkedList<>();
@@ -214,23 +206,25 @@ public class PoeTradeWebParser {
         return currentOffers;
     }
 
-    public CurrencyOffer getBestOffer(List<CurrencyOffer> list){
+    public CurrencyOffer getBestOffer(List<CurrencyOffer> list) {
         return getBestOffer(list, PropertyManager.filterStockOffers, PropertyManager.filterValidStockOffers);
     }
 
     public CurrencyOffer getBestOffer(List<CurrencyOffer> list, boolean filterStockOffers, boolean filterValidStockOffers) {
         CurrencyOffer bestOffer = null;
-        if(list == null){
+        if (list == null) {
             return null;
         }
         for (CurrencyOffer offer : list) {
             // Return most top offer that meets filter requirements
-            if (!filterStockOffers ||
-                    (!filterValidStockOffers && offer.getStock() >= 0) ||
-                    filterValidStockOffers && (offer.getStock() < 0 || offer.getStock() > offer.getSellValue())) {
-                bestOffer = offer;
-                break;
+
+            if ((filterStockOffers && offer.getStock() < 0) ||
+                    (filterValidStockOffers && (offer.getStock() >= 0 && offer.getStock() < offer.getSellValue()))) {
+                continue;
             }
+
+            bestOffer = offer;
+            break;
         }
         return bestOffer;
     }
@@ -251,15 +245,15 @@ public class PoeTradeWebParser {
         cancel = true;
     }
 
-    public static String getPoeTradeURL(String league, CurrencyID want, CurrencyID have){
+    public static String getPoeTradeURL(String league, CurrencyID want, CurrencyID have) {
         return poeTradeCurrencyURL + getBuyQuery(league, want, have);
     }
 
-    public static void openInBrowser(String league, CurrencyID want, CurrencyID have){
+    public static void openInBrowser(String league, CurrencyID want, CurrencyID have) {
         try {
             Desktop.getDesktop().browse(URI.create(PoeTradeWebParser.getPoeTradeURL(league, want, have)));
         } catch (Exception e) {
-            LogManager.getInstance().log(PoeTradeWebParser.class, "Error opening browser. "+ e);
+            LogManager.getInstance().log(PoeTradeWebParser.class, "Error opening browser. " + e);
         }
     }
 }
