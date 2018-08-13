@@ -135,7 +135,6 @@ public class Main extends Application implements ParseListener {
                 return new PlayerTradeCell();
             }
         });
-        playerDealList.setPlaceholder(new Label("No deals to show."));
         playerDealList.setItems(tradeManager.getPlayerDeals());
 
         currencyList.setPlaceholder(new Label("No deals to show."));
@@ -245,6 +244,9 @@ public class Main extends Application implements ParseListener {
 
     @Override
     public void onParsingFinished() {
+        currencyList.setPlaceholder(new Label("No deals to show."));
+        playerDealList.setPlaceholder(new Label("No deals to show."));
+
         updateButton.setText("Update");
         updateButton.setDisable(false);
     }
