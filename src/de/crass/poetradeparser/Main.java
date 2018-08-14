@@ -26,7 +26,7 @@ import java.util.List;
 public class Main extends Application implements ParseListener {
 
     public static final String title = "PoeTradeParser";
-    public static final String versionText = "v0.2.8-SNAPSHOT";
+    public static final String versionText = "v0.2.9-SNAPSHOT";
 
     @FXML
     private ListView<CurrencyDeal> playerDealList;
@@ -172,7 +172,7 @@ public class Main extends Application implements ParseListener {
         filterInvalid.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                PropertyManager.filterStockOffers = filterInvalid.isSelected();
+                PropertyManager.filterInvalidStockOffers = filterInvalid.isSelected();
                 tradeManager.parseDeals(true);
             }
         });

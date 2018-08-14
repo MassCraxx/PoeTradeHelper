@@ -24,7 +24,7 @@ public class PropertyManager {
     public final static boolean offlineMode = false;
     public static boolean filterStockOffers = true;
 
-    public static boolean filterValidStockOffers = true;
+    public static boolean filterInvalidStockOffers = true;
 
     private final ObservableList<CurrencyID> defaultCurrencyFilter = FXCollections.observableArrayList(
             ALCHEMY,
@@ -81,7 +81,7 @@ public class PropertyManager {
     }
 
     public boolean isFilterValidStockOffers() {
-        return filterValidStockOffers;
+        return filterInvalidStockOffers;
     }
 
     public static void setImage(String name, ImageView view) {
