@@ -4,6 +4,7 @@ import de.crass.poetradeparser.PropertyManager;
 import de.crass.poetradeparser.model.CurrencyDeal;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.CacheHint;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
@@ -74,6 +75,8 @@ public class CurrencyOfferCell<T> extends javafx.scene.control.ListCell<Currency
 
             String url = deal.getSecondaryCurrencyID().getID() + ".png";
             PropertyManager.setImage(url,currencyIcon);
+            currencyIcon.setCache(true);
+            currencyIcon.setCacheHint(CacheHint.SPEED);
 
             float buy = deal.getBuyAmount();
             float sell = deal.getSellAmount();

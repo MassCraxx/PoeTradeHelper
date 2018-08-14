@@ -90,27 +90,31 @@ public class PlayerTradeCell extends javafx.scene.control.ListCell<CurrencyDeal>
             float pBuy = deal.getPlayerBuyAmount();
             float pSell = deal.getPlayerSellAmount();
 
+            float currencyValue = deal.getcValue();
+
             float diffF = 0;
 
             float diffV = 0;
             if (pBuy != 0 && pSell != 0) {
                 diffF = pBuy - pSell;
-                diffV = diffF * deal.getcValue();
+                diffV = diffF * currencyValue;
             }
 
             float playerBuyStock = deal.getPlayerBuyStock();
+            boolean playerHasBuyStock = true;
             // buystock is primary, but buy is secondary
             if (playerBuyStock > 0 && playerBuyStock < 1) {
                 playerBuy.setFill(Color.GRAY);
-                buyTendency.setEffect(getColorEffect(Color.GRAY));
+                playerHasBuyStock = false;
             } else {
                 playerBuy.setFill(marketBuy.getFill());
             }
 
             float playerSellStock = deal.getPlayerSellStock();
+            boolean playerHasSellStock = true;
             if (playerSellStock > 0 && playerSellStock < pSell) {
                 playerSell.setFill(Color.GRAY);
-                sellTendency.setEffect(getColorEffect(Color.GRAY));
+                playerHasSellStock = false;
             } else {
                 playerSell.setFill(marketBuy.getFill());
             }
@@ -122,14 +126,10 @@ public class PlayerTradeCell extends javafx.scene.control.ListCell<CurrencyDeal>
                 } else if (pBuy > 0) {
                     setImage("ok.png", buyTendency);
                 }
-                // Check if player offer is too far from the market offers
-                if (Math.abs(pBuy - buy) * deal.getcValue() > WARNING_DIFF_THRESHOLD) {
-                    buyTendency.setEffect(getColorEffect(Color.RED));
-                    buyTendency.setCache(true);
-                    buyTendency.setCacheHint(CacheHint.SPEED);
-                } else{
-                    buyTendency.setEffect(null);
-                }
+                buyTendency.setCache(true);
+                buyTendency.setCacheHint(CacheHint.SPEED);
+
+                handleIconEffects(buyTendency, playerHasBuyStock, pBuy, buy, currencyValue);
             } else {
                 buyTendency.setImage(null);
                 buyTendency.setEffect(null);
@@ -141,16 +141,10 @@ public class PlayerTradeCell extends javafx.scene.control.ListCell<CurrencyDeal>
                 } else if (pSell > 0) {
                     setImage("ok.png", sellTendency);
                 }
-                // Check if player offer is too far from the market offers
+                sellTendency.setCache(true);
+                sellTendency.setCacheHint(CacheHint.SPEED);
 
-                if (Math.abs(pSell - sell) * deal.getcValue() > WARNING_DIFF_THRESHOLD) {
-                    sellTendency.setEffect(getColorEffect(Color.RED));
-                    sellTendency.setCache(true);
-                    sellTendency.setCacheHint(CacheHint.SPEED);
-                } else{
-                    sellTendency.setEffect(null);
-                }
-
+                handleIconEffects(sellTendency, playerHasSellStock, pSell, sell, currencyValue);
             } else {
                 sellTendency.setImage(null);
                 sellTendency.setEffect(null);
@@ -171,18 +165,31 @@ public class PlayerTradeCell extends javafx.scene.control.ListCell<CurrencyDeal>
         }
     }
 
+    private void handleIconEffects(ImageView view, boolean playerHasStock, float playerValue, float marketValue, float
+            cValue) {
+
+        // Check if player offer is too far from the market offers
+        if (Math.abs(playerValue - marketValue) * cValue > WARNING_DIFF_THRESHOLD) {
+            view.setEffect(getColorEffect(Color.RED));
+        } else if (!playerHasStock) {
+            view.setEffect(getColorEffect(Color.GRAY));
+        } else {
+            view.setEffect(null);
+        }
+    }
+
     @Override
     public void updateSelected(boolean selected) {
 //        super.updateSelected(selected);
     }
 
     private static Effect getColorEffect(Color color) {
-            Lighting lighting = new Lighting();
-            lighting.setDiffuseConstant(1.0);
-            lighting.setSpecularConstant(0.0);
-            lighting.setSurfaceScale(0.0);
-            lighting.setLight(new Light.Distant(45, 45, color));
+        Lighting lighting = new Lighting();
+        lighting.setDiffuseConstant(1.0);
+        lighting.setSpecularConstant(0.0);
+        lighting.setSurfaceScale(0.0);
+        lighting.setLight(new Light.Distant(45, 45, color));
 
-           return lighting;
+        return lighting;
     }
 }
