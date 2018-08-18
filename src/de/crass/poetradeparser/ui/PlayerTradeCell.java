@@ -14,8 +14,8 @@ import javafx.scene.text.Text;
 
 import java.io.IOException;
 
-import static de.crass.poetradeparser.PropertyManager.prettyFloat;
-import static de.crass.poetradeparser.PropertyManager.setImage;
+import static de.crass.poetradeparser.Main.prettyFloat;
+import static de.crass.poetradeparser.Main.setImage;
 
 /**
  * Created by mcrass on 19.07.2018.

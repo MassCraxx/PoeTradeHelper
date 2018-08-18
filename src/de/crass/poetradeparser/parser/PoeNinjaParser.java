@@ -27,7 +27,7 @@ public class PoeNinjaParser {
         objectMapper = new ObjectMapper();
     }
 
-    private void parseCurrency(String league, boolean forceUpdate) {
+    public void parseCurrency(String league, boolean forceUpdate) {
         if (!forceUpdate && (useOfflineCache && file.exists() &&
                 file.lastModified() + updateDelay > System.currentTimeMillis())) {
             TypeReference<HashMap<CurrencyID, Float>> typeRef = new TypeReference<HashMap<CurrencyID, Float>>() {};

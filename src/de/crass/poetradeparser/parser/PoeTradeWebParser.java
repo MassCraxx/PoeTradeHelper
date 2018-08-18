@@ -207,7 +207,8 @@ public class PoeTradeWebParser {
     }
 
     public CurrencyOffer getBestOffer(List<CurrencyOffer> list) {
-        return getBestOffer(list, PropertyManager.filterStockOffers, PropertyManager.filterInvalidStockOffers);
+        return getBestOffer(list, PropertyManager.getInstance().getFilterNoApi(), PropertyManager.getInstance()
+                .getFilterOutOfStock());
     }
 
     public CurrencyOffer getBestOffer(List<CurrencyOffer> list, boolean filterStockOffers, boolean filterValidStockOffers) {

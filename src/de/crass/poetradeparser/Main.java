@@ -9,6 +9,7 @@ import de.crass.poetradeparser.parser.TradeManager;
 import de.crass.poetradeparser.ui.CurrencyOfferCell;
 import de.crass.poetradeparser.ui.PlayerTradeCell;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -18,15 +19,20 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
+import java.io.File;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.List;
 
 public class Main extends Application implements ParseListener {
 
     public static final String title = "PoeTradeParser";
-    public static final String versionText = "v0.2.9-SNAPSHOT";
+    public static final String versionText = "v0.3.0-SNAPSHOT";
 
     @FXML
     private ListView<CurrencyDeal> playerDealList;
@@ -79,8 +85,9 @@ public class Main extends Application implements ParseListener {
     @FXML
     private Button addCurrencyFilterBtn;
 
+    private static Stage currentStage;
+
     private TradeManager tradeManager;
-    private Stage currentStage;
 
 
     public static void main(String[] args) {
@@ -113,6 +120,12 @@ public class Main extends Application implements ParseListener {
         setupUI();
 
         LogManager.getInstance().log(getClass(), "Started");
+    }
+
+    @Override
+    public void stop(){
+        LogManager.getInstance().log(getClass(), "Shutting down app.");
+        PropertyManager.getInstance().storeProperties();
     }
 
     private void setupUI() {
@@ -154,9 +167,8 @@ public class Main extends Application implements ParseListener {
             }
         });
 
-
+        // SETTINGS
         ObservableList<CurrencyID> currencyList = FXCollections.observableArrayList(CurrencyID.values());
-//        ObservableList<CurrencyID> currencyList = FXCollections.observableArrayList(CurrencyID.EXALTED);
         primaryComboBox.setItems(currencyList);
         primaryComboBox.setValue(PropertyManager.getInstance().getPrimaryCurrency());
         primaryComboBox.setOnAction(new EventHandler<ActionEvent>() {
@@ -164,26 +176,26 @@ public class Main extends Application implements ParseListener {
             public void handle(ActionEvent event) {
                 CurrencyID newValue = primaryComboBox.getValue();
                 PropertyManager.getInstance().setPrimaryCurrency(newValue);
-
             }
         });
 
-        // SETTINGS
         filterInvalid.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                PropertyManager.filterInvalidStockOffers = filterInvalid.isSelected();
+                PropertyManager.getInstance().setFilterOutOfStock(filterInvalid.isSelected());
                 tradeManager.parseDeals(true);
             }
         });
+        filterInvalid.setSelected(PropertyManager.getInstance().getFilterOutOfStock());
 
         filterWithoutAPI.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                PropertyManager.filterStockOffers = filterWithoutAPI.isSelected();
+                PropertyManager.getInstance().setFilterNoApi(filterWithoutAPI.isSelected());
                 tradeManager.parseDeals(true);
             }
         });
+        filterWithoutAPI.setSelected(PropertyManager.getInstance().getFilterNoApi());
 
         currencyFilterList.setItems(PropertyManager.getInstance().getFilterList());
 
@@ -233,6 +245,7 @@ public class Main extends Application implements ParseListener {
             public void handle(ActionEvent event) {
                 PropertyManager.getInstance().setLeague(leagueCB.getValue());
                 updateTitle();
+                tradeManager.updateCurrencyValues();
             }
         });
     }
@@ -252,5 +265,30 @@ public class Main extends Application implements ParseListener {
 
         updateButton.setText("Update");
         updateButton.setDisable(false);
+    }
+
+    public static String prettyFloat(float in) {
+        if (in == 0) {
+            return "---";
+        }
+        DecimalFormat df = new DecimalFormat("#.#");
+        df.setRoundingMode(RoundingMode.HALF_UP);
+        return String.valueOf(df.format(in));
+    }
+
+    public static void setImage(String name, ImageView view) {
+        String url = "./res/" + name;
+        File iconFile = new File(url);
+        if (iconFile.exists()) {
+            Image image = new Image(iconFile.toURI().toString());
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    view.setImage(image);
+                }
+            });
+        } else {
+            LogManager.getInstance().log(PropertyManager.class, "Image " + url + " not found!");
+        }
     }
 }

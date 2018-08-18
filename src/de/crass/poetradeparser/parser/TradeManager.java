@@ -255,4 +255,8 @@ public class TradeManager implements ParseListener {
     public ObservableList<String> getLeagueList() {
         return poeApiParser.getCurrentLeagues();
     }
+    
+    public void updateCurrencyValues(){
+        poeNinjaParser.parseCurrency(PropertyManager.getInstance().getCurrentLeague(), true);
+    }
 }

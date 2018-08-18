@@ -1,6 +1,5 @@
 package de.crass.poetradeparser.ui;
 
-import de.crass.poetradeparser.PropertyManager;
 import de.crass.poetradeparser.model.CurrencyDeal;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -12,7 +11,8 @@ import javafx.scene.text.Text;
 
 import java.io.IOException;
 
-import static de.crass.poetradeparser.PropertyManager.prettyFloat;
+import static de.crass.poetradeparser.Main.prettyFloat;
+import static de.crass.poetradeparser.Main.setImage;
 
 /**
  * Created by mcrass on 19.07.2018.
@@ -74,7 +74,7 @@ public class CurrencyOfferCell<T> extends javafx.scene.control.ListCell<Currency
 //                    BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(2))));
 
             String url = deal.getSecondaryCurrencyID().getID() + ".png";
-            PropertyManager.setImage(url,currencyIcon);
+            setImage(url,currencyIcon);
             currencyIcon.setCache(true);
             currencyIcon.setCacheHint(CacheHint.SPEED);
 

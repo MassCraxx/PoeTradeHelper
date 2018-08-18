@@ -1,15 +1,17 @@
 package de.crass.poetradeparser;
 
+import com.sun.deploy.util.StringUtils;
 import de.crass.poetradeparser.model.CurrencyID;
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 
-import java.io.*;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Properties;
 
 import static de.crass.poetradeparser.model.CurrencyID.*;
 
@@ -18,15 +20,28 @@ import static de.crass.poetradeparser.model.CurrencyID.*;
  */
 public class PropertyManager {
     private static PropertyManager instance;
-
-    private String currentLeague = "Incursion";
-    private CurrencyID primaryCurrency = EXALTED;
+    // DEBUG
     public final static boolean offlineMode = false;
-    public static boolean filterStockOffers = true;
 
-    public static boolean filterInvalidStockOffers = true;
+    private Properties appProps;
+    private String propFilename = "app.properties";
 
-    private final ObservableList<CurrencyID> defaultCurrencyFilter = FXCollections.observableArrayList(
+    // KEYS
+    private final String LEAGUE_KEY = "league";
+    private final String PRIMARY_CURRENCY = "primary_currency";
+    private final String FILTER_NOAPI = "filter_noapi";
+    private final String FILTER_OUTOFSTOCK = "filter_outofstock";
+    private final String CURRENCY_LIST = "currency_list";
+    private final String PLAYER_LIST = "player_list";
+
+    // DEFAULTS
+    private final String defaultLeague = "Standard";
+    private final CurrencyID defaultPrimary = EXALTED;
+
+    private final boolean defaultFilterStockOffers = false;
+    public final boolean defaultFilterInvalidStockOffers = true;
+
+    private final List<CurrencyID> defaultCurrencyFilterList = Arrays.asList(
             ALCHEMY,
             SCOURING,
             ALTERATION,
@@ -37,9 +52,68 @@ public class PropertyManager {
             CHISEL,
             JEWELLER);
 
-    private ObservableList<String> playerCharacterNames = FXCollections.observableArrayList("SenorDingDong", "FlashZoomDead");
+    // Current Values
+    private ObservableList<CurrencyID> currencyFilterList;
+    private ObservableList<String> playerList;
 
-    private ObservableList<CurrencyID> filterList = defaultCurrencyFilter;
+    private CurrencyID primaryCurrency;
+    boolean filterNoApi;
+    boolean filterOutOfStock;
+
+    private PropertyManager() {
+        loadProperties();
+    }
+
+    private void loadProperties() {
+        appProps = new Properties();
+        try {
+            appProps.load(new FileInputStream(propFilename));
+
+            if(appProps.isEmpty()){
+                loadDefaults();
+                return;
+            }
+
+            // Only converting on load and store
+            currencyFilterList = FXCollections.observableArrayList(stringToCurrencyList(appProps.getProperty(CURRENCY_LIST)));
+            playerList = FXCollections.observableArrayList(stringToList(appProps.getProperty(PLAYER_LIST)));
+            primaryCurrency = CurrencyID.valueOf(appProps.getProperty(PRIMARY_CURRENCY));
+
+            filterNoApi = Boolean.parseBoolean(appProps.getProperty(FILTER_NOAPI));
+            filterOutOfStock = Boolean.parseBoolean(appProps.getProperty(FILTER_OUTOFSTOCK));
+
+        } catch (IOException e) {
+            loadDefaults();
+        }
+    }
+
+    private void loadDefaults() {
+        appProps.setProperty(LEAGUE_KEY, defaultLeague);
+        appProps.setProperty(FILTER_NOAPI, String.valueOf(defaultFilterStockOffers));
+        appProps.setProperty(FILTER_OUTOFSTOCK, String.valueOf(defaultFilterInvalidStockOffers));
+
+        // Following are not queried from props, will be stored on quit
+        primaryCurrency = defaultPrimary;
+        currencyFilterList = FXCollections.observableArrayList(defaultCurrencyFilterList);
+        playerList = FXCollections.observableArrayList();
+
+        storeProperties();
+    }
+
+    public void storeProperties() {
+        appProps.setProperty(CURRENCY_LIST, currencyListToString(currencyFilterList));
+        appProps.setProperty(PLAYER_LIST,listToString(playerList));
+        appProps.setProperty(PRIMARY_CURRENCY, primaryCurrency.name());
+
+        appProps.setProperty(FILTER_NOAPI, String.valueOf(filterNoApi));
+        appProps.setProperty(FILTER_OUTOFSTOCK, String.valueOf(filterOutOfStock));
+
+        try {
+            appProps.store(new FileWriter(propFilename), "PoeTradeHelper Properties");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static PropertyManager getInstance() {
         if (instance == null) {
@@ -53,64 +127,80 @@ public class PropertyManager {
     }
 
     public String getCurrentLeague() {
-        return currentLeague;
+        return appProps.getProperty(LEAGUE_KEY);
     }
 
     public ObservableList<CurrencyID> getFilterList() {
-        return filterList;
+        return currencyFilterList;
     }
 
     public void setPrimaryCurrency(CurrencyID primaryCurrency) {
-        this.primaryCurrency = primaryCurrency;
+        appProps.setProperty(PRIMARY_CURRENCY, String.valueOf(primaryCurrency));
     }
 
     public ObservableList<String> getPlayerList() {
-        return playerCharacterNames;
+        return playerList;
     }
 
-    public void addPlayer(String characterName) {
-        playerCharacterNames.add(characterName);
+    public boolean getFilterNoApi() {
+        return filterNoApi;
     }
 
-    public void removePlayer(String characterName) {
-        playerCharacterNames.remove(characterName);
+    public boolean getFilterOutOfStock() {
+        return filterOutOfStock;
     }
 
-    public boolean isFilterStockOffers() {
-        return filterStockOffers;
+    public void setFilterNoApi(boolean filterNoApi) {
+        this.filterNoApi= filterNoApi;
     }
 
-    public boolean isFilterValidStockOffers() {
-        return filterInvalidStockOffers;
-    }
-
-    public static void setImage(String name, ImageView view) {
-        String url = "./res/" + name;
-        File iconFile = new File(url);
-        if (iconFile.exists()) {
-            Image image = new Image(iconFile.toURI().toString());
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    view.setImage(image);
-                }
-            });
-        } else {
-            LogManager.getInstance().log(PropertyManager.class, "Image " + url + " not found!");
-        }
+    public void setFilterOutOfStock(boolean filterOutOfStock) {
+        this.filterOutOfStock = filterOutOfStock;
     }
 
     public void setLeague(String league) {
         LogManager.getInstance().log(getClass(), "Setting " + league + " as new league.");
-        currentLeague = league;
+        appProps.setProperty(LEAGUE_KEY, league);
     }
 
-    public static String prettyFloat(float in) {
-        if (in == 0) {
-            return "---";
+    public Properties getAppProps() {
+        return appProps;
+    }
+
+    public String listToString(List<String> list) {
+        if(list == null || list.isEmpty()){
+            return "";
         }
-        DecimalFormat df = new DecimalFormat("#.#");
-        df.setRoundingMode(RoundingMode.HALF_UP);
-        return String.valueOf(df.format(in));
+        return StringUtils.join(list, ",");
+    }
+
+    public List<String> stringToList(String s) {
+        if(s == null || s.isEmpty()){
+            return new LinkedList<>();
+        }
+        return Arrays.asList(s.split(","));
+    }
+
+    public String currencyListToString(List<CurrencyID> list) {
+        StringBuilder sb = new StringBuilder();
+        for (CurrencyID currencyID : list) {
+            sb.append(currencyID.name());
+            sb.append(",");
+        }
+        sb.deleteCharAt(sb.length()-1);
+        return sb.toString();
+    }
+
+    public List<CurrencyID> stringToCurrencyList(String s) {
+        List<CurrencyID> list = new LinkedList<>();
+        for (String currency : s.split(",")) {
+            try {
+                CurrencyID id = CurrencyID.valueOf(currency.toUpperCase());
+                list.add(id);
+            } catch (IllegalArgumentException e) {
+                LogManager.getInstance().log(getClass(), "Error parsing currencyID: " + currency);
+            }
+        }
+        return list;
     }
 }
