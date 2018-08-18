@@ -97,7 +97,7 @@ public class Main extends Application implements ParseListener {
     @Override
     public void start(Stage primaryStage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("layout.fxml"));
-        Scene scene = new Scene(root, 600, 650);
+        Scene scene = new Scene(root, 640, 650);
         scene.getStylesheets().add(getClass().getResource("stylesheet.css").toExternalForm());
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -243,9 +243,10 @@ public class Main extends Application implements ParseListener {
         leagueCB.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
+                LogManager.getInstance().log(getClass(), "Setting " + leagueCB.getValue() + " as new league.");
                 PropertyManager.getInstance().setLeague(leagueCB.getValue());
-                updateTitle();
                 tradeManager.updateCurrencyValues();
+                updateTitle();
             }
         });
     }

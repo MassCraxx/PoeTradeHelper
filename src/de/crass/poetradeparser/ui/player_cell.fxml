@@ -23,7 +23,7 @@
                </HBox.margin>
             </ImageView>
             <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#d8d8d8" height="70.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="2.0" />
-            <AnchorPane>
+            <AnchorPane maxHeight="1.7976931348623157E308" HBox.hgrow="ALWAYS">
                <children>
                   <Text fill="#d8d8d8" layoutX="3.0" layoutY="40.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Buy" textAlignment="CENTER" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="7.900390625">
                      <font>
@@ -32,50 +32,34 @@
                   </Text>
                </children>
             </AnchorPane>
-            <BorderPane HBox.hgrow="ALWAYS">
-               <bottom>
-                  <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Market" textAlignment="CENTER" wrappingWidth="61.13671875" BorderPane.alignment="CENTER">
+            <AnchorPane maxHeight="1.7976931348623157E308" HBox.hgrow="ALWAYS">
+               <children>
+                  <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Player" textAlignment="CENTER" wrappingWidth="61.13671875" AnchorPane.topAnchor="7.0">
                      <font>
                         <Font name="System Bold" size="18.0" />
                      </font>
-                     <BorderPane.margin>
-                        <Insets bottom="7.0" />
-                     </BorderPane.margin>
                   </Text>
-               </bottom>
-               <top>
-                  <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Player" textAlignment="CENTER" wrappingWidth="61.13671875" BorderPane.alignment="CENTER">
+                  <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Market" textAlignment="CENTER" wrappingWidth="61.13671875" AnchorPane.bottomAnchor="7.0">
                      <font>
                         <Font name="System Bold" size="18.0" />
                      </font>
-                     <BorderPane.margin>
-                        <Insets top="7.0" />
-                     </BorderPane.margin>
                   </Text>
-               </top>
-            </BorderPane>
-            <BorderPane HBox.hgrow="ALWAYS">
-               <bottom>
-                  <Text fx:id="marketBuy" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="1100" textAlignment="CENTER" wrappingWidth="55.0" BorderPane.alignment="CENTER">
+               </children>
+            </AnchorPane>
+            <AnchorPane maxHeight="1.7976931348623157E308" HBox.hgrow="ALWAYS">
+               <children>
+                  <Text fx:id="playerBuy" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="1095" textAlignment="CENTER" wrappingWidth="55.0" AnchorPane.topAnchor="7.0">
                      <font>
                         <Font size="18.0" />
                      </font>
-                     <BorderPane.margin>
-                        <Insets bottom="7.0" />
-                     </BorderPane.margin>
                   </Text>
-               </bottom>
-               <top>
-                  <Text fx:id="playerBuy" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="1095" textAlignment="CENTER" wrappingWidth="55.0" BorderPane.alignment="CENTER">
+                  <Text fx:id="marketBuy" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="1100" textAlignment="CENTER" wrappingWidth="55.0" AnchorPane.bottomAnchor="7.0">
                      <font>
                         <Font size="18.0" />
                      </font>
-                     <BorderPane.margin>
-                        <Insets top="7.0" />
-                     </BorderPane.margin>
                   </Text>
-               </top>
-            </BorderPane>
+               </children>
+            </AnchorPane>
             <ImageView fx:id="buyTendency" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true" translateY="10.0">
                <image>
                   <Image url="@../../../../../res/arrow.png" />
@@ -85,7 +69,7 @@
                </HBox.margin>
             </ImageView>
             <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#d8d8d8" height="70.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="2.0" />
-            <AnchorPane>
+            <AnchorPane maxHeight="1.7976931348623157E308" HBox.hgrow="ALWAYS">
                <children>
                   <Text fill="#d8d8d8" layoutX="3.0" layoutY="40.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Sell" textAlignment="CENTER" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="7.900390625">
                      <font>
@@ -94,100 +78,68 @@
                   </Text>
                </children>
             </AnchorPane>
-            <BorderPane HBox.hgrow="ALWAYS">
-               <bottom>
-                  <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Market" textAlignment="CENTER" wrappingWidth="61.13671875" BorderPane.alignment="CENTER">
+            <AnchorPane maxHeight="1.7976931348623157E308" HBox.hgrow="ALWAYS">
+               <children>
+                  <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Player" textAlignment="CENTER" wrappingWidth="61.13671875" AnchorPane.topAnchor="7.0">
                      <font>
                         <Font name="System Bold" size="18.0" />
                      </font>
-                     <BorderPane.margin>
-                        <Insets bottom="7.0" />
-                     </BorderPane.margin>
                   </Text>
-               </bottom>
-               <top>
-                  <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Player" textAlignment="CENTER" wrappingWidth="61.13671875" BorderPane.alignment="CENTER">
+                  <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Market" textAlignment="CENTER" wrappingWidth="61.13671875" AnchorPane.bottomAnchor="7.0">
                      <font>
                         <Font name="System Bold" size="18.0" />
                      </font>
-                     <BorderPane.margin>
-                        <Insets top="7.0" />
-                     </BorderPane.margin>
                   </Text>
-               </top>
-            </BorderPane>
-            <BorderPane HBox.hgrow="ALWAYS">
-               <bottom>
-                  <Text fx:id="marketSell" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="180" textAlignment="CENTER" wrappingWidth="55.0" BorderPane.alignment="CENTER">
+               </children>
+            </AnchorPane>
+            <AnchorPane maxHeight="1.7976931348623157E308" HBox.hgrow="ALWAYS">
+               <children>
+                  <Text fx:id="playerSell" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="181" textAlignment="CENTER" wrappingWidth="55.0" AnchorPane.topAnchor="7.0">
                      <font>
                         <Font size="18.0" />
                      </font>
-                     <BorderPane.margin>
-                        <Insets bottom="7.0" />
-                     </BorderPane.margin>
                   </Text>
-               </bottom>
-               <top>
-                  <Text fx:id="playerSell" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="181" textAlignment="CENTER" wrappingWidth="55.0" BorderPane.alignment="CENTER">
+                  <Text fx:id="marketSell" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="180" textAlignment="CENTER" wrappingWidth="55.0" AnchorPane.bottomAnchor="7.0">
                      <font>
                         <Font size="18.0" />
                      </font>
-                     <BorderPane.margin>
-                        <Insets top="7.0" />
-                     </BorderPane.margin>
                   </Text>
-               </top>
-            </BorderPane>
+               </children>
+            </AnchorPane>
             <ImageView fx:id="sellTendency" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true" translateY="10.0">
                <HBox.margin>
                   <Insets bottom="15.0" right="10.0" top="10.0" />
                </HBox.margin>
             </ImageView>
             <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#d8d8d8" height="70.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="2.0" />
-            <BorderPane HBox.hgrow="ALWAYS">
-               <bottom>
-                  <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Profit" textAlignment="CENTER" wrappingWidth="61.13671875" BorderPane.alignment="CENTER">
+            <AnchorPane maxHeight="1.7976931348623157E308" HBox.hgrow="ALWAYS">
+               <children>
+                  <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Diff" textAlignment="CENTER" wrappingWidth="61.13671875" AnchorPane.topAnchor="7.0">
                      <font>
                         <Font name="System Bold" size="18.0" />
                      </font>
-                     <BorderPane.margin>
-                        <Insets bottom="7.0" />
-                     </BorderPane.margin>
                   </Text>
-               </bottom>
-               <top>
-                  <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Diff" textAlignment="CENTER" wrappingWidth="61.13671875" BorderPane.alignment="CENTER">
+                  <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Profit" textAlignment="CENTER" wrappingWidth="61.13671875" AnchorPane.bottomAnchor="7.0">
                      <font>
                         <Font name="System Bold" size="18.0" />
                      </font>
-                     <BorderPane.margin>
-                        <Insets top="7.0" />
-                     </BorderPane.margin>
                   </Text>
-               </top>
-            </BorderPane>
-            <BorderPane HBox.hgrow="ALWAYS">
-               <bottom>
-                  <Text fx:id="diffValue" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="180" textAlignment="CENTER" wrappingWidth="55.0" BorderPane.alignment="CENTER">
+               </children>
+            </AnchorPane>
+            <AnchorPane maxHeight="1.7976931348623157E308" HBox.hgrow="ALWAYS">
+               <children>
+                  <Text fx:id="diffValue" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="180" textAlignment="CENTER" wrappingWidth="55.0" AnchorPane.topAnchor="7.0">
                      <font>
                         <Font size="18.0" />
                      </font>
-                     <BorderPane.margin>
-                        <Insets bottom="7.0" />
-                     </BorderPane.margin>
                   </Text>
-               </bottom>
-               <top>
-                  <Text fx:id="diff" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="181" textAlignment="CENTER" wrappingWidth="55.0" BorderPane.alignment="CENTER">
+                  <Text fx:id="diff" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="181" textAlignment="CENTER" wrappingWidth="55.0" AnchorPane.bottomAnchor="7.0">
                      <font>
                         <Font size="18.0" />
                      </font>
-                     <BorderPane.margin>
-                        <Insets top="7.0" />
-                     </BorderPane.margin>
                   </Text>
-               </top>
-            </BorderPane>
+               </children>
+            </AnchorPane>
          </children>
       </HBox>
    </children>

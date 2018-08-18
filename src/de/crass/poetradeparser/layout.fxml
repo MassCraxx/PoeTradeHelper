@@ -8,9 +8,10 @@
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
 
-<BorderPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.crass.poetradeparser.Main">
-   <center>
-      <TabPane prefHeight="480.0" prefWidth="640.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+
+<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.crass.poetradeparser.Main">
+   <children>
+      <TabPane maxHeight="1.7976931348623157E308" prefHeight="480.0" prefWidth="640.0" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
         <tabs>
           <Tab text="CurrencyOverview">
                <content>
@@ -61,28 +62,48 @@
                <content>
                   <AnchorPane prefHeight="200.0" prefWidth="200.0">
                      <children>
-                        <CheckBox fx:id="filterWithoutAPI" layoutX="37.0" layoutY="52.0" mnemonicParsing="false" selected="true" text="Filter Offers without API" />
                         <Label layoutX="355.0" layoutY="25.0" text="Player Settings" />
-                        <CheckBox fx:id="filterInvalid" layoutX="37.0" layoutY="82.0" mnemonicParsing="false" selected="true" text="Filter Offers with insufficient stock" />
-                        <ComboBox fx:id="currencyFilterCB" layoutX="37.0" layoutY="114.0" prefHeight="37.0" prefWidth="132.0" />
-                        <ListView fx:id="currencyFilterList" layoutX="37.0" layoutY="157.0" prefHeight="210.0" prefWidth="200.0" />
-                        <Button fx:id="removeCurrencyFilterBtn" layoutX="37.0" layoutY="384.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="201.0" text="Remove" />
+                        <ComboBox fx:id="currencyFilterCB" layoutX="32.0" layoutY="61.0" prefHeight="37.0" prefWidth="132.0" />
+                        <ListView fx:id="currencyFilterList" layoutX="32.0" layoutY="104.0" prefHeight="210.0" prefWidth="200.0" />
+                        <Button fx:id="removeCurrencyFilterBtn" layoutX="32.0" layoutY="331.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="201.0" text="Remove" />
                         <Button fx:id="addPlayerButton" layoutX="493.0" layoutY="61.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="62.0" text="+" />
-                        <ListView fx:id="playerListView" layoutX="355.0" layoutY="113.0" prefHeight="127.0" prefWidth="200.0" />
+                        <ListView fx:id="playerListView" layoutX="356.0" layoutY="104.0" prefHeight="127.0" prefWidth="200.0" />
                         <TextField fx:id="playerField" layoutX="355.0" layoutY="61.0" prefHeight="36.0" prefWidth="131.0" />
-                        <Button fx:id="addCurrencyFilterBtn" layoutX="178.0" layoutY="114.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="59.0" text="+" />
+                        <Button fx:id="addCurrencyFilterBtn" layoutX="173.0" layoutY="61.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="59.0" text="+" />
                         <Label layoutX="355.0" layoutY="308.0" text="League" />
-                        <Button fx:id="removePlayerBtn" layoutX="355.0" layoutY="262.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="201.0" text="Remove" />
+                        <Button fx:id="removePlayerBtn" layoutX="355.0" layoutY="241.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="201.0" text="Remove" />
                         <ComboBox fx:id="leagueCB" layoutX="355.0" layoutY="335.0" prefWidth="201.0" />
+                        <Label layoutX="37.0" layoutY="25.0" text="Currency to check" />
                      </children>
                   </AnchorPane>
                </content>
             </Tab>
         </tabs>
       </TabPane>
-   </center>
-   <bottom>
-      <HBox prefHeight="40.0" prefWidth="640.0" BorderPane.alignment="CENTER">
+      <HBox VBox.vgrow="NEVER">
+         <children>
+            <Label maxHeight="1.7976931348623157E308" text="Flip currency" textAlignment="CENTER">
+               <HBox.margin>
+                  <Insets right="20.0" />
+               </HBox.margin>
+            </Label>
+            <ComboBox fx:id="primaryComboBox" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" BorderPane.alignment="CENTER" HBox.hgrow="ALWAYS" />
+            <CheckBox fx:id="filterWithoutAPI" maxHeight="1.7976931348623157E308" mnemonicParsing="false" text="Filter No API">
+               <HBox.margin>
+                  <Insets left="5.0" right="5.0" />
+               </HBox.margin>
+            </CheckBox>
+            <CheckBox fx:id="filterInvalid" maxHeight="1.7976931348623157E308" mnemonicParsing="false" text="Filter Out Of Stock">
+               <HBox.margin>
+                  <Insets left="5.0" right="5.0" />
+               </HBox.margin>
+            </CheckBox>
+         </children>
+         <VBox.margin>
+            <Insets bottom="5.0" left="22.0" right="22.0" top="5.0" />
+         </VBox.margin>
+      </HBox>
+      <HBox prefHeight="40.0" prefWidth="640.0" VBox.vgrow="NEVER">
          <children>
             <Button id="updateButton" fx:id="updateButton" defaultButton="true" minWidth="100.0" mnemonicParsing="false" prefHeight="73.0" prefWidth="70.0" text="Update">
                <HBox.margin>
@@ -96,12 +117,9 @@
                </HBox.margin>
             </Label>
          </children>
-         <BorderPane.margin>
-            <Insets bottom="5.0" top="5.0" />
-         </BorderPane.margin>
+         <VBox.margin>
+            <Insets bottom="5.0" />
+         </VBox.margin>
       </HBox>
-   </bottom>
-   <top>
-      <ComboBox fx:id="primaryComboBox" maxWidth="1.7976931348623157E308" BorderPane.alignment="CENTER" />
-   </top>
-</BorderPane>
+   </children>
+</VBox>

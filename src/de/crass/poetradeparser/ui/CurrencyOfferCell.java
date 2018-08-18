@@ -92,7 +92,6 @@ public class CurrencyOfferCell<T> extends javafx.scene.control.ListCell<Currency
 
             setContextMenu(new DealContextMenu(deal));
         }
-
     }
 
     @Override

@@ -123,7 +123,7 @@ public class PlayerTradeCell extends javafx.scene.control.ListCell<CurrencyDeal>
             if (buy > 0 && pBuy > 0) {
                 if (pBuy > 0 && pBuy >= buy) {
                     setImage(pBuy == buy ? "neut.png" : "nok.png", buyTendency);
-                } else if (pBuy > 0) {
+                } else {
                     setImage("ok.png", buyTendency);
                 }
                 buyTendency.setCache(true);
@@ -138,7 +138,7 @@ public class PlayerTradeCell extends javafx.scene.control.ListCell<CurrencyDeal>
             if (sell > 0 && pSell > 0) {
                 if (pSell > 0 && pSell <= sell) {
                     setImage(pSell == sell ? "neut.png" : "nok.png", sellTendency);
-                } else if (pSell > 0) {
+                } else {
                     setImage("ok.png", sellTendency);
                 }
                 sellTendency.setCache(true);

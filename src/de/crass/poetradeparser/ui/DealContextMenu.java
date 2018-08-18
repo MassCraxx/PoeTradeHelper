@@ -1,6 +1,5 @@
 package de.crass.poetradeparser.ui;
 
-import de.crass.poetradeparser.PropertyManager;
 import de.crass.poetradeparser.model.CurrencyDeal;
 import de.crass.poetradeparser.parser.PoeTradeWebParser;
 import javafx.event.ActionEvent;
@@ -15,7 +14,7 @@ import javafx.scene.control.SeparatorMenuItem;
 public class DealContextMenu extends ContextMenu {
 
     DealContextMenu(CurrencyDeal deal) {
-        String league = PropertyManager.getInstance().getCurrentLeague();
+        String league = deal.getLeague();
 
         MenuItem buyItem = new MenuItem("Open Buy Offers");
         buyItem.setOnAction(new EventHandler<ActionEvent>() {

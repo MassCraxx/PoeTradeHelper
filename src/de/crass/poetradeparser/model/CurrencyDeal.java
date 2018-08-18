@@ -1,5 +1,7 @@
 package de.crass.poetradeparser.model;
 
+import de.crass.poetradeparser.PropertyManager;
+
 /**
  * Created by mcrass on 19.07.2018.
  */
@@ -17,6 +19,7 @@ public class CurrencyDeal {
     private final float playerSellAmount;
     private int playerBuyStock;
     private int playerSellStock;
+    private String league;
 
     public CurrencyDeal(CurrencyID primaryCurrencyID,
                         CurrencyID secondaryCurrencyID,
@@ -48,6 +51,8 @@ public class CurrencyDeal {
         this.playerSellAmount = playerSellAmount;
         this.playerBuyStock = playerBuyStock;
         this.playerSellStock = playerSellStock;
+
+        this.league = PropertyManager.getInstance().getCurrentLeague();
     }
 
     public CurrencyID getPrimaryCurrencyID() {
@@ -115,5 +120,9 @@ public class CurrencyDeal {
 
     public int getPlayerSellStock() {
         return playerSellStock;
+    }
+
+    public String getLeague() {
+        return league;
     }
 }
