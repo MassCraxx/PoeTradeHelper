@@ -6,6 +6,7 @@ import de.crass.poetradeparser.model.CurrencyDeal;
 import de.crass.poetradeparser.model.CurrencyID;
 import de.crass.poetradeparser.parser.ParseListener;
 import de.crass.poetradeparser.parser.TradeManager;
+import de.crass.poetradeparser.tts.PoeChatTTS;
 import de.crass.poetradeparser.ui.CurrencyOfferCell;
 import de.crass.poetradeparser.ui.PlayerTradeCell;
 import javafx.application.Application;
@@ -25,6 +26,7 @@ import javafx.stage.Stage;
 import javafx.util.Callback;
 
 import java.io.File;
+import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.List;
@@ -36,6 +38,12 @@ public class Main extends Application implements ParseListener {
 
     @FXML
     private ListView<CurrencyDeal> playerDealList;
+
+    @FXML
+    private CheckBox voiceReadCurOffers;
+
+    @FXML
+    private CheckBox voiceReadTradeOffers;
 
     @FXML
     private TextArea console;
@@ -50,16 +58,22 @@ public class Main extends Application implements ParseListener {
     private CheckBox filterWithoutAPI;
 
     @FXML
+    private CheckBox voiceActive;
+
+    @FXML
     private ListView<CurrencyID> currencyFilterList;
 
     @FXML
     private ComboBox<CurrencyID> primaryComboBox;
 
     @FXML
+    private ComboBox<CurrencyID> currencyFilterCB;
+
+    @FXML
     private Label version;
 
     @FXML
-    private ComboBox<CurrencyID> currencyFilterCB;
+    private ComboBox<String> speakerCB;
 
     @FXML
     private Button addPlayerButton;
@@ -68,13 +82,22 @@ public class Main extends Application implements ParseListener {
     private Button removePlayerBtn;
 
     @FXML
-    private TextField playerField;
-
-    @FXML
     private ComboBox<String> leagueCB;
 
     @FXML
+    private Slider volumeSlider;
+
+    @FXML
+    private Label volumeLabel;
+
+    @FXML
+    private TextField playerField;
+
+    @FXML
     private Button updateButton;
+
+    @FXML
+    private CheckBox voiceReadChat;
 
     @FXML
     private CheckBox filterInvalid;
@@ -88,6 +111,10 @@ public class Main extends Application implements ParseListener {
     private static Stage currentStage;
 
     private TradeManager tradeManager;
+
+    private PoeChatTTS poeChatTTS;
+
+    private boolean balconAvalable = false;
 
 
     public static void main(String[] args) {
@@ -113,19 +140,27 @@ public class Main extends Application implements ParseListener {
         assert updateButton != null : "fx:id=\"updateButton\" was not injected: check your FXML file 'layout.fxml'.";
         assert version != null : "fx:id=\"version\" was not injected: check your FXML file 'layout.fxml'.";
 
+        LogManager.getInstance().setConsole(console);
+
         tradeManager = new TradeManager();
         tradeManager.registerListener(this);
 
-        LogManager.getInstance().setConsole(console);
+        poeChatTTS = new PoeChatTTS(PropertyManager.getInstance().getPathOfExilePath());
+        poeChatTTS.setVolume(PropertyManager.getInstance().getVoiceVolume());
+
         setupUI();
 
         LogManager.getInstance().log(getClass(), "Started");
     }
 
     @Override
-    public void stop(){
+    public void stop() {
         LogManager.getInstance().log(getClass(), "Shutting down app.");
         PropertyManager.getInstance().storeProperties();
+
+        if (poeChatTTS != null) {
+            poeChatTTS.stopTTS();
+        }
     }
 
     private void setupUI() {
@@ -249,10 +284,69 @@ public class Main extends Application implements ParseListener {
                 updateTitle();
             }
         });
+
+        voiceActive.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                if (voiceActive.isSelected()) {
+                    startTTS();
+                } else {
+                    poeChatTTS.stopTTS();
+                }
+            }
+        });
+
+        // Persist:
+        voiceReadChat.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                poeChatTTS.setReadChatMessages(voiceReadChat.isSelected());
+            }
+        });
+
+        voiceReadCurOffers.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                poeChatTTS.setReadCurrencyRequests(voiceReadCurOffers.isSelected());
+            }
+        });
+
+        voiceReadTradeOffers.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                poeChatTTS.setReadTradeRequests(voiceReadTradeOffers.isSelected());
+            }
+        });
+
+        int volume = PropertyManager.getInstance().getVoiceVolume();
+        volumeSlider.setValue(volume);
+        // FIXME VOLUME
+
+        volumeLabel.setText(String.valueOf(volume));
+
+        List<String> supportedVoices = poeChatTTS.getSupportedVoices();
+        if (supportedVoices == null || supportedVoices.isEmpty()) {
+            LogManager.getInstance().log(getClass(), "Could not activate TTS! No supported voices found.");
+            voiceActive.setDisable(true);
+        } else {
+            speakerCB.setItems(FXCollections.observableArrayList(supportedVoices));
+        }
+
+        speakerCB.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                String selected = speakerCB.getValue();
+                if(!selected.isEmpty()) {
+                    poeChatTTS.setVoice(selected);
+                }
+            }
+        });
+
+        //FIXME: PoEPath TextField
     }
 
-    private void updateTitle(){
-        if(currentStage == null){
+    private void updateTitle() {
+        if (currentStage == null) {
             LogManager.getInstance().log(getClass(), "Error setting title.");
             return;
         }
@@ -290,6 +384,16 @@ public class Main extends Application implements ParseListener {
             });
         } else {
             LogManager.getInstance().log(PropertyManager.class, "Image " + url + " not found!");
+        }
+    }
+
+    private void startTTS() {
+        poeChatTTS.startTTS();
+
+        try {
+            poeChatTTS.textToSpeech("Fire in the hole");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

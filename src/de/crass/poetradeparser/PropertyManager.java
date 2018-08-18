@@ -8,6 +8,8 @@ import javafx.collections.ObservableList;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,10 +35,13 @@ public class PropertyManager {
     private final String FILTER_OUTOFSTOCK = "filter_outofstock";
     private final String CURRENCY_LIST = "currency_list";
     private final String PLAYER_LIST = "player_list";
+    private final String POE_PATH = "poe_path";
+    private final String VOICE_VOLUME = "voice_volume";
 
     // DEFAULTS
     private final String defaultLeague = "Standard";
     private final CurrencyID defaultPrimary = EXALTED;
+    private final String defaultPoePath = "G:\\Steam\\SteamApps\\common\\Path of Exile\\logs";
 
     private final boolean defaultFilterStockOffers = false;
     public final boolean defaultFilterInvalidStockOffers = true;
@@ -91,6 +96,7 @@ public class PropertyManager {
         appProps.setProperty(LEAGUE_KEY, defaultLeague);
         appProps.setProperty(FILTER_NOAPI, String.valueOf(defaultFilterStockOffers));
         appProps.setProperty(FILTER_OUTOFSTOCK, String.valueOf(defaultFilterInvalidStockOffers));
+        appProps.setProperty(POE_PATH, defaultPoePath);
 
         // Following are not queried from props, will be stored on quit
         primaryCurrency = defaultPrimary;
@@ -201,5 +207,13 @@ public class PropertyManager {
             }
         }
         return list;
+    }
+
+    public Path getPathOfExilePath() {
+        return Paths.get(appProps.getProperty(POE_PATH));
+    }
+
+    public int getVoiceVolume() {
+        return Integer.parseInt(appProps.getProperty(VOICE_VOLUME, "100"));
     }
 }

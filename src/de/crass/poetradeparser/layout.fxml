@@ -65,15 +65,24 @@
                         <Label layoutX="355.0" layoutY="25.0" text="Player Settings" />
                         <ComboBox fx:id="currencyFilterCB" layoutX="32.0" layoutY="61.0" prefHeight="37.0" prefWidth="132.0" />
                         <ListView fx:id="currencyFilterList" layoutX="32.0" layoutY="104.0" prefHeight="210.0" prefWidth="200.0" />
-                        <Button fx:id="removeCurrencyFilterBtn" layoutX="32.0" layoutY="331.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="201.0" text="Remove" />
+                        <Button fx:id="removeCurrencyFilterBtn" layoutX="32.0" layoutY="314.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="201.0" text="Remove" />
                         <Button fx:id="addPlayerButton" layoutX="493.0" layoutY="61.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="62.0" text="+" />
-                        <ListView fx:id="playerListView" layoutX="356.0" layoutY="104.0" prefHeight="127.0" prefWidth="200.0" />
+                        <ListView fx:id="playerListView" layoutX="356.0" layoutY="104.0" prefHeight="104.0" prefWidth="200.0" />
                         <TextField fx:id="playerField" layoutX="355.0" layoutY="61.0" prefHeight="36.0" prefWidth="131.0" />
                         <Button fx:id="addCurrencyFilterBtn" layoutX="173.0" layoutY="61.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="59.0" text="+" />
-                        <Label layoutX="355.0" layoutY="308.0" text="League" />
-                        <Button fx:id="removePlayerBtn" layoutX="355.0" layoutY="241.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="201.0" text="Remove" />
-                        <ComboBox fx:id="leagueCB" layoutX="355.0" layoutY="335.0" prefWidth="201.0" />
-                        <Label layoutX="37.0" layoutY="25.0" text="Currency to check" />
+                        <Label layoutX="356.0" layoutY="264.0" text="Voice" />
+                        <Button fx:id="removePlayerBtn" layoutX="356.0" layoutY="208.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="201.0" text="Remove" />
+                        <ComboBox fx:id="leagueCB" layoutX="32.0" layoutY="400.0" prefWidth="201.0" />
+                        <Label layoutX="32.0" layoutY="25.0" text="Currency to check" />
+                        <CheckBox fx:id="voiceReadChat" layoutX="354.0" layoutY="298.0" mnemonicParsing="false" text="Read Chat" />
+                        <CheckBox fx:id="voiceActive" layoutX="506.0" layoutY="264.0" mnemonicParsing="false" text="Active" />
+                        <ComboBox fx:id="speakerCB" layoutX="412.0" layoutY="381.0" prefHeight="25.0" prefWidth="144.0" />
+                        <Label layoutX="356.0" layoutY="385.0" text="Speaker" />
+                        <Slider fx:id="volumeSlider" layoutX="406.0" layoutY="423.0" prefHeight="14.0" prefWidth="119.0" value="100.0" />
+                        <Label fx:id="volumeLabel" layoutX="533.0" layoutY="422.0" text="100" />
+                        <Label layoutX="355.0" layoutY="422.0" text="Volume" />
+                        <CheckBox fx:id="voiceReadCurOffers" layoutX="354.0" layoutY="319.0" mnemonicParsing="false" text="Read Currency Offers" />
+                        <CheckBox fx:id="voiceReadTradeOffers" layoutX="354.0" layoutY="339.0" mnemonicParsing="false" text="Read Trade Offers" />
                      </children>
                   </AnchorPane>
                </content>
