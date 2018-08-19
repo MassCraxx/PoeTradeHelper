@@ -60,7 +60,6 @@ public class WatchDog implements Runnable {
         } catch (Exception e) {
             LogManager.getInstance().log(getClass(), "Random Exception! " + e);
         } finally {
-            running = false;
             LogManager.getInstance().log(getClass(), "Shutting down.");
             if (wk != null) {
                 wk.cancel();
@@ -75,6 +74,7 @@ public class WatchDog implements Runnable {
                 }
             }
         }
+        running = false;
         listener.onShutDown();
     }
 

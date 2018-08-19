@@ -127,7 +127,7 @@ public class Main extends Application implements ParseListener {
 
     private TradeManager tradeManager;
 
-    private PoeChatTTS poeChatTTS;
+    private static PoeChatTTS poeChatTTS;
 
     public static void main(String[] args) {
         launch(args);
@@ -177,8 +177,9 @@ public class Main extends Application implements ParseListener {
         LogManager.getInstance().log(getClass(), "Shutting down app.");
         PropertyManager.getInstance().storeProperties();
 
-        if (poeChatTTS != null) {
+        if (poeChatTTS != null && poeChatTTS.isActive()) {
             poeChatTTS.stopTTS();
+            poeChatTTS = null;
         }
     }
 

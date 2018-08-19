@@ -36,7 +36,7 @@ public class PoeChatTTS {
     private Thread watchDogThread;
     private WatchDog watchDog;
 
-    public PoeChatTTS(Listener listener){
+    public PoeChatTTS(Listener listener) {
         this(PropertyManager.getInstance().getPathOfExilePath(), listener);
     }
 
@@ -47,7 +47,7 @@ public class PoeChatTTS {
         init();
     }
 
-    private void init(){
+    private void init() {
         PropertyManager proMan = PropertyManager.getInstance();
         setVolume(proMan.getVoiceVolume());
         setReadTradeRequests(Boolean.parseBoolean(proMan.getProp(PropertyManager.VOICE_TRADE, "true")));
@@ -173,7 +173,7 @@ public class PoeChatTTS {
 
             @Override
             public void onShutDown() {
-                if(listener != null){
+                if (listener != null) {
                     listener.onShutDown();
                 }
             }
@@ -185,7 +185,10 @@ public class PoeChatTTS {
     }
 
     public void stopTTS() {
+        watchDog.stop();
         watchDogThread.interrupt();
+        watchDog = null;
+        watchDogThread = null;
     }
 
     private String getRandomString(String[] list) {
@@ -396,7 +399,7 @@ public class PoeChatTTS {
         return randomizeMessages;
     }
 
-    public interface Listener{
+    public interface Listener {
         void onShutDown();
     }
 }
