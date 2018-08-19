@@ -187,7 +187,7 @@ public class PropertyManager {
 
     public String getProp(String key, String defaultValue) {
         String result = getProp(key);
-        if (result == null || result.isEmpty()) {
+        if (defaultValue != null && (result == null || result.isEmpty())) {
             result = defaultValue;
             setProp(key, result);
         }
