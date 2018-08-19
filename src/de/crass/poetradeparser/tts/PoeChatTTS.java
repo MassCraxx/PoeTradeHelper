@@ -50,6 +50,7 @@ public class PoeChatTTS {
     private void init() {
         PropertyManager proMan = PropertyManager.getInstance();
         setVolume(proMan.getVoiceVolume());
+        setVoice(proMan.getProp(PropertyManager.VOICE_SPEAKER, null));
         setReadTradeRequests(Boolean.parseBoolean(proMan.getProp(PropertyManager.VOICE_TRADE, "true")));
         setReadCurrencyRequests(Boolean.parseBoolean(proMan.getProp(PropertyManager.VOICE_CURRENCY, "true")));
         setReadChatMessages(Boolean.parseBoolean(proMan.getProp(PropertyManager.VOICE_CHAT, "false")));
@@ -350,7 +351,11 @@ public class PoeChatTTS {
     }
 
     public boolean isActive() {
-        return watchDog.isRunning();
+        return watchDog != null && watchDog.isRunning();
+    }
+
+    public String getVoice() {
+        return voice;
     }
 
     public enum InternetSlang {

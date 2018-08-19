@@ -336,6 +336,7 @@ public class Main extends Application implements ParseListener {
             });
 
             speakerCB.setItems(FXCollections.observableArrayList(supportedVoices));
+            speakerCB.setValue(poeChatTTS.getVoice());
             speakerCB.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
