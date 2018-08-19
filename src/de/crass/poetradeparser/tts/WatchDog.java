@@ -25,7 +25,7 @@ public class WatchDog implements Runnable {
 
     @Override
     public void run() {
-        // Setup Watchdog
+        running = true;
 //        Main.LogManager.getInstance().log(getClass(), "Watching files in: " + path);
         WatchService watchService = null;
         WatchKey wk = null;
@@ -33,8 +33,10 @@ public class WatchDog implements Runnable {
             watchService = FileSystems.getDefault().newWatchService();
             path.register(watchService, StandardWatchEventKinds.ENTRY_MODIFY);
             while (!stop) {
-                running = true;
                 wk = watchService.take();
+                if(stop){
+                    break;
+                }
                 List<WatchEvent<?>> events = wk.pollEvents();
                 for (WatchEvent<?> event : events) {
                     //we only register "ENTRY_MODIFY" so the context is always a Path.
@@ -54,12 +56,12 @@ public class WatchDog implements Runnable {
         } catch (IOException e) {
             LogManager.getInstance().log(getClass(), "IOException! " + e);
         } catch (InterruptedException e) {
-            LogManager.getInstance().log(getClass(), "Interrupted! " + e);
+            LogManager.getInstance().log(getClass(), "Interrupted!");
         } catch (Exception e) {
             LogManager.getInstance().log(getClass(), "Random Exception! " + e);
         } finally {
-            LogManager.getInstance().log(getClass(), "Shutting down.");
             running = false;
+            LogManager.getInstance().log(getClass(), "Shutting down.");
             if (wk != null) {
                 wk.cancel();
                 wk = null;
@@ -73,7 +75,7 @@ public class WatchDog implements Runnable {
                 }
             }
         }
-        LogManager.getInstance().log(getClass(), "Shutdown complete.");
+        listener.onShutDown();
     }
 
     private void onFileChanged(File file) {
@@ -126,6 +128,8 @@ public class WatchDog implements Runnable {
         void onFileChanged(File path);
 
         void onNewLine(File file, String newLine);
+
+        void onShutDown();
     }
 
     public void stop(){

@@ -11,6 +11,8 @@ import de.crass.poetradeparser.ui.CurrencyOfferCell;
 import de.crass.poetradeparser.ui.PlayerTradeCell;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -28,6 +30,7 @@ import javafx.util.Callback;
 import java.io.File;
 import java.io.IOException;
 import java.math.RoundingMode;
+import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.List;
 
@@ -108,14 +111,23 @@ public class Main extends Application implements ParseListener {
     @FXML
     private Button addCurrencyFilterBtn;
 
+    @FXML
+    private CheckBox voiceReadAFK;
+
+    @FXML
+    private CheckBox voiceRandom;
+
+    @FXML
+    private Button restoreCurrencyFilterBtn;
+
+    @FXML
+    private TextField poePath;
+
     private static Stage currentStage;
 
     private TradeManager tradeManager;
 
     private PoeChatTTS poeChatTTS;
-
-    private boolean balconAvalable = false;
-
 
     public static void main(String[] args) {
         launch(args);
@@ -126,6 +138,8 @@ public class Main extends Application implements ParseListener {
         Parent root = FXMLLoader.load(getClass().getResource("layout.fxml"));
         Scene scene = new Scene(root, 640, 650);
         scene.getStylesheets().add(getClass().getResource("stylesheet.css").toExternalForm());
+        primaryStage.setMinWidth(580);
+        primaryStage.setMinHeight(225);
         primaryStage.setScene(scene);
         primaryStage.show();
 
@@ -145,8 +159,13 @@ public class Main extends Application implements ParseListener {
         tradeManager = new TradeManager();
         tradeManager.registerListener(this);
 
-        poeChatTTS = new PoeChatTTS(PropertyManager.getInstance().getPathOfExilePath());
-        poeChatTTS.setVolume(PropertyManager.getInstance().getVoiceVolume());
+        poeChatTTS = new PoeChatTTS(new PoeChatTTS.Listener() {
+            @Override
+            public void onShutDown() {
+                voiceActive.setSelected(false);
+                poePath.setDisable(false);
+            }
+        });
 
         setupUI();
 
@@ -254,6 +273,13 @@ public class Main extends Application implements ParseListener {
             }
         });
 
+        restoreCurrencyFilterBtn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                PropertyManager.getInstance().resetFilterList();
+            }
+        });
+
         ObservableList<String> playerList = PropertyManager.getInstance().getPlayerList();
         playerListView.setItems(playerList);
         addPlayerButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -285,64 +311,139 @@ public class Main extends Application implements ParseListener {
             }
         });
 
-        voiceActive.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                if (voiceActive.isSelected()) {
-                    startTTS();
-                } else {
-                    poeChatTTS.stopTTS();
-                }
-            }
-        });
 
-        // Persist:
-        voiceReadChat.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                poeChatTTS.setReadChatMessages(voiceReadChat.isSelected());
-            }
-        });
-
-        voiceReadCurOffers.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                poeChatTTS.setReadCurrencyRequests(voiceReadCurOffers.isSelected());
-            }
-        });
-
-        voiceReadTradeOffers.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                poeChatTTS.setReadTradeRequests(voiceReadTradeOffers.isSelected());
-            }
-        });
-
-        int volume = PropertyManager.getInstance().getVoiceVolume();
-        volumeSlider.setValue(volume);
-        // FIXME VOLUME
-
-        volumeLabel.setText(String.valueOf(volume));
-
+        // Setup Voice Controls
         List<String> supportedVoices = poeChatTTS.getSupportedVoices();
-        if (supportedVoices == null || supportedVoices.isEmpty()) {
-            LogManager.getInstance().log(getClass(), "Could not activate TTS! No supported voices found.");
-            voiceActive.setDisable(true);
+        if (supportedVoices == null) {
+            LogManager.getInstance().log(getClass(), "TTS is disabled: Balcon not found.");
+            setDisableVoiceControls();
+        } else if (supportedVoices.isEmpty()) {
+            LogManager.getInstance().log(getClass(), "TTS is disabled: No supported voices found.");
+            setDisableVoiceControls();
         } else {
-            speakerCB.setItems(FXCollections.observableArrayList(supportedVoices));
-        }
-
-        speakerCB.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                String selected = speakerCB.getValue();
-                if(!selected.isEmpty()) {
-                    poeChatTTS.setVoice(selected);
+            voiceActive.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    if (voiceActive.isSelected()) {
+                        poeChatTTS.startTTS();
+                        poePath.setDisable(true);
+                    } else {
+                        poeChatTTS.stopTTS();
+                        poePath.setDisable(false);
+                    }
                 }
-            }
-        });
+            });
 
-        //FIXME: PoEPath TextField
+            speakerCB.setItems(FXCollections.observableArrayList(supportedVoices));
+            speakerCB.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    String selected = speakerCB.getValue();
+                    if (!selected.isEmpty()) {
+                        poeChatTTS.setVoice(selected);
+                        PropertyManager.getInstance().setProp(PropertyManager.VOICE_SPEAKER, selected);
+                    }
+                }
+            });
+
+            voiceReadAFK.setSelected(poeChatTTS.isReadAFK());
+            voiceReadAFK.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    poeChatTTS.setReadAFK(voiceReadAFK.isSelected());
+                    PropertyManager.getInstance().setProp(PropertyManager.VOICE_AFK, String.valueOf(voiceReadAFK
+                            .isSelected()));
+                }
+            });
+
+            voiceReadChat.setSelected(poeChatTTS.isReadChatMessages());
+            voiceReadChat.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    poeChatTTS.setReadChatMessages(voiceReadChat.isSelected());
+                    PropertyManager.getInstance().setProp(PropertyManager.VOICE_CHAT, String.valueOf(voiceReadChat
+                            .isSelected()));
+                }
+            });
+
+            voiceReadCurOffers.setSelected(poeChatTTS.isReadCurrencyRequests());
+            voiceReadCurOffers.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    poeChatTTS.setReadCurrencyRequests(voiceReadCurOffers.isSelected());
+                    PropertyManager.getInstance().setProp(PropertyManager.VOICE_CURRENCY, String.valueOf(voiceReadCurOffers
+                            .isSelected()));
+                }
+            });
+
+            voiceReadTradeOffers.setSelected(poeChatTTS.isReadTradeRequests());
+            voiceReadTradeOffers.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    poeChatTTS.setReadTradeRequests(voiceReadTradeOffers.isSelected());
+                    PropertyManager.getInstance().setProp(PropertyManager.VOICE_TRADE, String.valueOf(voiceReadTradeOffers.isSelected()));
+                }
+            });
+
+            voiceRandom.setSelected(poeChatTTS.isRandomizeMessages());
+            voiceRandom.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    poeChatTTS.setRandomizeMessages(voiceRandom.isSelected());
+                    PropertyManager.getInstance().setProp(PropertyManager.VOICE_RANDOMIZE, String.valueOf
+                            (voiceRandom.isSelected()));
+                }
+            });
+
+            int volume = PropertyManager.getInstance().getVoiceVolume();
+            volumeSlider.setValue(volume);
+            volumeSlider.valueProperty().addListener(new ChangeListener<Number>() {
+                @Override
+                public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                    volumeLabel.setText(String.valueOf(newValue.intValue()));
+                }
+            });
+            volumeSlider.valueChangingProperty().addListener(new ChangeListener<Boolean>() {
+                @Override
+                public void changed(ObservableValue<? extends Boolean> observable, Boolean changeEnds, Boolean changeStarts) {
+                    if(changeEnds) {
+                        int newVolume = (int) volumeSlider.getValue();
+                        poeChatTTS.setVolume(newVolume);
+                        PropertyManager.getInstance().setVoiceVolume(String.valueOf(newVolume));
+
+                        try {
+                            poeChatTTS.textToSpeech("One, Two, Microphone Check");
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            });
+
+            volumeLabel.setText(String.valueOf(volume));
+
+            poePath.setText(String.valueOf(PropertyManager.getInstance().getPathOfExilePath()));
+            poePath.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    String newPath = poePath.getText();
+                    poeChatTTS.setPath(Paths.get(newPath));
+                    PropertyManager.getInstance().setPathOfExilePath(newPath);
+                }
+            });
+        }
+    }
+
+    private void setDisableVoiceControls() {
+        voiceActive.setDisable(true);
+        voiceReadTradeOffers.setDisable(true);
+        voiceReadChat.setDisable(true);
+        voiceReadCurOffers.setDisable(true);
+        volumeLabel.setDisable(true);
+        volumeSlider.setDisable(true);
+        voiceReadAFK.setDisable(true);
+        voiceRandom.setDisable(true);
+        poePath.setDisable(true);
     }
 
     private void updateTitle() {
@@ -384,16 +485,6 @@ public class Main extends Application implements ParseListener {
             });
         } else {
             LogManager.getInstance().log(PropertyManager.class, "Image " + url + " not found!");
-        }
-    }
-
-    private void startTTS() {
-        poeChatTTS.startTTS();
-
-        try {
-            poeChatTTS.textToSpeech("Fire in the hole");
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 }

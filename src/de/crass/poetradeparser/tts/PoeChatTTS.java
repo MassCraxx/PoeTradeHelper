@@ -1,6 +1,7 @@
 package de.crass.poetradeparser.tts;
 
 import de.crass.poetradeparser.LogManager;
+import de.crass.poetradeparser.PropertyManager;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -15,6 +16,7 @@ import java.util.regex.Pattern;
 
 public class PoeChatTTS {
     private Path path;
+    private final Listener listener;
 
     private int volume = 100;
     private int speed = 0;
@@ -31,10 +33,28 @@ public class PoeChatTTS {
     private final String[] names = {"someone", "some dude", "this cheeky scrub lord", "some guy with too much cash", "an exile"};
     private final String[] endPhrases = {"congratulations", "good for you", "what a noob", "how fortunate"};
 
+    private Thread watchDogThread;
     private WatchDog watchDog;
 
-    public PoeChatTTS(Path path) {
+    public PoeChatTTS(Listener listener){
+        this(PropertyManager.getInstance().getPathOfExilePath(), listener);
+    }
+
+    public PoeChatTTS(Path path, Listener listener) {
         this.path = path;
+        this.listener = listener;
+
+        init();
+    }
+
+    private void init(){
+        PropertyManager proMan = PropertyManager.getInstance();
+        setVolume(proMan.getVoiceVolume());
+        setReadTradeRequests(Boolean.parseBoolean(proMan.getProp(PropertyManager.VOICE_TRADE, "true")));
+        setReadCurrencyRequests(Boolean.parseBoolean(proMan.getProp(PropertyManager.VOICE_CURRENCY, "true")));
+        setReadChatMessages(Boolean.parseBoolean(proMan.getProp(PropertyManager.VOICE_CHAT, "false")));
+        setReadAFK(Boolean.parseBoolean(proMan.getProp(PropertyManager.VOICE_AFK, "true")));
+        setRandomizeMessages(Boolean.parseBoolean(proMan.getProp(PropertyManager.VOICE_RANDOMIZE, "true")));
     }
 
     public void setVoice(String voice) {
@@ -63,7 +83,7 @@ public class PoeChatTTS {
         try {
             return executeCommand("balcon -l").contains(preferredVoice);
         } catch (InterruptedException | IOException e) {
-            LogManager.getInstance().log(getClass(), "Exception during checking voice support. " + e);
+//            LogManager.getInstance().log(getClass(), "Exception during checking voice support. " + e);
         }
         return false;
     }
@@ -77,7 +97,8 @@ public class PoeChatTTS {
                 result.add(voices[i].trim());
             }
         } catch (InterruptedException | IOException e) {
-            LogManager.getInstance().log(getClass(), "Exception during checking voice support. " + e);
+//            LogManager.getInstance().log(getClass(), "Exception during checking voice support. " + e);
+            return null;
         }
         return result;
     }
@@ -149,14 +170,22 @@ public class PoeChatTTS {
                     //LogManager.getInstance().log(getClass(), "Could not match new line: " + newLine);
                 }
             }
+
+            @Override
+            public void onShutDown() {
+                if(listener != null){
+                    listener.onShutDown();
+                }
+            }
         });
 
-        new Thread(watchDog, "logWatcher").start();
+        watchDogThread = new Thread(watchDog, "logWatcher");
+        watchDogThread.start();
         LogManager.getInstance().log(getClass(), "TTS Watchdog started.");
     }
 
     public void stopTTS() {
-        watchDog.stop();
+        watchDogThread.interrupt();
     }
 
     private String getRandomString(String[] list) {
@@ -317,6 +346,10 @@ public class PoeChatTTS {
         this.readCurrencyRequests = readCurrencyRequests;
     }
 
+    public boolean isActive() {
+        return watchDog.isRunning();
+    }
+
     public enum InternetSlang {
 
         SRY("sorry"),
@@ -337,5 +370,33 @@ public class PoeChatTTS {
         public String getSpokenTerm() {
             return spokenTerm;
         }
+    }
+
+    public boolean isReadAFK() {
+        return readAFK;
+    }
+
+    public boolean isReadTradeRequests() {
+        return readTradeRequests;
+    }
+
+    public boolean isReadCurrencyRequests() {
+        return readCurrencyRequests;
+    }
+
+    public boolean isReadChatMessages() {
+        return readChatMessages;
+    }
+
+    public void setPath(Path path) {
+        this.path = path;
+    }
+
+    public boolean isRandomizeMessages() {
+        return randomizeMessages;
+    }
+
+    public interface Listener{
+        void onShutDown();
     }
 }

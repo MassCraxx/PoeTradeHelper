@@ -39,6 +39,11 @@
     -fx-selection-bar-non-focused: derive(-fx-accent, -50%);
 }
 
+/* not working */
+.text-id{
+    -fx-text-fill: #d8d8d8;
+}
+
 .deal-list-cell:focused:even{
     -fx-background-color: -fx-control-inner-background;
 }

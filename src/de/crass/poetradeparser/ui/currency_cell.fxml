@@ -22,47 +22,12 @@
             <Rectangle fill="#d8d8d8" height="70.0" stroke="#d8d8d8" strokeType="INSIDE" strokeWidth="0.0" width="2.0" />
             <AnchorPane maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
                <children>
-                  <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Offers" textAlignment="CENTER" wrappingWidth="61.13671875" AnchorPane.topAnchor="7.0">
+                  <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Offers" textAlignment="CENTER" wrappingWidth="61.13671875" AnchorPane.topAnchor="7.0">
                      <font>
                         <Font name="System Bold" size="18.0" />
                      </font>
                   </Text>
-                  <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Value" textAlignment="CENTER" wrappingWidth="61.13671875" AnchorPane.bottomAnchor="7.0">
-                     <font>
-                        <Font name="System Bold" size="18.0" />
-                     </font>
-                  </Text>
-               </children>
-               <HBox.margin>
-                  <Insets left="5.0" right="5.0" />
-               </HBox.margin>
-            </AnchorPane>
-            <AnchorPane maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
-               <children>
-                  <Text fx:id="offersText" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="17 (20)" textAlignment="CENTER" wrappingWidth="61.13671875" AnchorPane.topAnchor="7.0">
-                     <font>
-                        <Font size="18.0" />
-                     </font>
-                  </Text>
-                  <Text fx:id="chaosValue" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="0,32c" textAlignment="CENTER" wrappingWidth="61.13671875" AnchorPane.bottomAnchor="7.0">
-                     <font>
-                        <Font size="18.0" />
-                     </font>
-                  </Text>
-               </children>
-               <HBox.margin>
-                  <Insets left="5.0" right="5.0" />
-               </HBox.margin>
-            </AnchorPane>
-            <Rectangle fill="#d8d8d8" height="70.0" stroke="#d8d8d8" strokeType="INSIDE" strokeWidth="0.0" width="2.0" />
-            <AnchorPane maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
-               <children>
-                  <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Buy" textAlignment="CENTER" wrappingWidth="61.13671875" AnchorPane.topAnchor="7.0">
-                     <font>
-                        <Font name="System Bold" size="18.0" />
-                     </font>
-                  </Text>
-                  <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Sell" textAlignment="CENTER" wrappingWidth="61.13671875" AnchorPane.bottomAnchor="7.0">
+                  <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Value" textAlignment="CENTER" wrappingWidth="61.13671875" AnchorPane.bottomAnchor="7.0">
                      <font>
                         <Font name="System Bold" size="18.0" />
                      </font>
@@ -74,12 +39,12 @@
             </AnchorPane>
             <AnchorPane maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
                <children>
-                  <Text fx:id="buyOffer" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="200" textAlignment="CENTER" wrappingWidth="61.13671875" AnchorPane.topAnchor="7.0">
+                  <Text fx:id="offersText" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="17 (20)" textAlignment="CENTER" wrappingWidth="61.13671875" AnchorPane.topAnchor="7.0">
                      <font>
                         <Font size="18.0" />
                      </font>
                   </Text>
-                  <Text fx:id="sellOffer" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="195" textAlignment="CENTER" wrappingWidth="61.13671875" AnchorPane.bottomAnchor="7.0">
+                  <Text fx:id="chaosValue" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="0,32c" textAlignment="CENTER" wrappingWidth="61.13671875" AnchorPane.bottomAnchor="7.0">
                      <font>
                         <Font size="18.0" />
                      </font>
@@ -92,12 +57,12 @@
             <Rectangle fill="#d8d8d8" height="70.0" stroke="#d8d8d8" strokeType="INSIDE" strokeWidth="0.0" width="2.0" />
             <AnchorPane maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
                <children>
-                  <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Diff" textAlignment="CENTER" wrappingWidth="61.13671875" AnchorPane.topAnchor="7.0">
+                  <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Buy" textAlignment="CENTER" wrappingWidth="61.13671875" AnchorPane.topAnchor="7.0">
                      <font>
                         <Font name="System Bold" size="18.0" />
                      </font>
                   </Text>
-                  <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Value" textAlignment="CENTER" wrappingWidth="61.13671875" AnchorPane.bottomAnchor="7.0">
+                  <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Sell" textAlignment="CENTER" wrappingWidth="61.13671875" AnchorPane.bottomAnchor="7.0">
                      <font>
                         <Font name="System Bold" size="18.0" />
                      </font>
@@ -109,12 +74,47 @@
             </AnchorPane>
             <AnchorPane maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
                <children>
-                  <Text fx:id="diff" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="14" textAlignment="CENTER" wrappingWidth="61.13671875" AnchorPane.topAnchor="7.0">
+                  <Text fx:id="buyOffer" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="200" textAlignment="CENTER" wrappingWidth="61.13671875" AnchorPane.topAnchor="7.0">
                      <font>
                         <Font size="18.0" />
                      </font>
                   </Text>
-                  <Text fx:id="diffValue" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="6,2c" textAlignment="CENTER" wrappingWidth="61.13671875" AnchorPane.bottomAnchor="7.0">
+                  <Text fx:id="sellOffer" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="195" textAlignment="CENTER" wrappingWidth="61.13671875" AnchorPane.bottomAnchor="7.0">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Text>
+               </children>
+               <HBox.margin>
+                  <Insets left="5.0" right="5.0" />
+               </HBox.margin>
+            </AnchorPane>
+            <Rectangle fill="#d8d8d8" height="70.0" stroke="#d8d8d8" strokeType="INSIDE" strokeWidth="0.0" width="2.0" />
+            <AnchorPane maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
+               <children>
+                  <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Diff" textAlignment="CENTER" wrappingWidth="61.13671875" AnchorPane.topAnchor="7.0">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font>
+                  </Text>
+                  <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Value" textAlignment="CENTER" wrappingWidth="61.13671875" AnchorPane.bottomAnchor="7.0">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font>
+                  </Text>
+               </children>
+               <HBox.margin>
+                  <Insets left="5.0" right="5.0" />
+               </HBox.margin>
+            </AnchorPane>
+            <AnchorPane maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
+               <children>
+                  <Text fx:id="diff" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="14" textAlignment="CENTER" wrappingWidth="61.13671875" AnchorPane.topAnchor="7.0">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Text>
+                  <Text fx:id="diffValue" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="6,2c" textAlignment="CENTER" wrappingWidth="61.13671875" AnchorPane.bottomAnchor="7.0">
                      <font>
                         <Font size="18.0" />
                      </font>

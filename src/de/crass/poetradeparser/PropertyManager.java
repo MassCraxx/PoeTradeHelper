@@ -29,14 +29,20 @@ public class PropertyManager {
     private String propFilename = "app.properties";
 
     // KEYS
-    private final String LEAGUE_KEY = "league";
-    private final String PRIMARY_CURRENCY = "primary_currency";
-    private final String FILTER_NOAPI = "filter_noapi";
-    private final String FILTER_OUTOFSTOCK = "filter_outofstock";
-    private final String CURRENCY_LIST = "currency_list";
-    private final String PLAYER_LIST = "player_list";
-    private final String POE_PATH = "poe_path";
-    private final String VOICE_VOLUME = "voice_volume";
+    public static final String LEAGUE_KEY = "league";
+    public static final String PRIMARY_CURRENCY = "primary_currency";
+    public static final String FILTER_NOAPI = "filter_noapi";
+    public static final String FILTER_OUTOFSTOCK = "filter_outofstock";
+    public static final String CURRENCY_LIST = "currency_list";
+    public static final String PLAYER_LIST = "player_list";
+    public static final String POE_PATH = "poe_path";
+    public static final String VOICE_VOLUME = "voice_volume";
+    public static final String VOICE_CHAT = "voice_read_chat";
+    public static final String VOICE_TRADE = "voice_read_trade_offers";
+    public static final String VOICE_CURRENCY = "voice_read_currency_offers";
+    public static final String VOICE_SPEAKER = "voice_speaker";
+    public static final String VOICE_AFK = "voice_read_afk";
+    public static final String VOICE_RANDOMIZE = "voice_randomize_messages";
 
     // DEFAULTS
     private final String defaultLeague = "Standard";
@@ -62,8 +68,8 @@ public class PropertyManager {
     private ObservableList<String> playerList;
 
     private CurrencyID primaryCurrency;
-    boolean filterNoApi;
-    boolean filterOutOfStock;
+    private boolean filterNoApi;
+    private boolean filterOutOfStock;
 
     private PropertyManager() {
         loadProperties();
@@ -74,7 +80,7 @@ public class PropertyManager {
         try {
             appProps.load(new FileInputStream(propFilename));
 
-            if(appProps.isEmpty()){
+            if (appProps.isEmpty()) {
                 loadDefaults();
                 return;
             }
@@ -96,7 +102,6 @@ public class PropertyManager {
         appProps.setProperty(LEAGUE_KEY, defaultLeague);
         appProps.setProperty(FILTER_NOAPI, String.valueOf(defaultFilterStockOffers));
         appProps.setProperty(FILTER_OUTOFSTOCK, String.valueOf(defaultFilterInvalidStockOffers));
-        appProps.setProperty(POE_PATH, defaultPoePath);
 
         // Following are not queried from props, will be stored on quit
         primaryCurrency = defaultPrimary;
@@ -108,7 +113,7 @@ public class PropertyManager {
 
     public void storeProperties() {
         appProps.setProperty(CURRENCY_LIST, currencyListToString(currencyFilterList));
-        appProps.setProperty(PLAYER_LIST,listToString(playerList));
+        appProps.setProperty(PLAYER_LIST, listToString(playerList));
         appProps.setProperty(PRIMARY_CURRENCY, primaryCurrency.name());
 
         appProps.setProperty(FILTER_NOAPI, String.valueOf(filterNoApi));
@@ -157,7 +162,7 @@ public class PropertyManager {
     }
 
     public void setFilterNoApi(boolean filterNoApi) {
-        this.filterNoApi= filterNoApi;
+        this.filterNoApi = filterNoApi;
     }
 
     public void setFilterOutOfStock(boolean filterOutOfStock) {
@@ -172,15 +177,32 @@ public class PropertyManager {
         return appProps;
     }
 
+    public void setProp(String key, String value) {
+        appProps.setProperty(key, value);
+    }
+
+    public String getProp(String key) {
+        return appProps.getProperty(key);
+    }
+
+    public String getProp(String key, String defaultValue) {
+        String result = getProp(key);
+        if (result == null || result.isEmpty()) {
+            result = defaultValue;
+            setProp(key, result);
+        }
+        return result;
+    }
+
     public String listToString(List<String> list) {
-        if(list == null || list.isEmpty()){
+        if (list == null || list.isEmpty()) {
             return "";
         }
         return StringUtils.join(list, ",");
     }
 
     public List<String> stringToList(String s) {
-        if(s == null || s.isEmpty()){
+        if (s == null || s.isEmpty()) {
             return new LinkedList<>();
         }
         return Arrays.asList(s.split(","));
@@ -192,7 +214,7 @@ public class PropertyManager {
             sb.append(currencyID.name());
             sb.append(",");
         }
-        sb.deleteCharAt(sb.length()-1);
+        sb.deleteCharAt(sb.length() - 1);
         return sb.toString();
     }
 
@@ -204,16 +226,30 @@ public class PropertyManager {
                 list.add(id);
             } catch (IllegalArgumentException e) {
                 LogManager.getInstance().log(getClass(), "Error parsing currencyID: " + currency);
+
             }
         }
         return list;
     }
 
     public Path getPathOfExilePath() {
-        return Paths.get(appProps.getProperty(POE_PATH));
+        return Paths.get(getProp(POE_PATH, defaultPoePath));
+    }
+
+    public void setPathOfExilePath(String path) {
+        appProps.setProperty(POE_PATH, path);
     }
 
     public int getVoiceVolume() {
-        return Integer.parseInt(appProps.getProperty(VOICE_VOLUME, "100"));
+        return Integer.parseInt(getProp(VOICE_VOLUME, "100"));
+    }
+
+    public void setVoiceVolume(String volume) {
+        appProps.setProperty(VOICE_VOLUME, volume);
+    }
+
+    public void resetFilterList() {
+        currencyFilterList.clear();
+        currencyFilterList.addAll(defaultCurrencyFilterList);
     }
 }
