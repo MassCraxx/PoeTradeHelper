@@ -32,6 +32,8 @@ import java.io.IOException;
 import java.math.RoundingMode;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 public class Main extends Application implements ParseListener {
@@ -488,5 +490,17 @@ public class Main extends Application implements ParseListener {
         } else {
             LogManager.getInstance().log(PropertyManager.class, "Image " + url + " not found!");
         }
+    }
+
+    public static String join(Collection col, String seperator) {
+        StringBuffer result = new StringBuffer();
+
+        for(Iterator var3 = col.iterator(); var3.hasNext(); result.append((String)var3.next())) {
+            if (result.length() != 0) {
+                result.append(seperator);
+            }
+        }
+
+        return result.toString();
     }
 }

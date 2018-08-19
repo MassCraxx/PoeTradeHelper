@@ -1,6 +1,5 @@
 package de.crass.poetradeparser;
 
-import com.sun.deploy.util.StringUtils;
 import de.crass.poetradeparser.model.CurrencyID;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -198,7 +197,7 @@ public class PropertyManager {
         if (list == null || list.isEmpty()) {
             return "";
         }
-        return StringUtils.join(list, ",");
+        return Main.join(list, ",");
     }
 
     public List<String> stringToList(String s) {
