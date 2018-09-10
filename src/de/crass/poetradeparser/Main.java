@@ -471,7 +471,7 @@ public class Main extends Application implements ParseListener {
         if (in == 0) {
             return "---";
         }
-        DecimalFormat df = new DecimalFormat("#.#");
+        DecimalFormat df = new DecimalFormat("#.##");
         df.setRoundingMode(RoundingMode.HALF_UP);
         return String.valueOf(df.format(in));
     }
@@ -493,7 +493,7 @@ public class Main extends Application implements ParseListener {
     }
 
     public static String join(Collection col, String seperator) {
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
 
         for(Iterator var3 = col.iterator(); var3.hasNext(); result.append((String)var3.next())) {
             if (result.length() != 0) {
