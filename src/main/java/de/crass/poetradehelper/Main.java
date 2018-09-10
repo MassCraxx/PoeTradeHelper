@@ -40,7 +40,7 @@ import java.util.List;
 public class Main extends Application implements ParseListener {
 
     public static final String title = "PoeTradeHelper";
-    public static final String versionText = "v0.3.0-SNAPSHOT";
+    public static final String versionText = "v0.3.0";
 
     @FXML
     private ListView<CurrencyDeal> playerDealList;
