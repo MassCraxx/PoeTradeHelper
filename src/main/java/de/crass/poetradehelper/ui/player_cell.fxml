@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane fx:id="root" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <HBox scaleShape="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <ImageView fx:id="currencyIcon" fitHeight="70.0" fitWidth="70.0" pickOnBounds="true" preserveRatio="true" HBox.hgrow="NEVER">
+               <image>
+                  <Image url="@../../../../res/1.png" />
+               </image>
+               <HBox.margin>
+                  <Insets left="-5.0" right="5.0" />
+               </HBox.margin>
+            </ImageView>
+            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#d8d8d8" height="70.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="2.0" />
+            <AnchorPane maxHeight="1.7976931348623157E308" HBox.hgrow="ALWAYS">
+               <children>
+                  <Text fill="#d8d8d8" layoutX="3.0" layoutY="40.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Buy" textAlignment="CENTER" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="7.900390625">
+                     <font>
+                        <Font size="13.0" />
+                     </font>
+                  </Text>
+               </children>
+            </AnchorPane>
+            <AnchorPane maxHeight="1.7976931348623157E308" HBox.hgrow="ALWAYS">
+               <children>
+                  <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Player" textAlignment="CENTER" wrappingWidth="61.13671875" AnchorPane.topAnchor="7.0">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font>
+                  </Text>
+                  <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Market" textAlignment="CENTER" wrappingWidth="61.13671875" AnchorPane.bottomAnchor="7.0">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font>
+                  </Text>
+               </children>
+            </AnchorPane>
+            <AnchorPane maxHeight="1.7976931348623157E308" HBox.hgrow="ALWAYS">
+               <children>
+                  <Text fx:id="playerBuy" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="1095" textAlignment="CENTER" wrappingWidth="55.0" AnchorPane.topAnchor="7.0">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Text>
+                  <Text fx:id="marketBuy" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="1100" textAlignment="CENTER" wrappingWidth="55.0" AnchorPane.bottomAnchor="7.0">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Text>
+               </children>
+            </AnchorPane>
+            <ImageView fx:id="buyTendency" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true" translateY="10.0">
+               <image>
+                  <Image url="@../../../../../resources/arrow.png" />
+               </image>
+               <HBox.margin>
+                  <Insets bottom="15.0" right="10.0" top="10.0" />
+               </HBox.margin>
+            </ImageView>
+            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#d8d8d8" height="70.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="2.0" />
+            <AnchorPane maxHeight="1.7976931348623157E308" HBox.hgrow="ALWAYS">
+               <children>
+                  <Text fill="#d8d8d8" layoutX="3.0" layoutY="40.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Sell" textAlignment="CENTER" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="7.900390625">
+                     <font>
+                        <Font size="13.0" />
+                     </font>
+                  </Text>
+               </children>
+            </AnchorPane>
+            <AnchorPane maxHeight="1.7976931348623157E308" HBox.hgrow="ALWAYS">
+               <children>
+                  <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Player" textAlignment="CENTER" wrappingWidth="61.13671875" AnchorPane.topAnchor="7.0">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font>
+                  </Text>
+                  <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Market" textAlignment="CENTER" wrappingWidth="61.13671875" AnchorPane.bottomAnchor="7.0">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font>
+                  </Text>
+               </children>
+            </AnchorPane>
+            <AnchorPane maxHeight="1.7976931348623157E308" HBox.hgrow="ALWAYS">
+               <children>
+                  <Text fx:id="playerSell" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="181" textAlignment="CENTER" wrappingWidth="55.0" AnchorPane.topAnchor="7.0">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Text>
+                  <Text fx:id="marketSell" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="180" textAlignment="CENTER" wrappingWidth="55.0" AnchorPane.bottomAnchor="7.0">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Text>
+               </children>
+            </AnchorPane>
+            <ImageView fx:id="sellTendency" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true" translateY="10.0">
+               <HBox.margin>
+                  <Insets bottom="15.0" right="10.0" top="10.0" />
+               </HBox.margin>
+            </ImageView>
+            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#d8d8d8" height="70.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="2.0" />
+            <AnchorPane maxHeight="1.7976931348623157E308" HBox.hgrow="ALWAYS">
+               <children>
+                  <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Diff" textAlignment="CENTER" wrappingWidth="61.13671875" AnchorPane.topAnchor="7.0">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font>
+                  </Text>
+                  <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Profit" textAlignment="CENTER" wrappingWidth="61.13671875" AnchorPane.bottomAnchor="7.0">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font>
+                  </Text>
+               </children>
+            </AnchorPane>
+            <AnchorPane maxHeight="1.7976931348623157E308" HBox.hgrow="ALWAYS">
+               <children>
+                  <Text fx:id="diffValue" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="180" textAlignment="CENTER" wrappingWidth="55.0" AnchorPane.topAnchor="7.0">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Text>
+                  <Text fx:id="diff" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="181" textAlignment="CENTER" wrappingWidth="55.0" AnchorPane.bottomAnchor="7.0">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Text>
+               </children>
+            </AnchorPane>
+         </children>
+      </HBox>
+   </children>
+   <padding>
+      <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+   </padding>
+</AnchorPane>
