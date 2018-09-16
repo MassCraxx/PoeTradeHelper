@@ -2,6 +2,7 @@ package de.crass.poetradehelper.ui;
 
 import de.crass.poetradehelper.model.CurrencyDeal;
 import de.crass.poetradehelper.parser.PoeTradeWebParser;
+import de.crass.poetradehelper.parser.TradeManager;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.ContextMenu;
@@ -36,8 +37,16 @@ public class DealContextMenu extends ContextMenu {
         MenuItem buyValueItem = new MenuItem("Market Buy Value: " + deal.getcValue() * deal.getBuyAmount());
         MenuItem sellValueItem = new MenuItem("Market Sell Value: " + deal.getcValue() * deal.getSellAmount());
 
-        SeparatorMenuItem seperator = new SeparatorMenuItem();
+        SeparatorMenuItem separator = new SeparatorMenuItem();
 
-        getItems().addAll(buyValueItem, sellValueItem, seperator, buyItem, sellItem);
+        MenuItem updateItem = new MenuItem("Update");
+        updateItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                TradeManager.getInstance().updateCurrency(deal.getSecondaryCurrencyID());
+            }
+        });
+
+        getItems().addAll(buyValueItem, sellValueItem, separator, buyItem, sellItem, updateItem);
     }
 }

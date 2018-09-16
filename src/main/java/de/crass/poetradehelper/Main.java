@@ -40,7 +40,7 @@ import java.util.List;
 public class Main extends Application implements ParseListener {
 
     public static final String title = "PoeTradeHelper";
-    public static final String versionText = "v0.3.0-SNAPSHOT";
+    public static final String versionText = "v0.3.1-SNAPSHOT";
 
     @FXML
     private ListView<CurrencyDeal> playerDealList;
@@ -159,7 +159,7 @@ public class Main extends Application implements ParseListener {
 
         LogManager.getInstance().setConsole(console);
 
-        tradeManager = new TradeManager();
+        tradeManager = TradeManager.getInstance();
         tradeManager.registerListener(this);
 
         poeChatTTS = new PoeChatTTS(new PoeChatTTS.Listener() {

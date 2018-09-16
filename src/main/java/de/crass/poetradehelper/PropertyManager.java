@@ -145,7 +145,7 @@ public class PropertyManager {
     }
 
     public void setPrimaryCurrency(CurrencyID primaryCurrency) {
-        appProps.setProperty(PRIMARY_CURRENCY, String.valueOf(primaryCurrency));
+        this.primaryCurrency = primaryCurrency;
     }
 
     public ObservableList<String> getPlayerList() {
