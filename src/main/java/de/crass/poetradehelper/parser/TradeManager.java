@@ -67,7 +67,19 @@ public class TradeManager implements ParseListener {
     }
 
     public void updateOffers() {
-        webParser.updateAll();
+        webParser.updateCurrencies(PropertyManager.getInstance().getFilterList(), true);
+    }
+
+    public void updatePlayerOffers(){
+        List<CurrencyID> list = new LinkedList<>();
+        for(CurrencyDeal deal : playerDeals){
+            list.add(deal.getSecondaryCurrencyID());
+        }
+        webParser.updateCurrencies(list, false);
+    }
+
+    public void updateOffersForCurrency(CurrencyID secondaryCurrencyID) {
+        webParser.updateCurrency(secondaryCurrencyID);
     }
 
     public void parseDeals(boolean async){
@@ -267,9 +279,5 @@ public class TradeManager implements ParseListener {
     
     public void updateCurrencyValues(){
         poeNinjaParser.parseCurrency(PropertyManager.getInstance().getCurrentLeague(), true);
-    }
-
-    public void updateCurrency(CurrencyID secondaryCurrencyID) {
-        webParser.updateCurrency(secondaryCurrencyID);
     }
 }

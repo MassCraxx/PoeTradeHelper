@@ -1,7 +1,6 @@
 package de.crass.poetradehelper.parser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import de.crass.poetradehelper.LogManager;
 import de.crass.poetradehelper.PropertyManager;
 import de.crass.poetradehelper.model.CurrencyID;
@@ -58,42 +57,22 @@ public class PoeTradeWebParser {
     public void reset() {
         currentOffers = new HashMap<>();
         playerOffers = new HashMap<>();
-//        currentValidStockOffers = new HashMap<>();
     }
 
-    void updateAll() {
-        reset();
-        Thread runThread = new Thread(() -> {
-            updating = true;
-            CurrencyID primaryCurrency = PropertyManager.getInstance().getPrimaryCurrency();
-            for (CurrencyID secondary : PropertyManager.getInstance().getFilterList()) {
-                if (secondary != primaryCurrency) {
-                    fetchCurrencyOffers(primaryCurrency, secondary, PropertyManager.getInstance().getCurrentLeague());
-                }
-            }
-            if (parseListener != null) {
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        parseListener.onParsingFinished();
-                    }
-                });
-            }
-            cancel = false;
-            updating = false;
-        }, "PoeTradeWebParser");
-
-        runThread.setDaemon(true);
-        runThread.start();
-    }
-
-    public void updateCurrency(CurrencyID currencyID) {
+    public void updateCurrencies(List<CurrencyID> currencyList, boolean clear) {
+        if(clear){
+            reset();
+        }
         if (!updating) {
             Thread runThread = new Thread(() -> {
                 updating = true;
-                removeOffers(PropertyManager.getInstance().getPrimaryCurrency(), currencyID);
-                CurrencyID primaryCurrency = PropertyManager.getInstance().getPrimaryCurrency();
-                fetchCurrencyOffers(primaryCurrency, currencyID, PropertyManager.getInstance().getCurrentLeague());
+                for(CurrencyID secondaryCurrency : currencyList) {
+                    CurrencyID primaryCurrency = PropertyManager.getInstance().getPrimaryCurrency();
+
+                    if(!clear)
+                        removeOffers(primaryCurrency, secondaryCurrency);
+                    fetchCurrencyOffers(primaryCurrency, secondaryCurrency, PropertyManager.getInstance().getCurrentLeague());
+                }
 
                 if (parseListener != null) {
                     Platform.runLater(new Runnable() {
@@ -103,12 +82,19 @@ public class PoeTradeWebParser {
                         }
                     });
                 }
+                cancel = false;
                 updating = false;
             }, "PoeTradeWebParser");
 
             runThread.setDaemon(true);
             runThread.start();
         }
+    }
+
+    public void updateCurrency(CurrencyID secondaryCurrencyID) {
+        List<CurrencyID> list = new LinkedList<>();
+        list.add(secondaryCurrencyID);
+        updateCurrencies(list, false);
     }
 
     public void fetchCurrencyOffers(CurrencyID primary, CurrencyID secondary, String league) {
