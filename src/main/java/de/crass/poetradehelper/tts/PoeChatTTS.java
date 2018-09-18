@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -15,6 +16,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PoeChatTTS {
+    final private String logsFolder = "logs";
+
     private Path path;
     private final Listener listener;
 
@@ -40,8 +43,8 @@ public class PoeChatTTS {
         this(PropertyManager.getInstance().getPathOfExilePath(), listener);
     }
 
-    public PoeChatTTS(Path path, Listener listener) {
-        this.path = path;
+    public PoeChatTTS(String path, Listener listener) {
+        setPath(path);
         this.listener = listener;
 
         init();
@@ -396,8 +399,15 @@ public class PoeChatTTS {
         return readChatMessages;
     }
 
-    public void setPath(Path path) {
-        this.path = path;
+    public void setPath(String path) {
+        if(!path.endsWith(logsFolder)){
+            if (!path.endsWith("\\")) {
+                path += "\\";
+            }
+            path +=logsFolder;
+        }
+
+        this.path = Paths.get(path);
     }
 
     public boolean isRandomizeMessages() {

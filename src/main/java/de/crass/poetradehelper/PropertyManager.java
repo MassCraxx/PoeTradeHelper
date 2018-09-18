@@ -7,8 +7,6 @@ import javafx.collections.ObservableList;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -46,7 +44,7 @@ public class PropertyManager {
     // DEFAULTS
     private final String defaultLeague = "Standard";
     private final CurrencyID defaultPrimary = EXALTED;
-    private final String defaultPoePath = "G:\\Steam\\SteamApps\\common\\Path of Exile\\logs";
+    private final String defaultPoePath = "G:\\Steam\\SteamApps\\common\\Path of Exile";
 
     private final boolean defaultFilterStockOffers = false;
     public final boolean defaultFilterInvalidStockOffers = true;
@@ -231,8 +229,13 @@ public class PropertyManager {
         return list;
     }
 
-    public Path getPathOfExilePath() {
-        return Paths.get(getProp(POE_PATH, defaultPoePath));
+    public String getPathOfExilePath() {
+        String path = getProp(POE_PATH, defaultPoePath);
+        if(path.isEmpty()){
+            path = defaultPoePath;
+            setPathOfExilePath(path);
+        }
+        return path;
     }
 
     public void setPathOfExilePath(String path) {

@@ -25,13 +25,13 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
 import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.math.RoundingMode;
-import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.Iterator;
@@ -427,12 +427,12 @@ public class Main extends Application implements ParseListener {
 
             volumeLabel.setText(String.valueOf(volume));
 
-            poePath.setText(String.valueOf(PropertyManager.getInstance().getPathOfExilePath()));
-            poePath.setOnAction(new EventHandler<ActionEvent>() {
+            poePath.setText(PropertyManager.getInstance().getPathOfExilePath());
+            poePath.setOnKeyTyped(new EventHandler<KeyEvent>() {
                 @Override
-                public void handle(ActionEvent event) {
+                public void handle(KeyEvent event) {
                     String newPath = poePath.getText();
-                    poeChatTTS.setPath(Paths.get(newPath));
+                    poeChatTTS.setPath(newPath);
                     PropertyManager.getInstance().setPathOfExilePath(newPath);
                 }
             });
