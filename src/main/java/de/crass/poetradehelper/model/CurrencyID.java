@@ -20,8 +20,7 @@ public enum CurrencyID {
     SILVER(35),
     APPRENTICE(45),
     JOURNEYMAN(46),
-    MASTER(47),
-    NOT_SUPPORTED(-1);
+    MASTER(47);
 
     private final int id;
 
@@ -39,7 +38,7 @@ public enum CurrencyID {
                 return id;
             }
         }
-        return NOT_SUPPORTED;
+        return null;
     }
 
     @Override

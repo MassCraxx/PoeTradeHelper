@@ -132,7 +132,7 @@ public class TradeManager implements ParseListener {
             }
 
             CurrencyID secondaryCurrency = key.getValue();
-            float cValue = poeNinjaParser.getCurrentValueFor(secondaryCurrency);
+            float cValue = poeNinjaParser.getCurrentCValueFor(secondaryCurrency);
 
             bestMarketSellOffer = webParser.getBestOffer(marketOffers.get(key));
 
@@ -231,7 +231,7 @@ public class TradeManager implements ParseListener {
                 playerBuyStock = playerBuyOffer.getStock();
             }
 
-            float cValue = poeNinjaParser.getCurrentValueFor(secondaryCurrency);
+            float cValue = poeNinjaParser.getCurrentCValueFor(secondaryCurrency);
             int totalOffers = -1;
 
             if (playerBuyPrice > 0 || playerSellPrice > 0) {
@@ -278,6 +278,10 @@ public class TradeManager implements ParseListener {
     }
     
     public void updateCurrencyValues(){
-        poeNinjaParser.parseCurrency(PropertyManager.getInstance().getCurrentLeague(), true);
+        poeNinjaParser.fetchRates(PropertyManager.getInstance().getCurrentLeague(), true);
+    }
+
+    public Float getCurrencyValue(CurrencyID what, CurrencyID inWhat){
+        return poeNinjaParser.getCurrentValue(what, inWhat);
     }
 }

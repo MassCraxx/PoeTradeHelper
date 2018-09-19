@@ -61,6 +61,64 @@ public class PoeChatTTS {
         setRandomizeMessages(Boolean.parseBoolean(proMan.getProp(PropertyManager.VOICE_RANDOMIZE, "true")));
     }
 
+    private void processNewLine(String newLine){
+        if (readAFK && newLine.contains("AFK mode is now ON.")) {
+            try {
+                textToSpeech("You just went AFK, better do something about it!");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return;
+        }
+
+        Pattern sayPattern = Pattern.compile("].+? (.+?): (.+)");
+        Pattern currencyPattern = Pattern.compile("] @From (.+?): .+your \\d+ (.+) for my \\d+ (.+) i");
+        Pattern tradePattern = Pattern.compile("] @From (.+?):.+ buy your (.+) listed for \\d+ (.+) in");
+        Matcher matcher = currencyPattern.matcher(newLine);
+
+        if (readCurrencyRequests && matcher.find() || readTradeRequests && (matcher = tradePattern.matcher(newLine)).find()) {
+            // Currency buy request
+            String buyCurrency = matcher.group(2);
+            String sellCurrency = matcher.group(3);
+
+            String ttsMessage;
+            if (randomizeMessages) {
+                ttsMessage = getRandomStartPhrase() + getRandomName() + " wants to buy your " + buyCurrency + " for " + sellCurrency + getRandomEndPhrase();
+            } else {
+                ttsMessage = "Someone wants to buy your " + buyCurrency + " for " + sellCurrency;
+            }
+            try {
+                textToSpeech(ttsMessage);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else if (readChatMessages && ((matcher = sayPattern.matcher(newLine)).find())) {
+            String name = readableName(matcher.group(1));
+            // Name is a NPC, cancel.
+            if (name == null) {
+                return;
+            }
+            String msg = matcher.group(2);
+            String verb = "says";
+
+            // Check if sent by player
+            if (newLine.contains("@To")) {
+                name = "you";
+                verb = "say";
+            }
+            LogManager.getInstance().log(getClass(), name + " said " + msg);
+            msg = convertSlangToSpoken(msg);
+
+            try {
+                textToSpeech(name + ' ' + verb + ' ' + msg);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            //LogManager.getInstance().log(getClass(), "Could not match new line: " + newLine);
+        }
+    }
+
     public void setVoice(String voice) {
         this.voice = voice;
     }
@@ -118,61 +176,8 @@ public class PoeChatTTS {
             public void onNewLine(File file, String newLine) {
                 if (file.getName().contains("Worker")) {
                     return;
-                } else if (readAFK && newLine.contains("AFK mode is now ON.")) {
-                    try {
-                        textToSpeech("You just went AFK, better do something about it!");
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    return;
                 }
-
-                Pattern sayPattern = Pattern.compile("].+? (.+?): (.+)");
-                Pattern currencyPattern = Pattern.compile("] @From (.+?): .+your \\d+ (.+) for my \\d+ (.+) i");
-                Pattern tradePattern = Pattern.compile("] @From (.+?):.+ buy your (.+) listed for \\d+ (.+) in");
-                Matcher matcher = currencyPattern.matcher(newLine);
-
-                if (readCurrencyRequests && matcher.find() || readTradeRequests && (matcher = tradePattern.matcher(newLine)).find()) {
-                    // Currency buy request
-                    String buyCurrency = matcher.group(2);
-                    String sellCurrency = matcher.group(3);
-
-                    String ttsMessage;
-                    if (randomizeMessages) {
-                        ttsMessage = getRandomStartPhrase() + getRandomName() + " wants to buy your " + buyCurrency + " for " + sellCurrency + getRandomEndPhrase();
-                    } else {
-                        ttsMessage = "Someone wants to buy your " + buyCurrency + " for " + sellCurrency;
-                    }
-                    try {
-                        textToSpeech(ttsMessage);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                } else if (readChatMessages && ((matcher = sayPattern.matcher(newLine)).find())) {
-                    String name = readableName(matcher.group(1));
-                    // Name is a NPC, cancel.
-                    if (name == null) {
-                        return;
-                    }
-                    String msg = matcher.group(2);
-                    String verb = "says";
-
-                    // Check if sent by player
-                    if (newLine.contains("@To")) {
-                        name = "you";
-                        verb = "say";
-                    }
-                    LogManager.getInstance().log(getClass(), name + " said " + msg);
-                    msg = convertSlangToSpoken(msg);
-
-                    try {
-                        textToSpeech(name + ' ' + verb + ' ' + msg);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    //LogManager.getInstance().log(getClass(), "Could not match new line: " + newLine);
-                }
+                processNewLine(newLine);
             }
 
             @Override
