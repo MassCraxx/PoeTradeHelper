@@ -60,35 +60,48 @@ public class PoeTradeWebParser {
     }
 
     public void updateCurrencies(List<CurrencyID> currencyList, boolean clear) {
-        if(clear){
+        if (updating) {
+            return;
+        }
+        if (parseListener != null) {
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    parseListener.onParsingStarted();
+                }
+            });
+        }
+
+        if (clear) {
             reset();
         }
-        if (!updating) {
-            Thread runThread = new Thread(() -> {
-                updating = true;
-                for(CurrencyID secondaryCurrency : currencyList) {
-                    CurrencyID primaryCurrency = PropertyManager.getInstance().getPrimaryCurrency();
-
-                    if(!clear)
-                        removeOffers(primaryCurrency, secondaryCurrency);
-                    fetchCurrencyOffers(primaryCurrency, secondaryCurrency, PropertyManager.getInstance().getCurrentLeague());
+        Thread runThread = new Thread(() -> {
+            updating = true;
+            CurrencyID primaryCurrency = PropertyManager.getInstance().getPrimaryCurrency();
+            for (CurrencyID secondaryCurrency : currencyList) {
+                if (cancel) {
+                    break;
                 }
 
-                if (parseListener != null) {
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            parseListener.onParsingFinished();
-                        }
-                    });
-                }
-                cancel = false;
-                updating = false;
-            }, "PoeTradeWebParser");
+                if (!clear)
+                    removeOffers(primaryCurrency, secondaryCurrency);
+                fetchCurrencyOffers(primaryCurrency, secondaryCurrency, PropertyManager.getInstance().getCurrentLeague());
+            }
 
-            runThread.setDaemon(true);
-            runThread.start();
-        }
+            if (parseListener != null) {
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        parseListener.onParsingFinished();
+                    }
+                });
+            }
+            cancel = false;
+            updating = false;
+        }, "PoeTradeWebParser");
+
+        runThread.setDaemon(true);
+        runThread.start();
     }
 
     public void updateCurrency(CurrencyID secondaryCurrencyID) {
@@ -111,9 +124,6 @@ public class PoeTradeWebParser {
     }
 
     private void fetchOffers(CurrencyID primary, CurrencyID secondary, String league) throws IOException, InterruptedException {
-        if (cancel) {
-            return;
-        }
         String buyResponseBody;
         ObjectMapper objectMapper = new ObjectMapper();
         File file = new File(primary.toString() + "-" + secondary.toString() + ".html");
@@ -213,7 +223,7 @@ public class PoeTradeWebParser {
         }
     }
 
-    public void removeOffers(CurrencyID primary, CurrencyID secondary){
+    public void removeOffers(CurrencyID primary, CurrencyID secondary) {
         Pair<CurrencyID, CurrencyID> key = new Pair<>(primary, secondary);
         currentOffers.remove(key);
         playerOffers.remove(key);

@@ -32,9 +32,10 @@ public class PoeChatTTS {
     private boolean readCurrencyRequests = true;
     private boolean readChatMessages = false;
 
-    private final String[] startPhrases = {"guess what", "check that out", "wait a second", "hold on", "what the fuck", "did you see"};
+    private final String[] startPhrases = {"guess what", "check that out", "wait a second", "hold on", "what the fuck", "did you see", "listen"};
     private final String[] names = {"someone", "some dude", "this cheeky scrub lord", "some guy with too much cash", "an exile"};
     private final String[] endPhrases = {"congratulations", "good for you", "what a noob", "how fortunate"};
+    private String[] testPhrases = {"One", "Check", "Boom"};
 
     private Thread watchDogThread;
     private WatchDog watchDog;
@@ -64,7 +65,7 @@ public class PoeChatTTS {
     private void processNewLine(String newLine){
         if (readAFK && newLine.contains("AFK mode is now ON.")) {
             try {
-                textToSpeech("You just went AFK, better do something about it!");
+                textToSpeech("You just went AFK!");
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -364,6 +365,19 @@ public class PoeChatTTS {
 
     public String getVoice() {
         return voice;
+    }
+
+    public void testSpeech() {
+        String text = getRandomString(endPhrases, 8);
+        if(text == null){
+            text = getRandomString(testPhrases);
+        }
+
+        try {
+            textToSpeech(text);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public enum InternetSlang {

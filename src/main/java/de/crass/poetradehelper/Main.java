@@ -33,9 +33,7 @@ import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class Main extends Application implements ParseListener {
 
@@ -132,6 +130,11 @@ public class Main extends Application implements ParseListener {
 
     private static PoeChatTTS poeChatTTS;
 
+    private Timer updateTimer;
+    private int updateDelay = 1000 * 60 * 5;
+
+    private boolean currencyFilterChanged = false;
+
     public static void main(String[] args) {
         launch(args);
     }
@@ -184,6 +187,10 @@ public class Main extends Application implements ParseListener {
             poeChatTTS.stopTTS();
             poeChatTTS = null;
         }
+
+        stopUpdateTimer();
+
+        LogManager.getInstance().log(getClass(), "Shutdown complete.");
     }
 
     private void setupUI() {
@@ -213,14 +220,11 @@ public class Main extends Application implements ParseListener {
         updateButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                if (!tradeManager.isUpdating()) {
-                    tradeManager.updateOffers();
-                    currencyList.setPlaceholder(new Label("Updating..."));
-                    playerDealList.setPlaceholder(new Label("Updating..."));
-                    updateButton.setText("Cancel");
-                } else {
+                if(tradeManager.isUpdating()){
                     tradeManager.cancelUpdate();
                     updateButton.setDisable(true);
+                } else{
+                    tradeManager.updateOffers(currencyFilterChanged);
                 }
             }
         });
@@ -263,9 +267,12 @@ public class Main extends Application implements ParseListener {
             @Override
             public void handle(ActionEvent event) {
                 CurrencyID newCurrency = currencyFilterCB.getValue();
-                List<CurrencyID> filterList = PropertyManager.getInstance().getFilterList();
-                if (!filterList.contains(newCurrency)) {
-                    filterList.add(newCurrency);
+                if(newCurrency != null) {
+                    List<CurrencyID> filterList = PropertyManager.getInstance().getFilterList();
+                    if (!filterList.contains(newCurrency)) {
+                        currencyFilterChanged = true;
+                        filterList.add(newCurrency);
+                    }
                 }
             }
         });
@@ -273,7 +280,11 @@ public class Main extends Application implements ParseListener {
         removeCurrencyFilterBtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                PropertyManager.getInstance().getFilterList().remove(currencyFilterList.getFocusModel().getFocusedItem());
+                CurrencyID focus = currencyFilterList.getFocusModel().getFocusedItem();
+                if(focus != null) {
+                    currencyFilterChanged = true;
+                    PropertyManager.getInstance().getFilterList().remove(focus);
+                }
             }
         });
 
@@ -411,16 +422,11 @@ public class Main extends Application implements ParseListener {
             volumeSlider.valueChangingProperty().addListener(new ChangeListener<Boolean>() {
                 @Override
                 public void changed(ObservableValue<? extends Boolean> observable, Boolean changeEnds, Boolean changeStarts) {
-                    if(changeEnds) {
+                    if (changeEnds) {
                         int newVolume = (int) volumeSlider.getValue();
                         poeChatTTS.setVolume(newVolume);
                         PropertyManager.getInstance().setVoiceVolume(String.valueOf(newVolume));
-
-                        try {
-                            poeChatTTS.textToSpeech("One, Two, Microphone Check");
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                        poeChatTTS.testSpeech();
                     }
                 }
             });
@@ -460,6 +466,16 @@ public class Main extends Application implements ParseListener {
     }
 
     @Override
+    public void onParsingStarted() {
+        currencyList.setPlaceholder(new Label("Updating..."));
+        playerDealList.setPlaceholder(new Label("Updating..."));
+
+        updateButton.setText("Cancel");
+
+        currencyFilterChanged = false;
+    }
+
+    @Override
     public void onParsingFinished() {
         currencyList.setPlaceholder(new Label("No deals to show."));
         playerDealList.setPlaceholder(new Label("No deals to show. Is your player set in settings?"));
@@ -478,7 +494,6 @@ public class Main extends Application implements ParseListener {
     }
 
     public static void setImage(String name, ImageView view) {
-//        String url = "./res/" + name;
         try {
             final Image image = SwingFXUtils.toFXImage(ImageIO.read(Main.class.getResource(name)), null);
             Platform.runLater(new Runnable() {
@@ -490,39 +505,37 @@ public class Main extends Application implements ParseListener {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-//        URL url = Main.class.getResource(name);
-//        if(url == null){
-//            LogManager.getInstance().log(PropertyManager.class, "Image " + url + " not found!");
-//            return;
-//        }
-//        try {
-//            File iconFile = new File(url.toURI());
-//            if (iconFile.exists()) {
-//                Image image = new Image(iconFile.toURI().toString());
-//                Platform.runLater(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        view.setImage(image);
-//                    }
-//                });
-//            } else {
-//                LogManager.getInstance().log(PropertyManager.class, "Image " + url + " not found!");
-//            }
-//        } catch (URISyntaxException e) {
-//            e.printStackTrace();
-//        }
     }
 
     public static String join(Collection col, String seperator) {
         StringBuilder result = new StringBuilder();
 
-        for(Iterator var3 = col.iterator(); var3.hasNext(); result.append((String)var3.next())) {
+        for (Iterator var3 = col.iterator(); var3.hasNext(); result.append((String) var3.next())) {
             if (result.length() != 0) {
                 result.append(seperator);
             }
         }
 
         return result.toString();
+    }
+
+    private void startUpdateTimer() {
+        if(updateTimer == null) {
+            updateTimer = new Timer("poeTradeHelperUpdateTimer");
+            updateTimer.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    LogManager.getInstance().log(getClass(), "Invoke Automatic Update");
+                    TradeManager.getInstance().updateOffers(currencyFilterChanged);
+                }
+            }, updateDelay, updateDelay);
+        }
+    }
+
+    private void stopUpdateTimer() {
+        if (updateTimer != null) {
+            updateTimer.cancel();
+            updateTimer = null;
+        }
     }
 }

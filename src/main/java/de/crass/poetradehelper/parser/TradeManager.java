@@ -66,8 +66,8 @@ public class TradeManager implements ParseListener {
         return instance;
     }
 
-    public void updateOffers() {
-        webParser.updateCurrencies(PropertyManager.getInstance().getFilterList(), true);
+    public void updateOffers(boolean clear) {
+        webParser.updateCurrencies(PropertyManager.getInstance().getFilterList(), clear);
     }
 
     public void updatePlayerOffers(){
@@ -251,6 +251,13 @@ public class TradeManager implements ParseListener {
 
     public ObservableList<CurrencyDeal> getPlayerDeals() {
         return playerDeals;
+    }
+
+    @Override
+    public void onParsingStarted() {
+        if(listener != null){
+            listener.onParsingStarted();
+        }
     }
 
     @Override
