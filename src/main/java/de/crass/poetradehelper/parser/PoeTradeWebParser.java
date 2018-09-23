@@ -237,30 +237,6 @@ public class PoeTradeWebParser {
         return currentOffers;
     }
 
-    public CurrencyOffer getBestOffer(List<CurrencyOffer> list) {
-        return getBestOffer(list, PropertyManager.getInstance().getFilterNoApi(), PropertyManager.getInstance()
-                .getFilterOutOfStock());
-    }
-
-    public CurrencyOffer getBestOffer(List<CurrencyOffer> list, boolean filterStockOffers, boolean filterValidStockOffers) {
-        CurrencyOffer bestOffer = null;
-        if (list == null) {
-            return null;
-        }
-        for (CurrencyOffer offer : list) {
-            // Return most top offer that meets filter requirements
-
-            if ((filterStockOffers && offer.getStock() < 0) ||
-                    (filterValidStockOffers && (offer.getStock() >= 0 && offer.getStock() < offer.getSellValue()))) {
-                continue;
-            }
-
-            bestOffer = offer;
-            break;
-        }
-        return bestOffer;
-    }
-
     public HashMap<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> getPlayerOffers() {
         return playerOffers;
     }

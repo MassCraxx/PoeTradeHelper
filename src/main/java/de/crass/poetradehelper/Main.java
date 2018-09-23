@@ -7,7 +7,7 @@ import de.crass.poetradehelper.model.CurrencyID;
 import de.crass.poetradehelper.parser.ParseListener;
 import de.crass.poetradehelper.parser.TradeManager;
 import de.crass.poetradehelper.tts.PoeChatTTS;
-import de.crass.poetradehelper.ui.CurrencyOfferCell;
+import de.crass.poetradehelper.ui.MarketCell;
 import de.crass.poetradehelper.ui.PlayerTradeCell;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -200,7 +200,7 @@ public class Main extends Application implements ParseListener {
         currencyList.setCellFactory(new Callback<ListView<CurrencyDeal>, ListCell<CurrencyDeal>>() {
             @Override
             public ListCell<CurrencyDeal> call(ListView<CurrencyDeal> studentListView) {
-                return new CurrencyOfferCell<>();
+                return new MarketCell<>();
             }
         });
         currencyList.setItems(tradeManager.getCurrentDeals());

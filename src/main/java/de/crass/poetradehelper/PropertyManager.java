@@ -30,6 +30,7 @@ public class PropertyManager {
     public static final String PRIMARY_CURRENCY = "primary_currency";
     public static final String FILTER_NOAPI = "filter_noapi";
     public static final String FILTER_OUTOFSTOCK = "filter_outofstock";
+    public static final String FILTER_EXCESSIVE = "filter_excessive";
     public static final String CURRENCY_LIST = "currency_list";
     public static final String PLAYER_LIST = "player_list";
     public static final String POE_PATH = "poe_path";
@@ -46,8 +47,9 @@ public class PropertyManager {
     private final CurrencyID defaultPrimary = EXALTED;
     private final String defaultPoePath = "G:\\Steam\\SteamApps\\common\\Path of Exile";
 
-    private final boolean defaultFilterStockOffers = false;
+    public final boolean defaultFilterStockOffers = false;
     public final boolean defaultFilterInvalidStockOffers = true;
+    public final boolean defaultFilterExcessive = true;
 
     private final List<CurrencyID> defaultCurrencyFilterList = Arrays.asList(
             ALCHEMY,
@@ -67,6 +69,7 @@ public class PropertyManager {
     private CurrencyID primaryCurrency;
     private boolean filterNoApi;
     private boolean filterOutOfStock;
+    private boolean filterExcessive;
 
     private PropertyManager() {
         loadProperties();
@@ -89,6 +92,7 @@ public class PropertyManager {
 
             filterNoApi = Boolean.parseBoolean(appProps.getProperty(FILTER_NOAPI));
             filterOutOfStock = Boolean.parseBoolean(appProps.getProperty(FILTER_OUTOFSTOCK));
+            filterExcessive = Boolean.parseBoolean(appProps.getProperty(FILTER_EXCESSIVE));
 
         } catch (IOException e) {
             loadDefaults();
@@ -99,6 +103,7 @@ public class PropertyManager {
         appProps.setProperty(LEAGUE_KEY, defaultLeague);
         appProps.setProperty(FILTER_NOAPI, String.valueOf(defaultFilterStockOffers));
         appProps.setProperty(FILTER_OUTOFSTOCK, String.valueOf(defaultFilterInvalidStockOffers));
+        appProps.setProperty(FILTER_EXCESSIVE, String.valueOf(defaultFilterExcessive));
 
         // Following are not queried from props, will be stored on quit
         primaryCurrency = defaultPrimary;
@@ -158,12 +163,18 @@ public class PropertyManager {
         return filterOutOfStock;
     }
 
+    public boolean getFilterExcessive() { return filterExcessive;}
+
     public void setFilterNoApi(boolean filterNoApi) {
         this.filterNoApi = filterNoApi;
     }
 
     public void setFilterOutOfStock(boolean filterOutOfStock) {
         this.filterOutOfStock = filterOutOfStock;
+    }
+
+    public void setFilterExcessive(boolean filterExcessive) {
+        this.filterExcessive = filterExcessive;
     }
 
     public void setLeague(String league) {
@@ -254,4 +265,5 @@ public class PropertyManager {
         currencyFilterList.clear();
         currencyFilterList.addAll(defaultCurrencyFilterList);
     }
+
 }
