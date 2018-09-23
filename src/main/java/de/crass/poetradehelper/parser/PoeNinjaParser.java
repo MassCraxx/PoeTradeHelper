@@ -58,6 +58,10 @@ public class PoeNinjaParser {
                 return;
             }
 
+            if(currentRates == null){
+                currentRates = new HashMap<>();
+            }
+
             HashMap<String, Integer> ninjaToTradeIdMap = new HashMap<>();
             JSONArray idArray = json.getJSONArray("currencyDetails");
             for (Object currencyDetailsObject : idArray) {
