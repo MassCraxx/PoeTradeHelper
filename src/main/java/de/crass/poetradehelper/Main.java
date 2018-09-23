@@ -471,8 +471,6 @@ public class Main extends Application implements ParseListener {
         playerDealList.setPlaceholder(new Label("Updating..."));
 
         updateButton.setText("Cancel");
-
-        currencyFilterChanged = false;
     }
 
     @Override
@@ -482,6 +480,8 @@ public class Main extends Application implements ParseListener {
 
         updateButton.setText("Update");
         updateButton.setDisable(false);
+
+        currencyFilterChanged = false;
     }
 
     public static String prettyFloat(float in) {

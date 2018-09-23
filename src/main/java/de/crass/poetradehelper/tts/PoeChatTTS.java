@@ -107,7 +107,6 @@ public class PoeChatTTS {
                 name = "you";
                 verb = "say";
             }
-            LogManager.getInstance().log(getClass(), name + " said " + msg);
             msg = convertSlangToSpoken(msg);
 
             try {
