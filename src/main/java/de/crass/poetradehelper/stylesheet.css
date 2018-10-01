@@ -95,8 +95,8 @@
   ' From metro design: https://github.com/JFXtras/jfxtras-styles/blob/master/jmetro/src/main/resources/jfxtras/styles
   */
 .button {
+/*
     -fx-padding: 5 22 5 22;
-
     /*-fx-border-color: #e2e2e2;*/
     -fx-border-color: #323534;
     -fx-border-width: 2;
@@ -144,4 +144,17 @@
 
 .button:default:hover{
     -fx-background-color: #3a3a3a;
+}
+
+#valueTable .table-cell {
+     /* The rest is from caspian.css */
+
+    -fx-skin: "com.sun.javafx.scene.control.skin.TableCellSkin";
+    -fx-padding: 0.166667em; /* 2px, plus border adds 1px */
+
+    -fx-background-color: transparent;
+    -fx-border-color: transparent -fx-table-cell-border-color transparent transparent;
+    -fx-border-width: 0.083333em; /* 1 */
+    -fx-cell-size: 2.0em; /* 24 */
+    -fx-text-fill: -fx-text-inner-color;
 }

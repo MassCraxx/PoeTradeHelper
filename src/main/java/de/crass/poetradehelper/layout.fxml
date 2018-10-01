@@ -9,6 +9,8 @@
 <?import javafx.scene.control.Slider?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -32,9 +34,48 @@
           </Tab>
           <Tab text="PlayerOverview">
                <content>
-                  <ListView fx:id="playerDealList" styleClass="deal-list" />
+                  <AnchorPane>
+                     <children>
+                        <VBox maxHeight="1.7976931348623157E308" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <children>
+                              <ListView fx:id="playerDealList" maxHeight="1.7976931348623157E308" styleClass="deal-list" VBox.vgrow="ALWAYS" />
+                              <Button fx:id="updatePlayerButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Update Player" />
+                           </children>
+                        </VBox>
+                     </children>
+                  </AnchorPane>
                </content>
           </Tab>
+            <Tab text="Currency Values">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <AnchorPane layoutX="205.0" layoutY="10.0" prefHeight="475.0" prefWidth="382.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+                           <children>
+                              <ComboBox fx:id="valueInputCB" layoutY="54.0" prefHeight="31.0" prefWidth="170.0" AnchorPane.rightAnchor="0.0" />
+                              <ComboBox fx:id="valueOutputCB" layoutY="107.0" prefHeight="31.0" prefWidth="170.0" AnchorPane.rightAnchor="0.0" />
+                              <TextField fx:id="valueInputText" layoutY="54.0" prefHeight="31.0" prefWidth="169.0" text="1" AnchorPane.leftAnchor="220.0" AnchorPane.rightAnchor="200.0" />
+                              <TextField fx:id="valueOutputText" editable="false" layoutY="107.0" prefHeight="31.0" prefWidth="169.0" AnchorPane.leftAnchor="220.0" AnchorPane.rightAnchor="200.0" />
+                              <Text fill="#d8d8d8" layoutX="220.0" layoutY="30.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Currency Conversion Calculator" AnchorPane.leftAnchor="220.0" />
+                              <Button fx:id="convertButton" layoutX="155.0" layoutY="152.0" mnemonicParsing="false" text="Convert" AnchorPane.leftAnchor="220.0" AnchorPane.rightAnchor="0.0" />
+                              <TableView id="valueTable" fx:id="valueTable" maxWidth="200.0" prefHeight="440.0" prefWidth="200.0" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="10.0">
+                                <columns>
+                                  <TableColumn prefWidth="100.0" text="Currency" />
+                                  <TableColumn prefWidth="100.0" text="in Chaos" />
+                                </columns>
+                                 <columnResizePolicy>
+                                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                 </columnResizePolicy>
+                              </TableView>
+                              <Button fx:id="updateValuesButton" mnemonicParsing="false" prefHeight="30.0" prefWidth="200.0" text="Update Values" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" />
+                              <Text fill="#d8d8d8" layoutX="380.0" layoutY="74.0" strokeType="OUTSIDE" strokeWidth="0.0" text="x" AnchorPane.rightAnchor="190.0" />
+                              <Text fill="#d8d8d8" layoutX="383.0" layoutY="128.0" strokeType="OUTSIDE" strokeWidth="0.0" text="x" AnchorPane.rightAnchor="190.0" />
+                           </children>
+                        </AnchorPane>
+                     </children>
+                  </AnchorPane>
+              </content>
+            </Tab>
             <!--<Tab text="Offers">-->
                <!--<content>-->
                   <!--<BorderPane prefHeight="200.0" prefWidth="200.0">-->
@@ -74,24 +115,29 @@
                         <Button fx:id="addCurrencyFilterBtn" layoutX="195.0" layoutY="61.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="58.0" text="+" AnchorPane.leftAnchor="192.0" />
                         <Button fx:id="removePlayerBtn" layoutX="358.0" layoutY="190.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="250.0" text="Remove" AnchorPane.rightAnchor="50.0" />
                         <ComboBox fx:id="leagueCB" layoutX="50.0" layoutY="423.0" prefHeight="25.0" prefWidth="200.0" AnchorPane.leftAnchor="50.0" />
-                        <CheckBox fx:id="voiceReadChat" layoutX="341.0" layoutY="299.0" mnemonicParsing="false" selected="true" text="Read Chat Messages" AnchorPane.rightAnchor="168.0" />
-                        <CheckBox fx:id="voiceActive" layoutX="534.0" layoutY="235.0" mnemonicParsing="false" text="Active" AnchorPane.rightAnchor="52.0" />
-                        <ComboBox fx:id="speakerCB" layoutX="415.0" layoutY="402.0" prefHeight="25.0" prefWidth="175.0" AnchorPane.rightAnchor="50.0" />
-                        <Slider fx:id="volumeSlider" layoutX="415.0" layoutY="445.0" prefHeight="14.0" prefWidth="145.0" value="100.0" AnchorPane.rightAnchor="80.0" />
-                        <Label fx:id="volumeLabel" layoutX="570.0" layoutY="443.0" text="100" AnchorPane.rightAnchor="50.0" />
-                        <CheckBox fx:id="voiceReadCurOffers" layoutX="341.0" layoutY="320.0" mnemonicParsing="false" selected="true" text="Read Currency Offer PM" AnchorPane.rightAnchor="150.0" />
-                        <CheckBox fx:id="voiceReadTradeOffers" layoutX="341.0" layoutY="341.0" mnemonicParsing="false" selected="true" text="Read Trade Offers PM" AnchorPane.rightAnchor="162.0" />
                         <Text fill="#d8d8d8" layoutX="50.0" layoutY="411.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="League" AnchorPane.leftAnchor="50.0" />
                         <Text fill="#d8d8d8" layoutX="50.0" layoutY="50.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Currency to check" AnchorPane.leftAnchor="50.0" />
-                        <Text fill="#d8d8d8" layoutX="342.0" layoutY="50.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Player Settings" AnchorPane.rightAnchor="220.087890625" />
-                        <Text fill="#d8d8d8" layoutX="340.0" layoutY="248.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Voice" AnchorPane.rightAnchor="270.791015625" />
-                        <Text fill="#d8d8d8" layoutX="341.0" layoutY="419.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Speaker" AnchorPane.rightAnchor="256.77734375" />
-                        <Text fill="#d8d8d8" layoutX="341.0" layoutY="456.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Volume" AnchorPane.rightAnchor="258.20703125" />
-                        <Text fill="#d8d8d8" layoutX="340.0" layoutY="382.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="PoE Path" AnchorPane.rightAnchor="253.20703125" />
-                        <TextField fx:id="poePath" layoutX="415.0" layoutY="365.0" prefHeight="25.0" prefWidth="175.0" AnchorPane.rightAnchor="50.0" />
-                        <CheckBox fx:id="voiceReadAFK" layoutX="341.0" layoutY="278.0" mnemonicParsing="false" selected="true" text="Notify on going AFK" AnchorPane.rightAnchor="170.0" />
+                        <Text fill="#d8d8d8" layoutX="300.0" layoutY="50.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Player Settings" AnchorPane.rightAnchor="202.60986328125" />
                         <Button fx:id="restoreCurrencyFilterBtn" layoutX="50.0" layoutY="346.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="200.0" text="Restore Defaults" AnchorPane.leftAnchor="50.0" />
-                        <CheckBox fx:id="voiceRandom" layoutX="341.0" layoutY="258.0" mnemonicParsing="false" selected="true" text="Randomize Messages" AnchorPane.rightAnchor="163.0" />
+                        <AnchorPane layoutX="300.0" layoutY="238.0" maxWidth="1.7976931348623157E308" prefHeight="267.0" AnchorPane.rightAnchor="50.0">
+                           <children>
+                              <CheckBox fx:id="voiceReadChat" layoutY="50.0" mnemonicParsing="false" selected="true" text="Read Chat Messages" />
+                              <CheckBox fx:id="voiceReadCurOffers" layoutY="75.0" mnemonicParsing="false" selected="true" text="Read Currency Offer PM" />
+                              <CheckBox fx:id="voiceReadTradeOffers" layoutY="100.0" mnemonicParsing="false" selected="true" text="Read Trade Offers PM" />
+                              <CheckBox fx:id="voiceReadAFK" layoutY="125.0" mnemonicParsing="false" selected="true" text="Notify on going AFK" />
+                              <CheckBox fx:id="voiceRandom" layoutY="25.0" mnemonicParsing="false" selected="true" text="Randomize Messages" />
+                              <CheckBox fx:id="voiceActive" layoutX="181.0" mnemonicParsing="false" text="Active" AnchorPane.rightAnchor="0.0" />
+                              <Text fill="#d8d8d8" layoutY="10.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Voice" />
+                              <ComboBox fx:id="speakerCB" layoutX="93.0" layoutY="200.0" prefHeight="25.0" prefWidth="175.0" />
+                              <Slider fx:id="volumeSlider" layoutX="93.0" layoutY="248.0" prefHeight="14.0" prefWidth="145.0" value="100.0" />
+                              <Label fx:id="volumeLabel" layoutX="242.0" layoutY="246.0" text="100" />
+                              <Text fill="#d8d8d8" layoutX="2.0" layoutY="220.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Speaker" />
+                              <Text fill="#d8d8d8" layoutY="260.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Volume" />
+                              <Text fill="#d8d8d8" layoutY="180.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="PoE Path" />
+                              <TextField fx:id="poePath" layoutX="93.0" layoutY="160.0" prefHeight="25.0" prefWidth="175.0" />
+                           </children>
+                        </AnchorPane>
+                        <CheckBox fx:id="autoUpdate" layoutX="52.0" layoutY="473.0" mnemonicParsing="false" text="Auto Update" />
                      </children>
                   </AnchorPane>
                </content>
@@ -102,7 +148,7 @@
          <children>
             <Label maxHeight="1.7976931348623157E308" text="Flip currency" textAlignment="CENTER">
                <HBox.margin>
-                  <Insets right="20.0" />
+                  <Insets left="5.0" right="10.0" />
                </HBox.margin>
             </Label>
             <ComboBox fx:id="primaryComboBox" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" BorderPane.alignment="CENTER" HBox.hgrow="ALWAYS" />
@@ -118,16 +164,19 @@
             </CheckBox>
          </children>
          <VBox.margin>
-            <Insets bottom="5.0" left="22.0" right="22.0" top="5.0" />
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
          </VBox.margin>
       </HBox>
       <HBox prefHeight="40.0" prefWidth="640.0" VBox.vgrow="NEVER">
          <children>
-            <Button id="updateButton" fx:id="updateButton" defaultButton="true" minWidth="100.0" mnemonicParsing="false" prefHeight="73.0" prefWidth="70.0" text="Update">
+            <VBox prefHeight="200.0" prefWidth="250.0">
+               <children>
+                  <Button id="updateButton" fx:id="updateButton" defaultButton="true" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="73.0" text="Update" />
+               </children>
                <HBox.margin>
                   <Insets left="5.0" right="5.0" />
                </HBox.margin>
-            </Button>
+            </VBox>
             <TextArea fx:id="console" editable="false" maxWidth="1.7976931348623157E308" nodeOrientation="LEFT_TO_RIGHT" prefHeight="0.0" promptText="Status console" wrapText="true" HBox.hgrow="ALWAYS" />
             <Label fx:id="version" alignment="CENTER" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" minWidth="50.0" text="Version" textAlignment="CENTER" textOverrun="CLIP">
                <HBox.margin>

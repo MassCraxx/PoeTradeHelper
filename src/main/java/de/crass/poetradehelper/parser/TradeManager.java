@@ -334,4 +334,8 @@ public class TradeManager implements ParseListener {
     public Float getCurrencyValue(CurrencyID what, CurrencyID inWhat){
         return poeNinjaParser.getCurrentValue(what, inWhat);
     }
+
+    public HashMap<CurrencyID, Float> getCurrencyValues(){
+        return poeNinjaParser.getCurrentRates();
+    }
 }

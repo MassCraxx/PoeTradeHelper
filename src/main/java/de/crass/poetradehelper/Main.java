@@ -11,6 +11,8 @@ import de.crass.poetradehelper.ui.MarketCell;
 import de.crass.poetradehelper.ui.PlayerTradeCell;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleFloatProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -124,6 +126,33 @@ public class Main extends Application implements ParseListener {
     @FXML
     private TextField poePath;
 
+    @FXML
+    private TableView<Map.Entry<CurrencyID, Float>> valueTable;
+
+    @FXML
+    private Button updateValuesButton;
+
+    @FXML
+    private Button updatePlayerButton;
+
+    @FXML
+    private TextField valueInputText;
+
+    @FXML
+    private TextField valueOutputText;
+
+    @FXML
+    private ComboBox<CurrencyID> valueInputCB;
+
+    @FXML
+    private ComboBox<CurrencyID> valueOutputCB;
+
+    @FXML
+    private Button convertButton;
+
+    @FXML
+    private CheckBox autoUpdate;
+
     private static Stage currentStage;
 
     private TradeManager tradeManager;
@@ -131,7 +160,7 @@ public class Main extends Application implements ParseListener {
     private static PoeChatTTS poeChatTTS;
 
     private Timer updateTimer;
-    private int updateDelay = 1000 * 60 * 5;
+    private int updateDelay = 1000 * 60 * 5; // 5 minutes
 
     private boolean currencyFilterChanged = false;
 
@@ -142,9 +171,9 @@ public class Main extends Application implements ParseListener {
     @Override
     public void start(Stage primaryStage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("layout.fxml"));
-        Scene scene = new Scene(root, 640, 650);
+        Scene scene = new Scene(root, 650, 650);
         scene.getStylesheets().add(getClass().getResource("stylesheet.css").toExternalForm());
-        primaryStage.setMinWidth(580);
+        primaryStage.setMinWidth(640);
         primaryStage.setMinHeight(225);
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -220,17 +249,127 @@ public class Main extends Application implements ParseListener {
         updateButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                if(tradeManager.isUpdating()){
+                if(updateTimer != null){
+                    stopUpdateTimer();
+                    startUpdateTimer();
+                }
+                if (tradeManager.isUpdating()) {
                     tradeManager.cancelUpdate();
                     updateButton.setDisable(true);
-                } else{
+                    updatePlayerButton.setDisable(true);
+                } else {
                     tradeManager.updateOffers(currencyFilterChanged);
+                    updatePlayerButton.setDisable(true);
                 }
             }
         });
 
-        // SETTINGS
+        updatePlayerButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                if(updateTimer != null){
+                    stopUpdateTimer();
+                    startUpdateTimer();
+                }
+                if (tradeManager.isUpdating()) {
+                    tradeManager.cancelUpdate();
+                    updateButton.setDisable(true);
+                    updatePlayerButton.setDisable(true);
+                } else {
+                    tradeManager.updatePlayerOffers();
+                    updateButton.setDisable(true);
+                }
+            }
+        });
+
+        // Value Tab
+        valueTable.setRowFactory(tv -> new TableRow<Map.Entry<CurrencyID, Float>>() {
+            @Override
+            public void updateItem(Map.Entry<CurrencyID, Float> item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item != null && PropertyManager.getInstance().getPrimaryCurrency().equals(item.getKey())) {
+                    setStyle("-fx-background-color: -fx-accent;");
+                } else {
+                    setStyle("");
+                }
+            }
+        });
+
+        TableColumn<Map.Entry<CurrencyID, Float>, String> column = new TableColumn<>();
+        column.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Map.Entry<CurrencyID, Float>, String>, ObservableValue<String>>() {
+            @Override
+            public ObservableValue<String> call(TableColumn.CellDataFeatures<Map.Entry<CurrencyID, Float>, String> param) {
+                return new SimpleStringProperty(param.getValue().getKey().toString());
+            }
+        });
+
+        TableColumn<Map.Entry<CurrencyID, Float>, Number> column2 = new TableColumn<>();
+        column2.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Map.Entry<CurrencyID, Float>, Number>, ObservableValue<Number>>() {
+            @Override
+            public ObservableValue<Number> call(TableColumn.CellDataFeatures<Map.Entry<CurrencyID, Float>, Number> param) {
+                return new SimpleFloatProperty(param.getValue().getValue());
+            }
+        });
+        column.setText("Currency");
+        column.setPrefWidth(100);
+        column.setMaxWidth(100);
+        column2.setText("Value in C");
+        column2.setPrefWidth(100);
+        column2.setMaxWidth(100);
+        column2.setStyle("-fx-alignment: CENTER-RIGHT;");
+
+        valueTable.getColumns().clear();
+        valueTable.getColumns().addAll(column, column2);
+
+        //FIXME: Dont create new lists all the time... also refresh on league change
+        valueTable.setItems(FXCollections.observableArrayList(tradeManager.getCurrencyValues().entrySet()));
+
+        updateValuesButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                tradeManager.updateCurrencyValues();
+                valueTable.setItems(FXCollections.observableArrayList(tradeManager.getCurrencyValues().entrySet()));
+                valueTable.refresh();
+            }
+        });
+
         ObservableList<CurrencyID> currencyList = FXCollections.observableArrayList(CurrencyID.values());
+        valueInputCB.setItems(currencyList);
+        valueInputCB.setValue(CurrencyID.EXALTED);
+        valueOutputCB.setItems(currencyList);
+        valueOutputCB.setValue(CurrencyID.CHAOS);
+        valueOutputCB.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                calculateValue();
+            }
+        });
+        valueInputCB.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                calculateValue();
+            }
+        });
+
+        valueInputText.setOnKeyTyped(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                // FIXME: Handle text input
+//                calculateValue(event.getCharacter());
+                valueOutputText.setText("");
+            }
+        });
+
+        convertButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                calculateValue();
+            }
+        });
+
+        calculateValue();
+
+        // SETTINGS
         primaryComboBox.setItems(currencyList);
         primaryComboBox.setValue(PropertyManager.getInstance().getPrimaryCurrency());
         primaryComboBox.setOnAction(new EventHandler<ActionEvent>() {
@@ -267,7 +406,7 @@ public class Main extends Application implements ParseListener {
             @Override
             public void handle(ActionEvent event) {
                 CurrencyID newCurrency = currencyFilterCB.getValue();
-                if(newCurrency != null) {
+                if (newCurrency != null) {
                     List<CurrencyID> filterList = PropertyManager.getInstance().getFilterList();
                     if (!filterList.contains(newCurrency)) {
                         currencyFilterChanged = true;
@@ -281,7 +420,7 @@ public class Main extends Application implements ParseListener {
             @Override
             public void handle(ActionEvent event) {
                 CurrencyID focus = currencyFilterList.getFocusModel().getFocusedItem();
-                if(focus != null) {
+                if (focus != null) {
                     currencyFilterChanged = true;
                     PropertyManager.getInstance().getFilterList().remove(focus);
                 }
@@ -442,7 +581,41 @@ public class Main extends Application implements ParseListener {
                     PropertyManager.getInstance().setPathOfExilePath(newPath);
                 }
             });
+
+            // Auto Update checkbox
+            autoUpdate.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    if(autoUpdate.isSelected()) {
+                        startUpdateTimer();
+                    } else{
+                        stopUpdateTimer();
+                    }
+                }
+            });
         }
+    }
+
+    private void calculateValue(){
+        calculateValue(null);
+    }
+
+    private void calculateValue(String newText) {
+        String inString = valueInputText.getText();
+        if(newText != null){
+            inString += newText;
+        }
+
+        String result = "0";
+        if (inString != null && !inString.isEmpty()) {
+            try {
+                float inAmount = Float.parseFloat(inString);
+                result = prettyFloat(inAmount * tradeManager.getCurrencyValue(valueInputCB.getValue(), valueOutputCB.getValue()));
+            } catch (NumberFormatException ignored) {
+
+            }
+        }
+        valueOutputText.setText(result);
     }
 
     private void setDisableVoiceControls() {
@@ -471,6 +644,7 @@ public class Main extends Application implements ParseListener {
         playerDealList.setPlaceholder(new Label("Updating..."));
 
         updateButton.setText("Cancel");
+        updatePlayerButton.setText("Cancel");
     }
 
     @Override
@@ -478,8 +652,10 @@ public class Main extends Application implements ParseListener {
         currencyList.setPlaceholder(new Label("No deals to show."));
         playerDealList.setPlaceholder(new Label("No deals to show. Is your player set in settings?"));
 
-        updateButton.setText("Update");
+        updateButton.setText("Update All");
+        updatePlayerButton.setText("Update Player");
         updateButton.setDisable(false);
+        updatePlayerButton.setDisable(false);
 
         currencyFilterChanged = false;
     }
@@ -488,7 +664,7 @@ public class Main extends Application implements ParseListener {
         if (in == 0) {
             return "---";
         }
-        DecimalFormat df = new DecimalFormat("#.##");
+        DecimalFormat df = new DecimalFormat("0.##");
         df.setRoundingMode(RoundingMode.HALF_UP);
         return String.valueOf(df.format(in));
     }
@@ -519,16 +695,19 @@ public class Main extends Application implements ParseListener {
         return result.toString();
     }
 
+    TimerTask updateTask = new TimerTask() {
+        @Override
+        public void run() {
+            LogManager.getInstance().log(getClass(), "Invoke Automatic Update");
+            TradeManager.getInstance().updateOffers(currencyFilterChanged);
+        }
+};
+
+    //FIXME: Timer leaks thread
     private void startUpdateTimer() {
-        if(updateTimer == null) {
+        if (updateTimer == null) {
             updateTimer = new Timer("poeTradeHelperUpdateTimer");
-            updateTimer.scheduleAtFixedRate(new TimerTask() {
-                @Override
-                public void run() {
-                    LogManager.getInstance().log(getClass(), "Invoke Automatic Update");
-                    TradeManager.getInstance().updateOffers(currencyFilterChanged);
-                }
-            }, updateDelay, updateDelay);
+            updateTimer.scheduleAtFixedRate(updateTask, updateDelay, updateDelay);
         }
     }
 
@@ -536,6 +715,7 @@ public class Main extends Application implements ParseListener {
         if (updateTimer != null) {
             updateTimer.cancel();
             updateTimer = null;
+            updateTask.cancel();
         }
     }
 }
