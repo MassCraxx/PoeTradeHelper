@@ -4,6 +4,7 @@ package de.crass.poetradehelper;/**
 
 import de.crass.poetradehelper.model.CurrencyDeal;
 import de.crass.poetradehelper.model.CurrencyID;
+import de.crass.poetradehelper.model.CurrencyOffer;
 import de.crass.poetradehelper.parser.ParseListener;
 import de.crass.poetradehelper.parser.TradeManager;
 import de.crass.poetradehelper.tts.PoeChatTTS;
@@ -40,7 +41,7 @@ import java.util.*;
 public class Main extends Application implements ParseListener {
 
     public static final String title = "PoeTradeHelper";
-    public static final String versionText = "v0.3.1-SNAPSHOT";
+    public static final String versionText = "v0.4-SNAPSHOT";
 
     @FXML
     private ListView<CurrencyDeal> playerDealList;
@@ -132,8 +133,8 @@ public class Main extends Application implements ParseListener {
     @FXML
     private Button updateValuesButton;
 
-    @FXML
-    private Button updatePlayerButton;
+//    @FXML
+//    private Button updatePlayerButton;
 
     @FXML
     private TextField valueInputText;
@@ -152,6 +153,15 @@ public class Main extends Application implements ParseListener {
 
     @FXML
     private CheckBox autoUpdate;
+
+    @FXML
+    private TableView<CurrencyOffer> buyOfferTable;
+
+    @FXML
+    private TableView<CurrencyOffer> sellOfferTable;
+
+    @FXML
+    private ComboBox<CurrencyID> offerSecondary;
 
     private static Stage currentStage;
 
@@ -256,28 +266,103 @@ public class Main extends Application implements ParseListener {
                 if (tradeManager.isUpdating()) {
                     tradeManager.cancelUpdate();
                     updateButton.setDisable(true);
-                    updatePlayerButton.setDisable(true);
+//                    updatePlayerButton.setDisable(true);
                 } else {
                     tradeManager.updateOffers(currencyFilterChanged);
-                    updatePlayerButton.setDisable(true);
+//                    updatePlayerButton.setDisable(true);
                 }
             }
         });
 
-        updatePlayerButton.setOnAction(new EventHandler<ActionEvent>() {
+//        updatePlayerButton.setOnAction(new EventHandler<ActionEvent>() {
+//            @Override
+//            public void handle(ActionEvent event) {
+//                if(updateTimer != null){
+//                    stopUpdateTimer();
+//                    startUpdateTimer();
+//                }
+//                if (tradeManager.isUpdating()) {
+//                    tradeManager.cancelUpdate();
+//                    updateButton.setDisable(true);
+//                    updatePlayerButton.setDisable(true);
+//                } else {
+//                    tradeManager.updatePlayerOffers();
+//                    updateButton.setDisable(true);
+//                }
+//            }
+//        });
+
+        // Offer tab
+
+        Callback<TableColumn.CellDataFeatures<CurrencyOffer, Number>, ObservableValue<Number>> stockCellFactory =
+                new Callback<TableColumn.CellDataFeatures<CurrencyOffer, Number>, ObservableValue<Number>>() {
+                    @Override
+                    public ObservableValue<Number> call(TableColumn.CellDataFeatures<CurrencyOffer, Number> param) {
+                        int stock = param.getValue().getStock();
+                        if(stock < 0){
+                            return null;
+                        }
+                        return new SimpleFloatProperty(stock);
+                    }
+                };
+
+        Callback<TableColumn.CellDataFeatures<CurrencyOffer, String>, ObservableValue<String>> playerCellFactory =
+                new Callback<TableColumn.CellDataFeatures<CurrencyOffer, String>, ObservableValue<String>>() {
+                    @Override
+                    public ObservableValue<String> call(TableColumn.CellDataFeatures<CurrencyOffer, String> param) {
+                        return new SimpleStringProperty(param.getValue().getPlayerName());
+                    }
+                };
+
+        TableColumn<CurrencyOffer, Number> valueColumn = new TableColumn<>();
+        valueColumn.setText("Amount");
+        valueColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<CurrencyOffer, Number>, ObservableValue<Number>>() {
+            @Override
+            public ObservableValue<Number> call(TableColumn.CellDataFeatures<CurrencyOffer, Number> param) {
+                return new SimpleFloatProperty(param.getValue().getBuyAmount());
+            }
+        });
+
+        TableColumn<CurrencyOffer, Number> stockColumn = new TableColumn<>();
+        stockColumn.setText("Stock");
+        stockColumn.setCellValueFactory(stockCellFactory);
+
+        TableColumn<CurrencyOffer, String> playerColumn = new TableColumn<>();
+        playerColumn.setText("Playername");
+        playerColumn.setCellValueFactory(playerCellFactory);
+
+        buyOfferTable.getColumns().clear();
+        buyOfferTable.getColumns().addAll(valueColumn, stockColumn, playerColumn);
+
+        // Sell table
+        TableColumn<CurrencyOffer, Number> sellValueColumn = new TableColumn<>();
+        sellValueColumn.setText("Amount");
+        sellValueColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<CurrencyOffer, Number>, ObservableValue<Number>>() {
+            @Override
+            public ObservableValue<Number> call(TableColumn.CellDataFeatures<CurrencyOffer, Number> param) {
+                return new SimpleFloatProperty(param.getValue().getSellAmount());
+            }
+        });
+
+        TableColumn<CurrencyOffer, Number> sellStockColumn = new TableColumn<>();
+        sellStockColumn.setText("Stock");
+        sellStockColumn.setCellValueFactory(stockCellFactory);
+
+        TableColumn<CurrencyOffer, String> sellPlayerColumn = new TableColumn<>();
+        sellPlayerColumn.setText("Playername");
+        sellPlayerColumn.setCellValueFactory(playerCellFactory);
+
+        sellOfferTable.getColumns().clear();
+        sellOfferTable.getColumns().addAll(sellValueColumn, sellStockColumn, sellPlayerColumn);
+
+        offerSecondary.setItems(PropertyManager.getInstance().getFilterList());
+        offerSecondary.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                if(updateTimer != null){
-                    stopUpdateTimer();
-                    startUpdateTimer();
-                }
-                if (tradeManager.isUpdating()) {
-                    tradeManager.cancelUpdate();
-                    updateButton.setDisable(true);
-                    updatePlayerButton.setDisable(true);
-                } else {
-                    tradeManager.updatePlayerOffers();
-                    updateButton.setDisable(true);
+                CurrencyID newValue = offerSecondary.getValue();
+                if(newValue != null) {
+                    buyOfferTable.setItems(tradeManager.getBuyOffers(newValue));
+                    sellOfferTable.setItems(tradeManager.getSellOffers(newValue));
                 }
             }
         });
@@ -593,6 +678,10 @@ public class Main extends Application implements ParseListener {
                     }
                 }
             });
+
+            if(PropertyManager.getInstance().getProp("DEBUG", null) == null){
+                autoUpdate.setDisable(true);
+            }
         }
     }
 
@@ -644,7 +733,7 @@ public class Main extends Application implements ParseListener {
         playerDealList.setPlaceholder(new Label("Updating..."));
 
         updateButton.setText("Cancel");
-        updatePlayerButton.setText("Cancel");
+//        updatePlayerButton.setText("Cancel");
     }
 
     @Override
@@ -653,9 +742,9 @@ public class Main extends Application implements ParseListener {
         playerDealList.setPlaceholder(new Label("No deals to show. Is your player set in settings?"));
 
         updateButton.setText("Update All");
-        updatePlayerButton.setText("Update Player");
         updateButton.setDisable(false);
-        updatePlayerButton.setDisable(false);
+//        updatePlayerButton.setText("Update Player");
+//        updatePlayerButton.setDisable(false);
 
         currencyFilterChanged = false;
     }
@@ -714,6 +803,7 @@ public class Main extends Application implements ParseListener {
     private void stopUpdateTimer() {
         if (updateTimer != null) {
             updateTimer.cancel();
+            updateTimer.purge();
             updateTimer = null;
             updateTask.cancel();
         }

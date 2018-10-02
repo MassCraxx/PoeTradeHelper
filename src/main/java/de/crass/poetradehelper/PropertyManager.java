@@ -120,6 +120,7 @@ public class PropertyManager {
 
         appProps.setProperty(FILTER_NOAPI, String.valueOf(filterNoApi));
         appProps.setProperty(FILTER_OUTOFSTOCK, String.valueOf(filterOutOfStock));
+        appProps.setProperty(FILTER_EXCESSIVE, String.valueOf(filterExcessive));
 
         try {
             appProps.store(new FileWriter(propFilename), "PoeTradeHelper Properties");

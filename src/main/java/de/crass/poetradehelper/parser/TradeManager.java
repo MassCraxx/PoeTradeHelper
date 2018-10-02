@@ -338,4 +338,12 @@ public class TradeManager implements ParseListener {
     public HashMap<CurrencyID, Float> getCurrencyValues(){
         return poeNinjaParser.getCurrentRates();
     }
+
+    public ObservableList<CurrencyOffer> getBuyOffers(CurrencyID secondary) {
+        return (ObservableList<CurrencyOffer>) webParser.getCurrentOffers().get(new Pair<>(secondary, PropertyManager.getInstance().getPrimaryCurrency()));
+    }
+
+    public ObservableList<CurrencyOffer> getSellOffers(CurrencyID secondary) {
+        return (ObservableList<CurrencyOffer>) webParser.getCurrentOffers().get(new Pair<>(PropertyManager.getInstance().getPrimaryCurrency(), secondary));
+    }
 }

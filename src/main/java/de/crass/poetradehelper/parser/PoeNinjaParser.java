@@ -38,9 +38,9 @@ public class PoeNinjaParser {
                 try {
                     LogManager.getInstance().log(getClass(), "Loading poe.ninja currency values from cache.");
                     currentRates = objectMapper.readValue(file, typeRef);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    currentRates = new HashMap<>();
+                } catch (Exception e) {
+                    LogManager.getInstance().log(getClass(), "Error loading poe.ninja values from cache.");
+                    fetchRates(league, true);
                 }
             }
         } else {
@@ -84,11 +84,11 @@ public class PoeNinjaParser {
                 }
             }
 
-            if (!currentRates.isEmpty()) {
+            if (!currentRates.isEmpty() && file.canWrite()) {
                 try {
                     objectMapper.writeValue(file, currentRates);
-                } catch (IOException e) {
-                    LogManager.getInstance().log(getClass(), "Writing ninja cache failed.\n" + e);
+                } catch (Exception e) {
+                    LogManager.getInstance().log(getClass(), "Writing ninja cache failed!\n" + e);
                 }
             }
         }

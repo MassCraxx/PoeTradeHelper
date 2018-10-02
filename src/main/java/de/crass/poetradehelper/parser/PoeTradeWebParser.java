@@ -7,6 +7,8 @@ import de.crass.poetradehelper.model.CurrencyID;
 import de.crass.poetradehelper.model.CurrencyOffer;
 import de.crass.poetradehelper.web.HttpManager;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.util.Pair;
 
 import java.awt.*;
@@ -214,9 +216,9 @@ public class PoeTradeWebParser {
             offers.add(offer);
             playerOffers.put(key, offers);
         } else {
-            List<CurrencyOffer> offers = currentOffers.get(key);
+            ObservableList<CurrencyOffer> offers = (ObservableList<CurrencyOffer>) currentOffers.get(key);
             if (offers == null) {
-                offers = new LinkedList<>();
+                offers = FXCollections.observableArrayList();
             }
             offers.add(offer);
             currentOffers.put(key, offers);
