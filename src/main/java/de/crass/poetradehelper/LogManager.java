@@ -27,8 +27,12 @@ public class LogManager {
     }
 
     public void log(Class clazz, String log) {
+        log(clazz.getSimpleName(), log);
+    }
+
+    public void log(String clazz, String log) {
         String timestamp = '>' + getTime() + '<';
-        String consoleLog = timestamp + ' ' + '[' + clazz.getSimpleName() + ']' + ' ' + log;
+        String consoleLog = timestamp + ' ' + '[' + clazz + ']' + ' ' + log;
         System.out.println(consoleLog);
 
         String msg = timestamp + ' ' + log;

@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.concurrent.*;
 
 public class Main extends Application implements ParseListener {
 
@@ -164,13 +165,10 @@ public class Main extends Application implements ParseListener {
     private ComboBox<CurrencyID> offerSecondary;
 
     private static Stage currentStage;
+    private static PoeChatTTS poeChatTTS;
+    private static ScheduledExecutorService autoUpdateExecutor;
 
     private TradeManager tradeManager;
-
-    private static PoeChatTTS poeChatTTS;
-
-    private Timer updateTimer;
-    private int updateDelay = 1000 * 60 * 5; // 5 minutes
 
     private boolean currencyFilterChanged = false;
 
@@ -259,9 +257,8 @@ public class Main extends Application implements ParseListener {
         updateButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                if(updateTimer != null){
+                if(autoUpdateExecutor != null){
                     stopUpdateTimer();
-                    startUpdateTimer();
                 }
                 if (tradeManager.isUpdating()) {
                     tradeManager.cancelUpdate();
@@ -279,7 +276,7 @@ public class Main extends Application implements ParseListener {
 //            public void handle(ActionEvent event) {
 //                if(updateTimer != null){
 //                    stopUpdateTimer();
-//                    startUpdateTimer();
+//                    startUpdateTask();
 //                }
 //                if (tradeManager.isUpdating()) {
 //                    tradeManager.cancelUpdate();
@@ -672,16 +669,12 @@ public class Main extends Application implements ParseListener {
                 @Override
                 public void handle(ActionEvent event) {
                     if(autoUpdate.isSelected()) {
-                        startUpdateTimer();
+                        startUpdateTask();
                     } else{
                         stopUpdateTimer();
                     }
                 }
             });
-
-            if(PropertyManager.getInstance().getProp("DEBUG", null) == null){
-                autoUpdate.setDisable(true);
-            }
         }
     }
 
@@ -747,6 +740,10 @@ public class Main extends Application implements ParseListener {
 //        updatePlayerButton.setDisable(false);
 
         currencyFilterChanged = false;
+
+        if(autoUpdate.isSelected()){
+            startUpdateTask();
+        }
     }
 
     public static String prettyFloat(float in) {
@@ -784,28 +781,25 @@ public class Main extends Application implements ParseListener {
         return result.toString();
     }
 
-    TimerTask updateTask = new TimerTask() {
-        @Override
-        public void run() {
-            LogManager.getInstance().log(getClass(), "Invoke Automatic Update");
-            TradeManager.getInstance().updateOffers(currencyFilterChanged);
+    private void startUpdateTask() {
+        if (autoUpdateExecutor == null) {
+            autoUpdateExecutor = Executors.newSingleThreadScheduledExecutor();
         }
-};
+        int updateDelay = PropertyManager.getInstance().getUpdateDelay();
+        autoUpdateExecutor.schedule(new Runnable() {
+            @Override
+            public void run() {
+                LogManager.getInstance().log("AutoUpdate", "Invoke Automatic Update");
+                TradeManager.getInstance().updateOffers(currencyFilterChanged, false);
+            }
+        }, updateDelay, TimeUnit.SECONDS);
 
-    //FIXME: Timer leaks thread
-    private void startUpdateTimer() {
-        if (updateTimer == null) {
-            updateTimer = new Timer("poeTradeHelperUpdateTimer");
-            updateTimer.scheduleAtFixedRate(updateTask, updateDelay, updateDelay);
-        }
     }
 
     private void stopUpdateTimer() {
-        if (updateTimer != null) {
-            updateTimer.cancel();
-            updateTimer.purge();
-            updateTimer = null;
-            updateTask.cancel();
+        if(autoUpdateExecutor != null) {
+            autoUpdateExecutor.shutdown();
+            autoUpdateExecutor = null;
         }
     }
 }

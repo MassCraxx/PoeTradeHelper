@@ -66,8 +66,12 @@ public class TradeManager implements ParseListener {
         return instance;
     }
 
-    public void updateOffers(boolean clear) {
-        webParser.updateCurrencies(PropertyManager.getInstance().getFilterList(), clear);
+    public void updateOffers(boolean clear){
+        updateOffers(clear, true);
+    }
+
+    public void updateOffers(boolean clear, boolean async) {
+        webParser.updateCurrencies(PropertyManager.getInstance().getFilterList(), clear, async);
     }
 
     public void updatePlayerOffers(){

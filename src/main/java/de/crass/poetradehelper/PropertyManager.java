@@ -41,6 +41,7 @@ public class PropertyManager {
     public static final String VOICE_SPEAKER = "voice_speaker";
     public static final String VOICE_AFK = "voice_read_afk";
     public static final String VOICE_RANDOMIZE = "voice_randomize_messages";
+    public static final String UPDATE_DELAY_MINUTES = "update_delay_minutes";
 
     // DEFAULTS
     private final String defaultLeague = "Standard";
@@ -70,6 +71,7 @@ public class PropertyManager {
     private boolean filterNoApi;
     private boolean filterOutOfStock;
     private boolean filterExcessive;
+    private int updateDelay;
 
     private PropertyManager() {
         loadProperties();
@@ -93,6 +95,8 @@ public class PropertyManager {
             filterNoApi = Boolean.parseBoolean(appProps.getProperty(FILTER_NOAPI));
             filterOutOfStock = Boolean.parseBoolean(appProps.getProperty(FILTER_OUTOFSTOCK));
             filterExcessive = Boolean.parseBoolean(appProps.getProperty(FILTER_EXCESSIVE));
+
+            updateDelay = Integer.parseInt(appProps.getProperty(UPDATE_DELAY_MINUTES, "5"));
 
         } catch (IOException e) {
             loadDefaults();
@@ -121,6 +125,8 @@ public class PropertyManager {
         appProps.setProperty(FILTER_NOAPI, String.valueOf(filterNoApi));
         appProps.setProperty(FILTER_OUTOFSTOCK, String.valueOf(filterOutOfStock));
         appProps.setProperty(FILTER_EXCESSIVE, String.valueOf(filterExcessive));
+
+        appProps.setProperty(UPDATE_DELAY_MINUTES, String.valueOf(updateDelay));
 
         try {
             appProps.store(new FileWriter(propFilename), "PoeTradeHelper Properties");
@@ -267,4 +273,11 @@ public class PropertyManager {
         currencyFilterList.addAll(defaultCurrencyFilterList);
     }
 
+    public int getUpdateDelay() {
+        return updateDelay;
+    }
+
+    public void setUpdateDelay(int updateDelay) {
+        this.updateDelay = updateDelay;
+    }
 }

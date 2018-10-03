@@ -145,7 +145,7 @@
                                         <TextField fx:id="poePath" layoutX="93.0" layoutY="160.0" prefHeight="25.0" prefWidth="175.0" />
                                     </children>
                                 </AnchorPane>
-                                <CheckBox fx:id="autoUpdate" layoutX="52.0" layoutY="473.0" mnemonicParsing="false" text="Auto Update" />
+                                <CheckBox fx:id="autoUpdate" layoutX="52.0" layoutY="473.0" mnemonicParsing="false" text="Auto Update 5min" />
                             </children>
                         </AnchorPane>
                     </content>
