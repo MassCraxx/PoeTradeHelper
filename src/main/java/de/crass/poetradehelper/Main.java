@@ -785,7 +785,7 @@ public class Main extends Application implements ParseListener {
         if (autoUpdateExecutor == null) {
             autoUpdateExecutor = Executors.newSingleThreadScheduledExecutor();
         }
-        int updateDelay = PropertyManager.getInstance().getUpdateDelay();
+        int updateDelay = PropertyManager.getInstance().getUpdateDelay() * 60;
         autoUpdateExecutor.schedule(new Runnable() {
             @Override
             public void run() {
