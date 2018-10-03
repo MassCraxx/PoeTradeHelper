@@ -793,12 +793,11 @@ public class Main extends Application implements ParseListener {
                 TradeManager.getInstance().updateOffers(currencyFilterChanged, false);
             }
         }, updateDelay, TimeUnit.SECONDS);
-
     }
 
     private void stopUpdateTimer() {
         if(autoUpdateExecutor != null) {
-            autoUpdateExecutor.shutdown();
+            autoUpdateExecutor.shutdownNow();
             autoUpdateExecutor = null;
         }
     }
