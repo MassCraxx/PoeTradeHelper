@@ -46,7 +46,7 @@ public class PropertyManager {
     // DEFAULTS
     private final String defaultLeague = "Standard";
     private final CurrencyID defaultPrimary = EXALTED;
-    private final String defaultPoePath = "G:\\Steam\\SteamApps\\common\\Path of Exile";
+    private final String defaultPoePath = "C:\\Program Files (x86)\\Grinding Gear Games\\Path of Exile\\";
 
     public final boolean defaultFilterStockOffers = false;
     public final boolean defaultFilterInvalidStockOffers = true;

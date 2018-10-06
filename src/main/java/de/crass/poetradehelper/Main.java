@@ -29,13 +29,17 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
 import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -230,8 +234,21 @@ public class Main extends Application implements ParseListener {
         LogManager.getInstance().log(getClass(), "Shutdown complete.");
     }
 
+    private int versionClicked = 0;
+    private final String debugSecretValue = "foobar";
     private void setupUI() {
         version.setText(versionText);
+        version.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                versionClicked++;
+                if(versionClicked%10 == 0){
+                    JOptionPane.showMessageDialog(null, "Philly ist ein boon.");
+//                    PropertyManager.getInstance().setProp("DEBUG", debugSecretValue);
+//                    autoUpdate.setDisable(false);
+                }
+            }
+        });
 
         currencyList.setEditable(false);
         currencyList.setCellFactory(new Callback<ListView<CurrencyDeal>, ListCell<CurrencyDeal>>() {
@@ -254,6 +271,7 @@ public class Main extends Application implements ParseListener {
         currencyList.setPlaceholder(new Label("Update to fill lists."));
         playerDealList.setPlaceholder(new Label("Update to fill lists."));
 
+        updateButton.setTooltip(new Tooltip("Fetch offers from poe.trade for currency configured in settings"));
         updateButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -436,9 +454,15 @@ public class Main extends Application implements ParseListener {
         valueInputText.setOnKeyTyped(new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent event) {
-                // FIXME: Handle text input
 //                calculateValue(event.getCharacter());
                 valueOutputText.setText("");
+            }
+        });
+
+        valueOutputText.setOnKeyTyped(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                valueInputText.setText("");
             }
         });
 
@@ -452,6 +476,7 @@ public class Main extends Application implements ParseListener {
         calculateValue();
 
         // SETTINGS
+        primaryComboBox.setTooltip(new Tooltip("Select currency to flip with"));
         primaryComboBox.setItems(currencyList);
         primaryComboBox.setValue(PropertyManager.getInstance().getPrimaryCurrency());
         primaryComboBox.setOnAction(new EventHandler<ActionEvent>() {
@@ -462,6 +487,7 @@ public class Main extends Application implements ParseListener {
             }
         });
 
+        filterInvalid.setTooltip(new Tooltip("Ignore all offers that do have a stock value but not enough on stock to sell"));
         filterInvalid.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -471,6 +497,7 @@ public class Main extends Application implements ParseListener {
         });
         filterInvalid.setSelected(PropertyManager.getInstance().getFilterOutOfStock());
 
+        filterWithoutAPI.setTooltip(new Tooltip("Ignore all offers that don't have stock information"));
         filterWithoutAPI.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -481,9 +508,11 @@ public class Main extends Application implements ParseListener {
         filterWithoutAPI.setSelected(PropertyManager.getInstance().getFilterNoApi());
 
         currencyFilterList.setItems(PropertyManager.getInstance().getFilterList());
+        currencyFilterList.setTooltip(new Tooltip("Only offers for currency in this list will be fetched on update"));
 
         currencyFilterCB.setItems(FXCollections.observableArrayList(CurrencyID.values()));
 
+        addCurrencyFilterBtn.setTooltip(new Tooltip("Add selected currency to list"));
         addCurrencyFilterBtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -498,6 +527,7 @@ public class Main extends Application implements ParseListener {
             }
         });
 
+        removeCurrencyFilterBtn.setTooltip(new Tooltip("Remove selected currency from list"));
         removeCurrencyFilterBtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -509,6 +539,7 @@ public class Main extends Application implements ParseListener {
             }
         });
 
+        restoreCurrencyFilterBtn.setTooltip(new Tooltip("Restore default currency list"));
         restoreCurrencyFilterBtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -518,6 +549,9 @@ public class Main extends Application implements ParseListener {
 
         ObservableList<String> playerList = PropertyManager.getInstance().getPlayerList();
         playerListView.setItems(playerList);
+        playerListView.setTooltip(new Tooltip("Offers from players in this list will be considered player offers and shown in player tab"));
+
+        addPlayerButton.setTooltip(new Tooltip("Add player from TextField to list"));
         addPlayerButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -527,6 +561,7 @@ public class Main extends Application implements ParseListener {
             }
         });
 
+        removePlayerBtn.setTooltip(new Tooltip("Remove selected player from list"));
         removePlayerBtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -534,6 +569,7 @@ public class Main extends Application implements ParseListener {
             }
         });
 
+        leagueCB.setTooltip(new Tooltip("Set Path of Exile league"));
         leagueCB.setItems(tradeManager.getLeagueList());
         leagueCB.setValue(PropertyManager.getInstance().getCurrentLeague());
 
@@ -652,6 +688,7 @@ public class Main extends Application implements ParseListener {
                 }
             });
 
+            volumeLabel.setTooltip(new Tooltip("Set volume of the voice speaker"));
             volumeLabel.setText(String.valueOf(volume));
 
             poePath.setText(PropertyManager.getInstance().getPathOfExilePath());
@@ -663,18 +700,25 @@ public class Main extends Application implements ParseListener {
                     PropertyManager.getInstance().setPathOfExilePath(newPath);
                 }
             });
+        }
 
-            // Auto Update checkbox
-            autoUpdate.setOnAction(new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent event) {
-                    if(autoUpdate.isSelected()) {
-                        startUpdateTask();
-                    } else{
-                        stopUpdateTimer();
-                    }
+        // Auto Update checkbox
+        autoUpdate.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                if(autoUpdate.isSelected()) {
+                    startUpdateTask();
+                } else{
+                    stopUpdateTimer();
                 }
-            });
+            }
+        });
+
+        autoUpdate.setTooltip(new Tooltip("Invoke Update every " + PropertyManager.getInstance().getUpdateDelay() + " minutes."));
+
+        if(!debugSecretValue.equals(PropertyManager.getInstance().getProp("DEBUG", null))){
+            autoUpdate.setDisable(true);
+            autoUpdate.setTooltip(new Tooltip("Experimental - disabled for now."));
         }
     }
 
@@ -684,6 +728,13 @@ public class Main extends Application implements ParseListener {
 
     private void calculateValue(String newText) {
         String inString = valueInputText.getText();
+
+        boolean outputReversed = false;
+        if(inString == null || inString.isEmpty()){
+            inString = valueOutputText.getText();
+            outputReversed = true;
+        }
+
         if(newText != null){
             inString += newText;
         }
@@ -691,16 +742,27 @@ public class Main extends Application implements ParseListener {
         String result = "0";
         if (inString != null && !inString.isEmpty()) {
             try {
-                float inAmount = Float.parseFloat(inString);
-                result = prettyFloat(inAmount * tradeManager.getCurrencyValue(valueInputCB.getValue(), valueOutputCB.getValue()));
-            } catch (NumberFormatException ignored) {
+                DecimalFormat format = new DecimalFormat("0.#");
+                float inAmount = format.parse(inString).floatValue();
+                if(outputReversed){
+                    result = prettyFloat(inAmount * tradeManager.getCurrencyValue(valueOutputCB.getValue(), valueInputCB.getValue()));
+                }else {
+                    result = prettyFloat(inAmount * tradeManager.getCurrencyValue(valueInputCB.getValue(), valueOutputCB.getValue()));
+                }
+            } catch (ParseException ignored) {
 
             }
         }
-        valueOutputText.setText(result);
+
+        if(outputReversed){
+            valueInputText.setText(result);
+        } else {
+            valueOutputText.setText(result);
+        }
     }
 
     private void setDisableVoiceControls() {
+        voiceActive.setTooltip(new Tooltip("Place balcon.exe next to the app to use this feature."));
         voiceActive.setDisable(true);
         voiceReadTradeOffers.setDisable(true);
         voiceReadChat.setDisable(true);
@@ -734,7 +796,7 @@ public class Main extends Application implements ParseListener {
         currencyList.setPlaceholder(new Label("No deals to show."));
         playerDealList.setPlaceholder(new Label("No deals to show. Is your player set in settings?"));
 
-        updateButton.setText("Update All");
+        updateButton.setText("Update");
         updateButton.setDisable(false);
 //        updatePlayerButton.setText("Update Player");
 //        updatePlayerButton.setDisable(false);

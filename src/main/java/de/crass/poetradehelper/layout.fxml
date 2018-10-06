@@ -19,7 +19,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
 
-<VBox prefHeight="650.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.crass.poetradehelper.Main">
+<VBox prefHeight="650.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.crass.poetradehelper.Main">
     <children>
         <TabPane maxHeight="1.7976931348623157E308" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
             <tabs>
@@ -49,7 +49,7 @@
                     <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                             <children>
-                                <ComboBox fx:id="offerSecondary" layoutX="240.0" layoutY="11.0" prefWidth="150.0" AnchorPane.leftAnchor="200.0" AnchorPane.rightAnchor="200.0" AnchorPane.topAnchor="11.0" />
+                                <ComboBox fx:id="offerSecondary" layoutX="240.0" layoutY="11.0" prefWidth="150.0" AnchorPane.leftAnchor="200.0" AnchorPane.rightAnchor="200.0" AnchorPane.topAnchor="10.0" />
                                 <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Buy Offers" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="15.0" />
                                 <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Sell Offers" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="15.0" />
                                 <HBox layoutY="50.0" maxWidth="1.7976931348623157E308" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="50.0">
@@ -88,8 +88,8 @@
                                 <ComboBox fx:id="valueInputCB" layoutX="420.0" layoutY="64.0" prefHeight="31.0" prefWidth="170.0" AnchorPane.rightAnchor="0.0" />
                                 <ComboBox fx:id="valueOutputCB" layoutX="420.0" layoutY="117.0" prefHeight="31.0" prefWidth="170.0" AnchorPane.rightAnchor="0.0" />
                                 <TextField fx:id="valueInputText" layoutX="230.0" layoutY="64.0" prefHeight="31.0" prefWidth="169.0" text="1" AnchorPane.leftAnchor="220.0" AnchorPane.rightAnchor="200.0" />
-                                <TextField fx:id="valueOutputText" editable="false" layoutX="230.0" layoutY="117.0" prefHeight="31.0" prefWidth="169.0" AnchorPane.leftAnchor="220.0" AnchorPane.rightAnchor="200.0" />
-                                <Text fill="#d8d8d8" layoutX="230.0" layoutY="40.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Currency Conversion Calculator" AnchorPane.leftAnchor="220.0" />
+                                <TextField fx:id="valueOutputText" layoutX="230.0" layoutY="117.0" prefHeight="31.0" prefWidth="169.0" text="1" AnchorPane.leftAnchor="220.0" AnchorPane.rightAnchor="200.0" />
+                                <Text fill="#d8d8d8" layoutX="230.0" layoutY="40.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Currency Conversion Calculator" AnchorPane.leftAnchor="220.0" AnchorPane.topAnchor="15.0" />
                                 <Button fx:id="convertButton" layoutX="230.0" layoutY="162.0" mnemonicParsing="false" text="Convert" AnchorPane.leftAnchor="220.0" AnchorPane.rightAnchor="0.0" />
                                 <TableView id="valueTable" fx:id="valueTable" layoutX="10.0" layoutY="20.0" maxWidth="200.0" prefHeight="440.0" prefWidth="200.0" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="10.0">
                                     <columns>
@@ -114,28 +114,17 @@
                     <content>
                         <AnchorPane prefHeight="200.0" prefWidth="200.0">
                             <children>
-                                <ComboBox fx:id="currencyFilterCB" layoutX="32.0" layoutY="61.0" prefHeight="37.0" prefWidth="140.0" AnchorPane.leftAnchor="50.0" />
-                                <ListView fx:id="currencyFilterList" layoutX="32.0" layoutY="104.0" prefHeight="210.0" prefWidth="200.0" AnchorPane.leftAnchor="50.0" />
-                                <Button fx:id="removeCurrencyFilterBtn" layoutX="32.0" layoutY="314.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="200.0" text="Remove" AnchorPane.leftAnchor="50.0" />
-                                <Button fx:id="addPlayerButton" layoutX="493.0" layoutY="61.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="58.0" text="+" AnchorPane.rightAnchor="50.0" />
-                                <ListView fx:id="playerListView" layoutX="358.0" layoutY="104.0" prefHeight="86.0" prefWidth="250.0" AnchorPane.rightAnchor="50.0" />
-                                <TextField fx:id="playerField" layoutX="340.0" layoutY="61.0" prefHeight="37.0" prefWidth="190.0" AnchorPane.rightAnchor="110.0" />
-                                <Button fx:id="addCurrencyFilterBtn" layoutX="195.0" layoutY="61.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="58.0" text="+" AnchorPane.leftAnchor="192.0" />
-                                <Button fx:id="removePlayerBtn" layoutX="358.0" layoutY="190.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="250.0" text="Remove" AnchorPane.rightAnchor="50.0" />
                                 <ComboBox fx:id="leagueCB" layoutX="50.0" layoutY="423.0" prefHeight="25.0" prefWidth="200.0" AnchorPane.leftAnchor="50.0" />
                                 <Text fill="#d8d8d8" layoutX="50.0" layoutY="411.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="League" AnchorPane.leftAnchor="50.0" />
-                                <Text fill="#d8d8d8" layoutX="50.0" layoutY="50.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Currency to check" AnchorPane.leftAnchor="50.0" />
-                                <Text fill="#d8d8d8" layoutX="300.0" layoutY="50.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Player Settings" AnchorPane.rightAnchor="202.60986328125" />
-                                <Button fx:id="restoreCurrencyFilterBtn" layoutX="50.0" layoutY="346.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="200.0" text="Restore Defaults" AnchorPane.leftAnchor="50.0" />
-                                <AnchorPane layoutX="300.0" layoutY="238.0" maxWidth="1.7976931348623157E308" prefHeight="267.0" AnchorPane.rightAnchor="50.0">
+                                <AnchorPane layoutX="300.0" layoutY="238.0" maxWidth="1.7976931348623157E308" prefWidth="270.0" AnchorPane.rightAnchor="50.0">
                                     <children>
-                                        <CheckBox fx:id="voiceReadChat" layoutY="50.0" mnemonicParsing="false" selected="true" text="Read Chat Messages" />
-                                        <CheckBox fx:id="voiceReadCurOffers" layoutY="75.0" mnemonicParsing="false" selected="true" text="Read Currency Offer PM" />
-                                        <CheckBox fx:id="voiceReadTradeOffers" layoutY="100.0" mnemonicParsing="false" selected="true" text="Read Trade Offers PM" />
-                                        <CheckBox fx:id="voiceReadAFK" layoutY="125.0" mnemonicParsing="false" selected="true" text="Notify on going AFK" />
-                                        <CheckBox fx:id="voiceRandom" layoutY="25.0" mnemonicParsing="false" selected="true" text="Randomize Messages" />
+                                        <CheckBox fx:id="voiceReadChat" layoutY="54.0" mnemonicParsing="false" selected="true" text="Read Chat Messages" />
+                                        <CheckBox fx:id="voiceReadCurOffers" layoutY="79.0" mnemonicParsing="false" selected="true" text="Read Currency Offer PM" />
+                                        <CheckBox fx:id="voiceReadTradeOffers" layoutY="104.0" mnemonicParsing="false" selected="true" text="Read Trade Offers PM" />
+                                        <CheckBox fx:id="voiceReadAFK" layoutY="129.0" mnemonicParsing="false" selected="true" text="Notify on going AFK" />
+                                        <CheckBox fx:id="voiceRandom" layoutY="29.0" mnemonicParsing="false" selected="true" text="Randomize Messages" />
                                         <CheckBox fx:id="voiceActive" layoutX="181.0" mnemonicParsing="false" text="Active" AnchorPane.rightAnchor="0.0" />
-                                        <Text fill="#d8d8d8" layoutY="10.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Voice" />
+                                        <Text fill="#d8d8d8" layoutY="10.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Read chat trade requests" AnchorPane.topAnchor="0.0" />
                                         <ComboBox fx:id="speakerCB" layoutX="93.0" layoutY="200.0" prefHeight="25.0" prefWidth="175.0" />
                                         <Slider fx:id="volumeSlider" layoutX="93.0" layoutY="248.0" prefHeight="14.0" prefWidth="145.0" value="100.0" />
                                         <Label fx:id="volumeLabel" layoutX="242.0" layoutY="246.0" text="100" />
@@ -146,6 +135,29 @@
                                     </children>
                                 </AnchorPane>
                                 <CheckBox fx:id="autoUpdate" layoutX="52.0" layoutY="473.0" mnemonicParsing="false" text="Auto Update 5min" />
+                        <AnchorPane layoutX="320.0" layoutY="21.0" prefHeight="200.0" prefWidth="270.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="15.0">
+                           <children>
+                                      <Button fx:id="addPlayerButton" mnemonicParsing="false" prefHeight="37.0" prefWidth="58.0" text="+" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
+                                      <ListView fx:id="playerListView" prefHeight="100.0" prefWidth="270.0" AnchorPane.bottomAnchor="30.0" />
+                                      <TextField fx:id="playerField" prefHeight="37.0" prefWidth="210.0" AnchorPane.topAnchor="30.0" />
+                                      <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Player Settings" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                      <Button fx:id="removePlayerBtn" mnemonicParsing="false" prefHeight="25.0" prefWidth="270.0" text="Remove" AnchorPane.bottomAnchor="0.0" />
+                           </children>
+                        </AnchorPane>
+                        <AnchorPane layoutX="50.0" layoutY="122.0" prefHeight="380.0" prefWidth="200.0" AnchorPane.leftAnchor="50.0" AnchorPane.topAnchor="15.0">
+                           <children>
+                                      <ComboBox fx:id="currencyFilterCB" prefHeight="37.0" prefWidth="140.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="30.0" />
+                                      <Button fx:id="addCurrencyFilterBtn" mnemonicParsing="false" prefHeight="37.0" prefWidth="58.0" text="+" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
+                                      <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Currency to check" AnchorPane.topAnchor="0.0" />
+                              <VBox prefHeight="310.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                                 <children>
+                                            <ListView fx:id="currencyFilterList" prefHeight="233.0" prefWidth="200.0" />
+                                            <Button fx:id="removeCurrencyFilterBtn" mnemonicParsing="false" prefHeight="25.0" prefWidth="200.0" text="Remove" />
+                                            <Button fx:id="restoreCurrencyFilterBtn" mnemonicParsing="false" prefHeight="25.0" prefWidth="200.0" text="Restore Defaults" />
+                                 </children>
+                              </VBox>
+                           </children>
+                        </AnchorPane>
                             </children>
                         </AnchorPane>
                     </content>
