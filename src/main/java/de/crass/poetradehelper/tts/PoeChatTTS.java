@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -15,6 +16,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PoeChatTTS {
+    final private String logsFolder = "logs";
+
     private Path path;
     private final Listener listener;
 
@@ -29,9 +32,10 @@ public class PoeChatTTS {
     private boolean readCurrencyRequests = true;
     private boolean readChatMessages = false;
 
-    private final String[] startPhrases = {"guess what", "check that out", "wait a second", "hold on", "what the fuck", "did you see"};
+    private final String[] startPhrases = {"guess what", "check that out", "wait a second", "hold on", "what the fuck", "did you see", "listen"};
     private final String[] names = {"someone", "some dude", "this cheeky scrub lord", "some guy with too much cash", "an exile"};
     private final String[] endPhrases = {"congratulations", "good for you", "what a noob", "how fortunate"};
+    private String[] testPhrases = {"One", "Check", "Boom"};
 
     private Thread watchDogThread;
     private WatchDog watchDog;
@@ -40,8 +44,8 @@ public class PoeChatTTS {
         this(PropertyManager.getInstance().getPathOfExilePath(), listener);
     }
 
-    public PoeChatTTS(Path path, Listener listener) {
-        this.path = path;
+    public PoeChatTTS(String path, Listener listener) {
+        setPath(path);
         this.listener = listener;
 
         init();
@@ -56,6 +60,63 @@ public class PoeChatTTS {
         setReadChatMessages(Boolean.parseBoolean(proMan.getProp(PropertyManager.VOICE_CHAT, "false")));
         setReadAFK(Boolean.parseBoolean(proMan.getProp(PropertyManager.VOICE_AFK, "true")));
         setRandomizeMessages(Boolean.parseBoolean(proMan.getProp(PropertyManager.VOICE_RANDOMIZE, "true")));
+    }
+
+    private void processNewLine(String newLine){
+        if (readAFK && newLine.contains("AFK mode is now ON.")) {
+            try {
+                textToSpeech("You just went AFK!");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return;
+        }
+
+        Pattern sayPattern = Pattern.compile("].+? (.+?): (.+)");
+        Pattern currencyPattern = Pattern.compile("] @From (.+?): .+your \\d+ (.+) for my \\d+ (.+) i");
+        Pattern tradePattern = Pattern.compile("] @From (.+?):.+ buy your (.+) listed for \\d+ (.+) in");
+        Matcher matcher = currencyPattern.matcher(newLine);
+
+        if (readCurrencyRequests && matcher.find() || readTradeRequests && (matcher = tradePattern.matcher(newLine)).find()) {
+            // Currency buy request
+            String buyCurrency = matcher.group(2);
+            String sellCurrency = matcher.group(3);
+
+            String ttsMessage;
+            if (randomizeMessages) {
+                ttsMessage = getRandomStartPhrase() + getRandomName() + " wants to buy your " + buyCurrency + " for " + sellCurrency + getRandomEndPhrase();
+            } else {
+                ttsMessage = "Someone wants to buy your " + buyCurrency + " for " + sellCurrency;
+            }
+            try {
+                textToSpeech(ttsMessage);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else if (readChatMessages && ((matcher = sayPattern.matcher(newLine)).find())) {
+            String name = readableName(matcher.group(1));
+            // Name is a NPC, cancel.
+            if (name == null) {
+                return;
+            }
+            String msg = matcher.group(2);
+            String verb = "says";
+
+            // Check if sent by player
+            if (newLine.contains("@To")) {
+                name = "you";
+                verb = "say";
+            }
+            msg = convertSlangToSpoken(msg);
+
+            try {
+                textToSpeech(name + ' ' + verb + ' ' + msg);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            //LogManager.getInstance().log(getClass(), "Could not match new line: " + newLine);
+        }
     }
 
     public void setVoice(String voice) {
@@ -115,61 +176,8 @@ public class PoeChatTTS {
             public void onNewLine(File file, String newLine) {
                 if (file.getName().contains("Worker")) {
                     return;
-                } else if (readAFK && newLine.contains("AFK mode is now ON.")) {
-                    try {
-                        textToSpeech("You just went AFK, better do something about it!");
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    return;
                 }
-
-                Pattern sayPattern = Pattern.compile("].+? (.+?): (.+)");
-                Pattern currencyPattern = Pattern.compile("] @From (.+?): .+your \\d+ (.+) for my \\d+ (.+) i");
-                Pattern tradePattern = Pattern.compile("] @From (.+?):.+ buy your (.+) listed for \\d+ (.+) in");
-                Matcher matcher = currencyPattern.matcher(newLine);
-
-                if (readCurrencyRequests && matcher.find() || readTradeRequests && (matcher = tradePattern.matcher(newLine)).find()) {
-                    // Currency buy request
-                    String buyCurrency = matcher.group(2);
-                    String sellCurrency = matcher.group(3);
-
-                    String ttsMessage;
-                    if (randomizeMessages) {
-                        ttsMessage = getRandomStartPhrase() + getRandomName() + " wants to buy your " + buyCurrency + " for " + sellCurrency + getRandomEndPhrase();
-                    } else {
-                        ttsMessage = "Someone wants to buy your " + buyCurrency + " for " + sellCurrency;
-                    }
-                    try {
-                        textToSpeech(ttsMessage);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                } else if (readChatMessages && ((matcher = sayPattern.matcher(newLine)).find())) {
-                    String name = readableName(matcher.group(1));
-                    // Name is a NPC, cancel.
-                    if (name == null) {
-                        return;
-                    }
-                    String msg = matcher.group(2);
-                    String verb = "says";
-
-                    // Check if sent by player
-                    if (newLine.contains("@To")) {
-                        name = "you";
-                        verb = "say";
-                    }
-                    LogManager.getInstance().log(getClass(), name + " said " + msg);
-                    msg = convertSlangToSpoken(msg);
-
-                    try {
-                        textToSpeech(name + ' ' + verb + ' ' + msg);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    //LogManager.getInstance().log(getClass(), "Could not match new line: " + newLine);
-                }
+                processNewLine(newLine);
             }
 
             @Override
@@ -358,6 +366,19 @@ public class PoeChatTTS {
         return voice;
     }
 
+    public void testSpeech() {
+        String text = getRandomString(endPhrases, 8);
+        if(text == null){
+            text = getRandomString(testPhrases);
+        }
+
+        try {
+            textToSpeech(text);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public enum InternetSlang {
 
         SRY("sorry"),
@@ -396,8 +417,15 @@ public class PoeChatTTS {
         return readChatMessages;
     }
 
-    public void setPath(Path path) {
-        this.path = path;
+    public void setPath(String path) {
+        if(!path.endsWith(logsFolder)){
+            if (!path.endsWith("\\")) {
+                path += "\\";
+            }
+            path +=logsFolder;
+        }
+
+        this.path = Paths.get(path);
     }
 
     public boolean isRandomizeMessages() {

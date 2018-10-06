@@ -17,7 +17,7 @@ import static de.crass.poetradehelper.Main.setImage;
 /**
  * Created by mcrass on 19.07.2018.
  */
-public class CurrencyOfferCell<T> extends javafx.scene.control.ListCell<CurrencyDeal> {
+public class MarketCell<T> extends javafx.scene.control.ListCell<CurrencyDeal> {
 
     private FXMLLoader mLLoader;
 

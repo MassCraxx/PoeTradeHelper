@@ -1,7 +1,9 @@
 package de.crass.poetradehelper.ui;
 
+import de.crass.poetradehelper.Main;
 import de.crass.poetradehelper.model.CurrencyDeal;
 import de.crass.poetradehelper.parser.PoeTradeWebParser;
+import de.crass.poetradehelper.parser.TradeManager;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.ContextMenu;
@@ -33,11 +35,33 @@ public class DealContextMenu extends ContextMenu {
             }
         });
 
-        MenuItem buyValueItem = new MenuItem("Market Buy Value: " + deal.getcValue() * deal.getBuyAmount());
-        MenuItem sellValueItem = new MenuItem("Market Sell Value: " + deal.getcValue() * deal.getSellAmount());
+        MenuItem buyValueItem = new MenuItem("Market Buy Value: " + Main.prettyFloat(deal.getcValue() * deal.getBuyAmount()));
+        MenuItem sellValueItem = new MenuItem("Market Sell Value: " + Main.prettyFloat(deal.getcValue() * deal.getSellAmount()));
 
-        SeparatorMenuItem seperator = new SeparatorMenuItem();
+        MenuItem updateItem = new MenuItem("Update Currency");
+        updateItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                TradeManager.getInstance().updateOffersForCurrency(deal.getSecondaryCurrencyID());
+            }
+        });
 
-        getItems().addAll(buyValueItem, sellValueItem, seperator, buyItem, sellItem);
+        MenuItem updatePlayerItem = new MenuItem("Update Player Offers");
+        updatePlayerItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                TradeManager.getInstance().updatePlayerOffers();
+            }
+        });
+
+        getItems().addAll(
+                buyValueItem,
+                sellValueItem,
+                new SeparatorMenuItem(),
+                buyItem,
+                sellItem,
+                new SeparatorMenuItem(),
+                updateItem,
+                updatePlayerItem);
     }
 }

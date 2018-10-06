@@ -7,6 +7,8 @@ import de.crass.poetradehelper.model.CurrencyID;
 import de.crass.poetradehelper.model.CurrencyOffer;
 import de.crass.poetradehelper.web.HttpManager;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.util.Pair;
 
 import java.awt.*;
@@ -57,33 +59,69 @@ public class PoeTradeWebParser {
     public void reset() {
         currentOffers = new HashMap<>();
         playerOffers = new HashMap<>();
-//        currentValidStockOffers = new HashMap<>();
     }
 
-    void update() {
-        reset();
-        Thread runThread = new Thread(() -> {
-            updating = true;
-            CurrencyID primaryCurrency = PropertyManager.getInstance().getPrimaryCurrency();
-            for (Object secondary : PropertyManager.getInstance().getFilterList().toArray()) {
-                if (secondary != primaryCurrency) {
-                    fetchCurrencyOffers(primaryCurrency, (CurrencyID) secondary, PropertyManager.getInstance().getCurrentLeague());
-                }
-            }
-            if (parseListener != null) {
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        parseListener.onParsingFinished();
-                    }
-                });
-            }
-            cancel = false;
-            updating = false;
-        }, "PoeTradeWebParser");
+    public void updateCurrencies(List<CurrencyID> currencyList, boolean clear){
+        updateCurrencies(currencyList, clear, true);
+    }
 
-        runThread.setDaemon(true);
-        runThread.start();
+    public void updateCurrencies(List<CurrencyID> currencyList, boolean clear, boolean async) {
+        if (updating) {
+            return;
+        }
+        if (parseListener != null) {
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    parseListener.onParsingStarted();
+                }
+            });
+        }
+
+        if (clear) {
+            reset();
+        }
+        if(async) {
+            Thread runThread = new Thread(() -> {
+                doUpdate(currencyList, clear);
+            }, "PoeTradeWebParser");
+
+            runThread.setDaemon(true);
+            runThread.start();
+        } else{
+            doUpdate(currencyList, clear);
+        }
+    }
+
+    public void doUpdate(List<CurrencyID> currencyList, boolean clear){
+        updating = true;
+        CurrencyID primaryCurrency = PropertyManager.getInstance().getPrimaryCurrency();
+        for (CurrencyID secondaryCurrency : currencyList) {
+            if (cancel) {
+                break;
+            }
+
+            if (!clear)
+                removeOffers(primaryCurrency, secondaryCurrency);
+            fetchCurrencyOffers(primaryCurrency, secondaryCurrency, PropertyManager.getInstance().getCurrentLeague());
+        }
+
+        if (parseListener != null) {
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    parseListener.onParsingFinished();
+                }
+            });
+        }
+        cancel = false;
+        updating = false;
+    }
+
+    public void updateCurrency(CurrencyID secondaryCurrencyID) {
+        List<CurrencyID> list = new LinkedList<>();
+        list.add(secondaryCurrencyID);
+        updateCurrencies(list, false);
     }
 
     public void fetchCurrencyOffers(CurrencyID primary, CurrencyID secondary, String league) {
@@ -100,9 +138,6 @@ public class PoeTradeWebParser {
     }
 
     private void fetchOffers(CurrencyID primary, CurrencyID secondary, String league) throws IOException, InterruptedException {
-        if (cancel) {
-            return;
-        }
         String buyResponseBody;
         ObjectMapper objectMapper = new ObjectMapper();
         File file = new File(primary.toString() + "-" + secondary.toString() + ".html");
@@ -193,41 +228,27 @@ public class PoeTradeWebParser {
             offers.add(offer);
             playerOffers.put(key, offers);
         } else {
-            List<CurrencyOffer> offers = currentOffers.get(key);
+            ObservableList<CurrencyOffer> offers = (ObservableList<CurrencyOffer>) currentOffers.get(key);
             if (offers == null) {
-                offers = new LinkedList<>();
+                offers = FXCollections.observableArrayList();
             }
             offers.add(offer);
             currentOffers.put(key, offers);
         }
     }
 
+    public void removeOffers(CurrencyID primary, CurrencyID secondary) {
+        Pair<CurrencyID, CurrencyID> key = new Pair<>(primary, secondary);
+        currentOffers.remove(key);
+        playerOffers.remove(key);
+
+        key = new Pair<>(secondary, primary);
+        currentOffers.remove(key);
+        playerOffers.remove(key);
+    }
+
     public HashMap<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> getCurrentOffers() {
         return currentOffers;
-    }
-
-    public CurrencyOffer getBestOffer(List<CurrencyOffer> list) {
-        return getBestOffer(list, PropertyManager.getInstance().getFilterNoApi(), PropertyManager.getInstance()
-                .getFilterOutOfStock());
-    }
-
-    public CurrencyOffer getBestOffer(List<CurrencyOffer> list, boolean filterStockOffers, boolean filterValidStockOffers) {
-        CurrencyOffer bestOffer = null;
-        if (list == null) {
-            return null;
-        }
-        for (CurrencyOffer offer : list) {
-            // Return most top offer that meets filter requirements
-
-            if ((filterStockOffers && offer.getStock() < 0) ||
-                    (filterValidStockOffers && (offer.getStock() >= 0 && offer.getStock() < offer.getSellValue()))) {
-                continue;
-            }
-
-            bestOffer = offer;
-            break;
-        }
-        return bestOffer;
     }
 
     public HashMap<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> getPlayerOffers() {
@@ -252,7 +273,7 @@ public class PoeTradeWebParser {
 
     public static void openInBrowser(String league, CurrencyID want, CurrencyID have) {
         try {
-            Desktop.getDesktop().browse(URI.create(PoeTradeWebParser.getPoeTradeURL(league, want, have)));
+            Desktop.getDesktop().browse(URI.create(getPoeTradeURL(league, want, have)));
         } catch (Exception e) {
             LogManager.getInstance().log(PoeTradeWebParser.class, "Error opening browser. " + e);
         }

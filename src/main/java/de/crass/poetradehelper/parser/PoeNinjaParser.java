@@ -20,86 +20,105 @@ public class PoeNinjaParser {
     private boolean useOfflineCache = true;
     private long updateDelay = 6 * 60 * 60 * 1000; // 6 hours
 
-    // Currency - (Pay<>Sell)
-    private HashMap<CurrencyID, Float> currentRates = new HashMap<>();
+    // Currency - (CurrencyID<>Chaos Value)
+    private HashMap<CurrencyID, Float> currentRates;
 
     public PoeNinjaParser() {
         objectMapper = new ObjectMapper();
     }
 
-    public void parseCurrency(String league, boolean forceUpdate) {
+    public void fetchRates(String league, boolean forceUpdate) {
+        // If there is a file  and it is recent
         if (!forceUpdate && (useOfflineCache && file.exists() &&
                 file.lastModified() + updateDelay > System.currentTimeMillis())) {
-            TypeReference<HashMap<CurrencyID, Float>> typeRef = new TypeReference<HashMap<CurrencyID, Float>>() {};
+
+            // If no current rates have been loaded before, load from cache
+            if (currentRates == null || currentRates.isEmpty()) {
+                TypeReference<HashMap<CurrencyID, Float>> typeRef = new TypeReference<HashMap<CurrencyID, Float>>() {};
+                try {
+                    LogManager.getInstance().log(getClass(), "Loading poe.ninja currency values from cache.");
+                    currentRates = objectMapper.readValue(file, typeRef);
+                } catch (Exception e) {
+                    LogManager.getInstance().log(getClass(), "Error loading poe.ninja values from cache.");
+                    fetchRates(league, true);
+                }
+            }
+        } else {
+            // Fetch online
+            LogManager.getInstance().log(getClass(), "Fetching new currency values from poe.ninja.");
+            JSONObject json = null;
             try {
-                LogManager.getInstance().log(getClass(), "Loading poe.ninja currency values from cache..");
-                currentRates = objectMapper.readValue(file, typeRef);
+                json = HttpManager.getInstance().getJson(currencyURL, "?league=" + league);
             } catch (IOException e) {
-                e.printStackTrace();
+                LogManager.getInstance().log(getClass(), "IOException!\n" + e);
+            }
+
+            if (json == null || json.length() == 0) {
+                LogManager.getInstance().log(getClass(), "Invalid response");
+                return;
+            }
+
+            if(currentRates == null){
                 currentRates = new HashMap<>();
             }
-            return;
-        }
 
-        LogManager.getInstance().log(getClass(), "Fetching new currency values from poe.ninja.");
-        JSONObject json = null;
-        try {
-            json = HttpManager.getInstance().getJson(currencyURL, "?league=" + league);
-        } catch (IOException e) {
-            LogManager.getInstance().log(getClass(), "IOException!\n" + e);
-        }
-
-        if (json == null || json.length() == 0) {
-            LogManager.getInstance().log(getClass(), "Invalid response");
-            return;
-        }
-
-        HashMap<String, Integer> ninjaToTradeIdMap = new HashMap<>();
-        JSONArray idArray = json.getJSONArray("currencyDetails");
-        for (Object currencyDetailsObject : idArray) {
-            if (currencyDetailsObject instanceof JSONObject) {
-                JSONObject currencyDetails = (JSONObject) currencyDetailsObject;
-                ninjaToTradeIdMap.put(currencyDetails.getString("name"), currencyDetails.getInt("poeTradeId"));
+            HashMap<String, Integer> ninjaToTradeIdMap = new HashMap<>();
+            JSONArray idArray = json.getJSONArray("currencyDetails");
+            for (Object currencyDetailsObject : idArray) {
+                if (currencyDetailsObject instanceof JSONObject) {
+                    JSONObject currencyDetails = (JSONObject) currencyDetailsObject;
+                    ninjaToTradeIdMap.put(currencyDetails.getString("name"), currencyDetails.getInt("poeTradeId"));
+                }
             }
-        }
 
-        JSONArray array = json.getJSONArray("lines");
-        for (Object currencyObject : array) {
-            if (currencyObject instanceof JSONObject) {
-                JSONObject currency = (JSONObject) currencyObject;
-                String currencyName = currency.getString("currencyTypeName");
-                CurrencyID id = CurrencyID.get(ninjaToTradeIdMap.get(currencyName));
-                float chaosValue = currency.getFloat("chaosEquivalent");
-                currentRates.put(id, chaosValue);
+            JSONArray array = json.getJSONArray("lines");
+            for (Object currencyObject : array) {
+                if (currencyObject instanceof JSONObject) {
+                    JSONObject currency = (JSONObject) currencyObject;
+                    String currencyName = currency.getString("currencyTypeName");
+                    CurrencyID id = CurrencyID.get(ninjaToTradeIdMap.get(currencyName));
+                    if (id != null) {
+                        float chaosValue = currency.getFloat("chaosEquivalent");
+                        currentRates.put(id, chaosValue);
+                    }
+                }
             }
-        }
 
-
-        if (!currentRates.isEmpty()) {
-            try {
-                objectMapper.writeValue(file, currentRates);
-            } catch (IOException e) {
-                LogManager.getInstance().log(getClass(), "Writing ninja cache failed.\n" + e);
+            if (!currentRates.isEmpty() && file.canWrite()) {
+                try {
+                    objectMapper.writeValue(file, currentRates);
+                } catch (Exception e) {
+                    LogManager.getInstance().log(getClass(), "Writing ninja cache failed!\n" + e);
+                }
             }
         }
     }
 
     public HashMap<CurrencyID, Float> getCurrentRates() {
-        if (currentRates == null || currentRates.isEmpty()) {
-            parseCurrency(PropertyManager.getInstance().getCurrentLeague(), false);
-            if (currentRates == null) {
-                currentRates = new HashMap<>();
-            }
+        fetchRates(PropertyManager.getInstance().getCurrentLeague(), false);
+        if (currentRates == null) {
+            currentRates = new HashMap<>();
         }
         return currentRates;
     }
 
-    public Float getCurrentValueFor(CurrencyID id) {
-        Float value = getCurrentRates().get(id);
-        if(value == null){
-            parseCurrency(PropertyManager.getInstance().getCurrentLeague(), true);
-            value = getCurrentRates().get(id);
+    public Float getCurrentCValueFor(CurrencyID id) {
+        if (id == CurrencyID.CHAOS) {
+            return 1f;
         }
+        Float value = getCurrentRates().get(id);
+
         return value == null ? 0 : value;
+    }
+
+    public Float getCurrentValue(CurrencyID what, CurrencyID inWhat) {
+        Float whatValue = getCurrentCValueFor(what);
+        Float inWhatValue = getCurrentCValueFor(inWhat);
+
+        if (inWhatValue == null || inWhatValue == 0) {
+            return 0f;
+        }
+
+        return whatValue / inWhatValue;
     }
 }

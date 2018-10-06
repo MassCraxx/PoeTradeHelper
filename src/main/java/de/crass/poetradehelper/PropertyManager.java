@@ -7,8 +7,6 @@ import javafx.collections.ObservableList;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -32,6 +30,7 @@ public class PropertyManager {
     public static final String PRIMARY_CURRENCY = "primary_currency";
     public static final String FILTER_NOAPI = "filter_noapi";
     public static final String FILTER_OUTOFSTOCK = "filter_outofstock";
+    public static final String FILTER_EXCESSIVE = "filter_excessive";
     public static final String CURRENCY_LIST = "currency_list";
     public static final String PLAYER_LIST = "player_list";
     public static final String POE_PATH = "poe_path";
@@ -42,14 +41,16 @@ public class PropertyManager {
     public static final String VOICE_SPEAKER = "voice_speaker";
     public static final String VOICE_AFK = "voice_read_afk";
     public static final String VOICE_RANDOMIZE = "voice_randomize_messages";
+    public static final String UPDATE_DELAY_MINUTES = "update_delay_minutes";
 
     // DEFAULTS
     private final String defaultLeague = "Standard";
     private final CurrencyID defaultPrimary = EXALTED;
-    private final String defaultPoePath = "G:\\Steam\\SteamApps\\common\\Path of Exile\\logs";
+    private final String defaultPoePath = "C:\\Program Files (x86)\\Grinding Gear Games\\Path of Exile\\";
 
-    private final boolean defaultFilterStockOffers = false;
+    public final boolean defaultFilterStockOffers = false;
     public final boolean defaultFilterInvalidStockOffers = true;
+    public final boolean defaultFilterExcessive = true;
 
     private final List<CurrencyID> defaultCurrencyFilterList = Arrays.asList(
             ALCHEMY,
@@ -69,6 +70,8 @@ public class PropertyManager {
     private CurrencyID primaryCurrency;
     private boolean filterNoApi;
     private boolean filterOutOfStock;
+    private boolean filterExcessive;
+    private int updateDelay;
 
     private PropertyManager() {
         loadProperties();
@@ -91,6 +94,9 @@ public class PropertyManager {
 
             filterNoApi = Boolean.parseBoolean(appProps.getProperty(FILTER_NOAPI));
             filterOutOfStock = Boolean.parseBoolean(appProps.getProperty(FILTER_OUTOFSTOCK));
+            filterExcessive = Boolean.parseBoolean(appProps.getProperty(FILTER_EXCESSIVE));
+
+            updateDelay = Integer.parseInt(appProps.getProperty(UPDATE_DELAY_MINUTES, "5"));
 
         } catch (IOException e) {
             loadDefaults();
@@ -101,6 +107,7 @@ public class PropertyManager {
         appProps.setProperty(LEAGUE_KEY, defaultLeague);
         appProps.setProperty(FILTER_NOAPI, String.valueOf(defaultFilterStockOffers));
         appProps.setProperty(FILTER_OUTOFSTOCK, String.valueOf(defaultFilterInvalidStockOffers));
+        appProps.setProperty(FILTER_EXCESSIVE, String.valueOf(defaultFilterExcessive));
 
         // Following are not queried from props, will be stored on quit
         primaryCurrency = defaultPrimary;
@@ -117,6 +124,9 @@ public class PropertyManager {
 
         appProps.setProperty(FILTER_NOAPI, String.valueOf(filterNoApi));
         appProps.setProperty(FILTER_OUTOFSTOCK, String.valueOf(filterOutOfStock));
+        appProps.setProperty(FILTER_EXCESSIVE, String.valueOf(filterExcessive));
+
+        appProps.setProperty(UPDATE_DELAY_MINUTES, String.valueOf(updateDelay));
 
         try {
             appProps.store(new FileWriter(propFilename), "PoeTradeHelper Properties");
@@ -145,7 +155,7 @@ public class PropertyManager {
     }
 
     public void setPrimaryCurrency(CurrencyID primaryCurrency) {
-        appProps.setProperty(PRIMARY_CURRENCY, String.valueOf(primaryCurrency));
+        this.primaryCurrency = primaryCurrency;
     }
 
     public ObservableList<String> getPlayerList() {
@@ -160,12 +170,18 @@ public class PropertyManager {
         return filterOutOfStock;
     }
 
+    public boolean getFilterExcessive() { return filterExcessive;}
+
     public void setFilterNoApi(boolean filterNoApi) {
         this.filterNoApi = filterNoApi;
     }
 
     public void setFilterOutOfStock(boolean filterOutOfStock) {
         this.filterOutOfStock = filterOutOfStock;
+    }
+
+    public void setFilterExcessive(boolean filterExcessive) {
+        this.filterExcessive = filterExcessive;
     }
 
     public void setLeague(String league) {
@@ -231,8 +247,13 @@ public class PropertyManager {
         return list;
     }
 
-    public Path getPathOfExilePath() {
-        return Paths.get(getProp(POE_PATH, defaultPoePath));
+    public String getPathOfExilePath() {
+        String path = getProp(POE_PATH, defaultPoePath);
+        if(path.isEmpty()){
+            path = defaultPoePath;
+            setPathOfExilePath(path);
+        }
+        return path;
     }
 
     public void setPathOfExilePath(String path) {
@@ -250,5 +271,13 @@ public class PropertyManager {
     public void resetFilterList() {
         currencyFilterList.clear();
         currencyFilterList.addAll(defaultCurrencyFilterList);
+    }
+
+    public int getUpdateDelay() {
+        return updateDelay;
+    }
+
+    public void setUpdateDelay(int updateDelay) {
+        this.updateDelay = updateDelay;
     }
 }

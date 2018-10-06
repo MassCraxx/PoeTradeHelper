@@ -51,6 +51,7 @@ public class WatchDog implements Runnable {
                 boolean valid = wk.reset();
                 if (!valid) {
                     LogManager.getInstance().log(getClass(), "!!! Key has been unregistered !!!");
+                    stop = true;
                 }
             }
         } catch (IOException e) {
