@@ -243,9 +243,8 @@ public class Main extends Application implements ParseListener {
             public void handle(MouseEvent event) {
                 versionClicked++;
                 if(versionClicked%10 == 0){
-                    JOptionPane.showMessageDialog(null, "Philly ist ein boon.");
-//                    PropertyManager.getInstance().setProp("DEBUG", debugSecretValue);
-//                    autoUpdate.setDisable(false);
+                    JOptionPane.showMessageDialog(null, "Bananarama!");
+                    autoUpdate.setVisible(true);
                 }
             }
         });
@@ -334,7 +333,7 @@ public class Main extends Application implements ParseListener {
         valueColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<CurrencyOffer, Number>, ObservableValue<Number>>() {
             @Override
             public ObservableValue<Number> call(TableColumn.CellDataFeatures<CurrencyOffer, Number> param) {
-                return new SimpleFloatProperty(param.getValue().getBuyAmount());
+                return new SimpleFloatProperty(param.getValue().getBuyAmount() / param.getValue().getSellAmount());
             }
         });
 
@@ -355,7 +354,7 @@ public class Main extends Application implements ParseListener {
         sellValueColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<CurrencyOffer, Number>, ObservableValue<Number>>() {
             @Override
             public ObservableValue<Number> call(TableColumn.CellDataFeatures<CurrencyOffer, Number> param) {
-                return new SimpleFloatProperty(param.getValue().getSellAmount());
+                return new SimpleFloatProperty(param.getValue().getSellAmount() / param.getValue().getBuyAmount());
             }
         });
 
@@ -549,7 +548,7 @@ public class Main extends Application implements ParseListener {
 
         ObservableList<String> playerList = PropertyManager.getInstance().getPlayerList();
         playerListView.setItems(playerList);
-        playerListView.setTooltip(new Tooltip("Offers from players in this list will be considered player offers and shown in player tab"));
+        playerListView.setTooltip(new Tooltip("Offers from players in this list will be shown in PlayerOverview"));
 
         addPlayerButton.setTooltip(new Tooltip("Add player from TextField to list"));
         addPlayerButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -717,8 +716,7 @@ public class Main extends Application implements ParseListener {
         autoUpdate.setTooltip(new Tooltip("Invoke Update every " + PropertyManager.getInstance().getUpdateDelay() + " minutes."));
 
         if(!debugSecretValue.equals(PropertyManager.getInstance().getProp("DEBUG", null))){
-            autoUpdate.setDisable(true);
-            autoUpdate.setTooltip(new Tooltip("Experimental - disabled for now."));
+            autoUpdate.setVisible(false);
         }
     }
 
