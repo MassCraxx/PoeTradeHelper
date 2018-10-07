@@ -38,7 +38,6 @@ import javax.swing.*;
 import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.*;
@@ -46,7 +45,7 @@ import java.util.concurrent.*;
 public class Main extends Application implements ParseListener {
 
     public static final String title = "PoeTradeHelper";
-    public static final String versionText = "v0.4.0";
+    public static final String versionText = "v0.5-SNAPSHOT";
 
     @FXML
     private ListView<CurrencyDeal> playerDealList;
@@ -188,6 +187,7 @@ public class Main extends Application implements ParseListener {
         primaryStage.setMinWidth(640);
         primaryStage.setMinHeight(225);
         primaryStage.setScene(scene);
+        primaryStage.getIcons().add(new Image(Main.class.getResourceAsStream("icon.png")));
         primaryStage.show();
 
         currentStage = primaryStage;
@@ -229,7 +229,7 @@ public class Main extends Application implements ParseListener {
             poeChatTTS = null;
         }
 
-        stopUpdateTimer();
+        stopUpdateTask();
 
         LogManager.getInstance().log(getClass(), "Shutdown complete.");
     }
@@ -275,7 +275,7 @@ public class Main extends Application implements ParseListener {
             @Override
             public void handle(ActionEvent event) {
                 if(autoUpdateExecutor != null){
-                    stopUpdateTimer();
+                    stopUpdateTask();
                 }
                 if (tradeManager.isUpdating()) {
                     tradeManager.cancelUpdate();
@@ -292,7 +292,7 @@ public class Main extends Application implements ParseListener {
 //            @Override
 //            public void handle(ActionEvent event) {
 //                if(updateTimer != null){
-//                    stopUpdateTimer();
+//                    stopUpdateTask();
 //                    startUpdateTask();
 //                }
 //                if (tradeManager.isUpdating()) {
@@ -708,7 +708,7 @@ public class Main extends Application implements ParseListener {
                 if(autoUpdate.isSelected()) {
                     startUpdateTask();
                 } else{
-                    stopUpdateTimer();
+                    stopUpdateTask();
                 }
             }
         });
@@ -787,6 +787,9 @@ public class Main extends Application implements ParseListener {
 
         updateButton.setText("Cancel");
 //        updatePlayerButton.setText("Cancel");
+        if(autoUpdate.isSelected()){
+            stopUpdateTask();
+        }
     }
 
     @Override
@@ -855,7 +858,7 @@ public class Main extends Application implements ParseListener {
         }, updateDelay, TimeUnit.SECONDS);
     }
 
-    private void stopUpdateTimer() {
+    private void stopUpdateTask() {
         if(autoUpdateExecutor != null) {
             autoUpdateExecutor.shutdownNow();
             autoUpdateExecutor = null;

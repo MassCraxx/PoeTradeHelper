@@ -384,9 +384,15 @@ public class PoeChatTTS {
         SRY("sorry"),
         NVM("nevermind"),
         WTF("what the fuck"),
+        GTFO("get the fuck out"),
         SRSLY("seriously"),
         FU("fuck you"),
         TY("thank you"),
+        THX("thanks"),
+        T4T("thanks for trade"),
+        N1("nice one"),
+        GJ("good job"),
+        WP("well played"),
         HF("have fun"),
         GL("good luck");
 
