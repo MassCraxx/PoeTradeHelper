@@ -20,7 +20,13 @@ public enum CurrencyID {
     SILVER(35),
     APPRENTICE(45),
     JOURNEYMAN(46),
-    MASTER(47);
+    MASTER(47),
+    ANNULMENT(513),
+    BINDING(514),
+    HORIZONS(515),
+    HARBINGER(516),
+    ENGINEERS(517),
+    ANCIENT(518);
 
     private final int id;
 

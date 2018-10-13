@@ -45,7 +45,7 @@ import java.util.concurrent.*;
 public class Main extends Application implements ParseListener {
 
     public static final String title = "PoeTradeHelper";
-    public static final String versionText = "v0.4.1";
+    public static final String versionText = "v0.4.2";
 
     @FXML
     private ListView<CurrencyDeal> playerDealList;
