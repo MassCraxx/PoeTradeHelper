@@ -8,6 +8,7 @@ import de.crass.poetradehelper.model.CurrencyOffer;
 import de.crass.poetradehelper.parser.ParseListener;
 import de.crass.poetradehelper.parser.TradeManager;
 import de.crass.poetradehelper.tts.PoeChatTTS;
+import de.crass.poetradehelper.ui.CurrencyContextMenu;
 import de.crass.poetradehelper.ui.MarketCell;
 import de.crass.poetradehelper.ui.PlayerTradeCell;
 import javafx.application.Application;
@@ -422,6 +423,8 @@ public class Main extends Application implements ParseListener {
 
         //FIXME: Dont create new lists all the time... also refresh on league change
         valueTable.setItems(FXCollections.observableArrayList(tradeManager.getCurrencyValues().entrySet()));
+
+        valueTable.setContextMenu(new CurrencyContextMenu(valueTable));
 
         updateValuesButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
