@@ -28,8 +28,8 @@ import static de.crass.poetradehelper.PropertyManager.offlineMode;
 public class PoeTradeWebParser {
 
     private final static String poeTradeCurrencyURL = "http://currency.poe.trade/search";
-    private HashMap<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> currentOffers;
-    private HashMap<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> playerOffers;
+    private HashMap<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> currentOffers = new HashMap<>();
+    private HashMap<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> playerOffers = new HashMap<>();
 
     private final static int parseStartIndex = 435845;
     private final static int fetchDelay = 500;
@@ -57,8 +57,15 @@ public class PoeTradeWebParser {
     }
 
     public void reset() {
-        currentOffers = new HashMap<>();
-        playerOffers = new HashMap<>();
+        for(List<CurrencyOffer> list : currentOffers.values()){
+            list.clear();
+        }
+
+        for(List<CurrencyOffer> list : playerOffers.values()){
+            list.clear();
+        }
+//        currentOffers = new HashMap<>();
+//        playerOffers = new HashMap<>();
     }
 
     public void updateCurrencies(List<CurrencyID> currencyList, boolean clear){
@@ -118,10 +125,10 @@ public class PoeTradeWebParser {
         updating = false;
     }
 
-    public void updateCurrency(CurrencyID secondaryCurrencyID) {
+    public void updateCurrency(CurrencyID secondaryCurrencyID, boolean async) {
         List<CurrencyID> list = new LinkedList<>();
         list.add(secondaryCurrencyID);
-        updateCurrencies(list, false);
+        updateCurrencies(list, false, async);
     }
 
     public void fetchCurrencyOffers(CurrencyID primary, CurrencyID secondary, String league) {
@@ -239,12 +246,18 @@ public class PoeTradeWebParser {
 
     public void removeOffers(CurrencyID primary, CurrencyID secondary) {
         Pair<CurrencyID, CurrencyID> key = new Pair<>(primary, secondary);
-        currentOffers.remove(key);
-        playerOffers.remove(key);
+        clearListIfPossible(currentOffers.get(key));
+        clearListIfPossible(playerOffers.get(key));
 
         key = new Pair<>(secondary, primary);
-        currentOffers.remove(key);
-        playerOffers.remove(key);
+        clearListIfPossible(currentOffers.get(key));
+        clearListIfPossible(playerOffers.get(key));
+    }
+
+    void clearListIfPossible(List list){
+        if(list != null && !list.isEmpty()){
+            list.clear();
+        }
     }
 
     public HashMap<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> getCurrentOffers() {
@@ -277,5 +290,22 @@ public class PoeTradeWebParser {
         } catch (Exception e) {
             LogManager.getInstance().log(PoeTradeWebParser.class, "Error opening browser. " + e);
         }
+    }
+
+    public ObservableList<CurrencyOffer> getOffersFor(CurrencyID secondary, boolean sell) {
+        Pair entry;
+        if(sell){
+            entry = new Pair<>(PropertyManager.getInstance().getPrimaryCurrency(), secondary);
+        } else {
+            entry = new Pair<>(secondary, PropertyManager.getInstance().getPrimaryCurrency());
+        }
+
+        List<CurrencyOffer> offer = currentOffers.get(entry);
+
+        if (offer == null || offer.isEmpty()) {
+            updateCurrency(secondary, false);
+        }
+        offer = currentOffers.get(entry);
+        return (ObservableList<CurrencyOffer>) offer;
     }
 }

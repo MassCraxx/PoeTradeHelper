@@ -16,8 +16,8 @@ import java.util.*;
  * Created by mcrass on 19.07.2018.
  */
 public class TradeManager implements ParseListener {
-    private static TradeManager instance
-            ;
+    private static TradeManager instance;
+
     private PoeApiParser poeApiParser;
     private PoeTradeWebParser webParser;
     private ObservableList<CurrencyDeal> currentDeals;
@@ -29,7 +29,7 @@ public class TradeManager implements ParseListener {
             float o1Value = o1.getDiffValue();
             float o2Value = o2.getDiffValue();
 
-            if(o1Value == o2Value){
+            if (o1Value == o2Value) {
                 return 0;
             }
             return o1Value > o2Value ? -1 : 1;
@@ -41,7 +41,7 @@ public class TradeManager implements ParseListener {
             float o1Value = o1.getPlayerDiffValue();
             float o2Value = o2.getPlayerDiffValue();
 
-            if(o1Value == o2Value){
+            if (o1Value == o2Value) {
                 return 0;
             }
             return o1Value > o2Value ? -1 : 1;
@@ -66,7 +66,7 @@ public class TradeManager implements ParseListener {
         return instance;
     }
 
-    public void updateOffers(boolean clear){
+    public void updateOffers(boolean clear) {
         updateOffers(clear, true);
     }
 
@@ -74,19 +74,20 @@ public class TradeManager implements ParseListener {
         webParser.updateCurrencies(PropertyManager.getInstance().getFilterList(), clear, async);
     }
 
-    public void updatePlayerOffers(){
+    public void updatePlayerOffers() {
         List<CurrencyID> list = new LinkedList<>();
-        for(CurrencyDeal deal : playerDeals){
+        for (CurrencyDeal deal : playerDeals) {
             list.add(deal.getSecondaryCurrencyID());
         }
         webParser.updateCurrencies(list, false);
     }
 
     public void updateOffersForCurrency(CurrencyID secondaryCurrencyID) {
-        webParser.updateCurrency(secondaryCurrencyID);
+        webParser.updateCurrency(secondaryCurrencyID, true);
     }
 
     public void parseDeals(boolean async){
+        // Cannot really be async, since working on observable lists
         if(async){
             Platform.runLater(new Runnable() {
                 @Override
@@ -130,6 +131,11 @@ public class TradeManager implements ParseListener {
             CurrencyOffer bestMarketBuyOffer;
 
             if (key.getKey() != primaryCurrency) {
+                // Check if offer actually contains primary
+                if (key.getValue() != primaryCurrency) {
+                    continue;
+                }
+
                 //Buy offer -> Sell offer
                 key = invertedKey;
                 invertedKey = offerMap.getKey();
@@ -183,6 +189,10 @@ public class TradeManager implements ParseListener {
             CurrencyOffer playerBuyOffer = null;
 
             if (key.getKey() != primaryCurrency) {
+                // Check if offer actually contains primary
+                if (key.getValue() != primaryCurrency) {
+                    continue;
+                }
                 //Buy offer -> Sell offer
                 key = invertedKey;
                 invertedKey = offerMap.getKey();
@@ -190,7 +200,7 @@ public class TradeManager implements ParseListener {
 
             CurrencyID secondaryCurrency = key.getValue();
 
-            if(playerOffers.get(key) != null) {
+            if (playerOffers.get(key) != null) {
                 playerSellOffer = playerOffers.get(key).get(0);
             }
 
@@ -280,7 +290,7 @@ public class TradeManager implements ParseListener {
                 float higherValue = (buyValue > sellValue ? buyValue : sellValue);
 
                 // If sell and buy value differ too much from each other, filter
-                if(Math.abs(buyValue - sellValue) > 0.5 * higherValue){
+                if (Math.abs(buyValue - sellValue) > 0.5 * higherValue) {
                     LogManager.getInstance().log(getClass(), "Filtered excessive offer: " + buyValue + " - " + sellValue);
                     continue;
                 }
@@ -302,7 +312,7 @@ public class TradeManager implements ParseListener {
 
     @Override
     public void onParsingStarted() {
-        if(listener != null){
+        if (listener != null) {
             listener.onParsingStarted();
         }
     }
@@ -310,7 +320,7 @@ public class TradeManager implements ParseListener {
     @Override
     public void onParsingFinished() {
         parseDeals(true);
-        if(listener != null){
+        if (listener != null) {
             listener.onParsingFinished();
         }
     }
@@ -323,7 +333,7 @@ public class TradeManager implements ParseListener {
         this.listener = listener;
     }
 
-    public void cancelUpdate(){
+    public void cancelUpdate() {
         webParser.cancel();
     }
 
@@ -331,23 +341,25 @@ public class TradeManager implements ParseListener {
         return poeApiParser.getCurrentLeagues();
     }
 
-    public void updateCurrencyValues(){
+    public void updateCurrencyValues() {
         poeNinjaParser.fetchRates(PropertyManager.getInstance().getCurrentLeague(), true);
     }
 
-    public Float getCurrencyValue(CurrencyID what, CurrencyID inWhat){
+    public Float getCurrencyValue(CurrencyID what, CurrencyID inWhat) {
         return poeNinjaParser.getCurrentValue(what, inWhat);
     }
 
-    public HashMap<CurrencyID, Float> getCurrencyValues(){
+    public HashMap<CurrencyID, Float> getCurrencyValues() {
         return poeNinjaParser.getCurrentRates();
     }
 
     public ObservableList<CurrencyOffer> getBuyOffers(CurrencyID secondary) {
-        return (ObservableList<CurrencyOffer>) webParser.getCurrentOffers().get(new Pair<>(secondary, PropertyManager.getInstance().getPrimaryCurrency()));
+        return webParser.getOffersFor(secondary, false);
+//        return (ObservableList<CurrencyOffer>) webParser.getCurrentOffers().get(new Pair<>(secondary, PropertyManager.getInstance().getPrimaryCurrency()));
     }
 
     public ObservableList<CurrencyOffer> getSellOffers(CurrencyID secondary) {
-        return (ObservableList<CurrencyOffer>) webParser.getCurrentOffers().get(new Pair<>(PropertyManager.getInstance().getPrimaryCurrency(), secondary));
+        return webParser.getOffersFor(secondary, true);
+//        return (ObservableList<CurrencyOffer>) webParser.getCurrentOffers().get(new Pair<>(PropertyManager.getInstance().getPrimaryCurrency(), secondary));
     }
 }

@@ -46,7 +46,7 @@ import java.util.concurrent.*;
 public class Main extends Application implements ParseListener {
 
     public static final String title = "PoeTradeHelper";
-    public static final String versionText = "v0.4.2";
+    public static final String versionText = "v0.4.3-SNAPSHOT";
 
     @FXML
     private ListView<CurrencyDeal> playerDealList;
@@ -167,6 +167,9 @@ public class Main extends Application implements ParseListener {
 
     @FXML
     private ComboBox<CurrencyID> offerSecondary;
+
+    @FXML
+    private Button refreshBtn;
 
     private static Stage currentStage;
     private static PoeChatTTS poeChatTTS;
@@ -382,6 +385,13 @@ public class Main extends Application implements ParseListener {
             }
         });
 
+        refreshBtn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                tradeManager.updateOffersForCurrency(offerSecondary.getValue());
+            }
+        });
+
         // Value Tab
         valueTable.setRowFactory(tv -> new TableRow<Map.Entry<CurrencyID, Float>>() {
             @Override
@@ -486,6 +496,7 @@ public class Main extends Application implements ParseListener {
             public void handle(ActionEvent event) {
                 CurrencyID newValue = primaryComboBox.getValue();
                 PropertyManager.getInstance().setPrimaryCurrency(newValue);
+                tradeManager.parseDeals(true);
             }
         });
 
