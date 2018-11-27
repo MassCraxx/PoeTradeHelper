@@ -811,7 +811,7 @@ public class Main extends Application implements ParseListener {
         currencyList.setPlaceholder(new Label("No deals to show."));
         playerDealList.setPlaceholder(new Label("No deals to show. Is your player set in settings?"));
 
-        updateButton.setText("Update");
+        updateButton.setText("Update All");
         updateButton.setDisable(false);
 //        updatePlayerButton.setText("Update Player");
 //        updatePlayerButton.setDisable(false);

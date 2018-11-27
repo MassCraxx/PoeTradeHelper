@@ -23,33 +23,11 @@
     <children>
         <TabPane maxHeight="1.7976931348623157E308" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
             <tabs>
-                <Tab text="Market Overview">
-                    <content>
-                        <AnchorPane>
-                            <children>
-                                <ListView fx:id="currencyList" styleClass="deal-list" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                            </children>
-                        </AnchorPane>
-                    </content>
-                </Tab>
-                <Tab text="Player Overview">
-                    <content>
-                        <AnchorPane>
-                            <children>
-                                <VBox maxHeight="1.7976931348623157E308" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                    <children>
-                                        <ListView fx:id="playerDealList" maxHeight="1.7976931348623157E308" styleClass="deal-list" VBox.vgrow="ALWAYS" />
-                                    </children>
-                                </VBox>
-                            </children>
-                        </AnchorPane>
-                    </content>
-                </Tab>
                 <Tab text="Currency Offers">
                     <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                             <children>
-                                <ComboBox fx:id="offerSecondary" layoutX="292.0" layoutY="11.0" prefHeight="31.0" prefWidth="138.0" AnchorPane.leftAnchor="280.0" AnchorPane.rightAnchor="200.0" AnchorPane.topAnchor="10.0" />
+                                <ComboBox fx:id="offerSecondary" layoutX="292.0" layoutY="11.0" prefHeight="31.0" prefWidth="138.0" AnchorPane.leftAnchor="270.0" AnchorPane.rightAnchor="190.0" AnchorPane.topAnchor="10.0" />
                                 <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Buy Offers" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="15.0" />
                                 <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Sell Offers" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="15.0" />
                                 <HBox layoutY="50.0" maxWidth="1.7976931348623157E308" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="50.0">
@@ -74,11 +52,33 @@
                                         </TableView>
                                     </children>
                                 </HBox>
-                        <Button fx:id="refreshBtn" layoutX="134.0" layoutY="10.0" mnemonicParsing="false" text="Refresh" AnchorPane.leftAnchor="200.0" />
+                        <Button fx:id="refreshBtn" layoutX="134.0" layoutY="10.0" mnemonicParsing="false" text="Refresh" AnchorPane.leftAnchor="190.0" />
                             </children>
                             <padding>
                                 <Insets left="10.0" right="10.0" />
                             </padding>
+                        </AnchorPane>
+                    </content>
+                </Tab>
+                <Tab text="Market Overview">
+                    <content>
+                        <AnchorPane>
+                            <children>
+                                <ListView fx:id="currencyList" styleClass="deal-list" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </Tab>
+                <Tab text="Player Overview">
+                    <content>
+                        <AnchorPane>
+                            <children>
+                                <VBox maxHeight="1.7976931348623157E308" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                    <children>
+                                        <ListView fx:id="playerDealList" maxHeight="1.7976931348623157E308" styleClass="deal-list" VBox.vgrow="ALWAYS" />
+                                    </children>
+                                </VBox>
+                            </children>
                         </AnchorPane>
                     </content>
                 </Tab>
@@ -192,7 +192,7 @@
             <children>
                 <VBox maxWidth="100.0" minWidth="100.0" prefWidth="100.0">
                     <children>
-                        <Button id="updateButton" fx:id="updateButton" defaultButton="true" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="73.0" text="Update" />
+                        <Button id="updateButton" fx:id="updateButton" defaultButton="true" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="73.0" text="Update All" />
                     </children>
                     <HBox.margin>
                         <Insets left="5.0" right="5.0" />
