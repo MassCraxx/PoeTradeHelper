@@ -4,6 +4,7 @@ import de.crass.poetradehelper.model.CurrencyID;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+import javax.swing.*;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -185,6 +186,11 @@ public class PropertyManager {
     }
 
     public void setLeague(String league) {
+        if(league == null){
+            LogManager.getInstance().log(getClass(), "Prevented setting null as league.");
+            return;
+        }
+        LogManager.getInstance().log(getClass(), "Setting " + league + " as new league.");
         appProps.setProperty(LEAGUE_KEY, league);
     }
 
@@ -279,5 +285,10 @@ public class PropertyManager {
 
     public void setUpdateDelay(int updateDelay) {
         this.updateDelay = updateDelay;
+    }
+
+    public void resetLeague() {
+        JOptionPane.showMessageDialog(null, "League ended - resetting to " + defaultLeague+".");
+        setLeague(defaultLeague);
     }
 }

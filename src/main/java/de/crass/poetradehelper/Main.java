@@ -46,7 +46,7 @@ import java.util.concurrent.*;
 public class Main extends Application implements ParseListener {
 
     public static final String title = "PoeTradeHelper";
-    public static final String versionText = "v0.4.3";
+    public static final String versionText = "v0.4.4-SNAPSHOT";
 
     @FXML
     private ListView<CurrencyDeal> playerDealList;
@@ -431,8 +431,8 @@ public class Main extends Application implements ParseListener {
         valueTable.getColumns().clear();
         valueTable.getColumns().addAll(column, column2);
 
-        //FIXME: Dont create new lists all the time... also refresh on league change
-        valueTable.setItems(FXCollections.observableArrayList(tradeManager.getCurrencyValues().entrySet()));
+        //FIXME: Dont create new lists all the time... also refresh on currency parsed callback
+        valueTable.setItems(tradeManager.getCurrencyValues());
 
         valueTable.setContextMenu(new CurrencyContextMenu(valueTable));
 
@@ -440,7 +440,7 @@ public class Main extends Application implements ParseListener {
             @Override
             public void handle(ActionEvent event) {
                 tradeManager.updateCurrencyValues();
-                valueTable.setItems(FXCollections.observableArrayList(tradeManager.getCurrencyValues().entrySet()));
+                valueTable.setItems(tradeManager.getCurrencyValues());
                 valueTable.refresh();
             }
         });
@@ -484,8 +484,6 @@ public class Main extends Application implements ParseListener {
                 calculateValue();
             }
         });
-
-        calculateValue();
 
         // SETTINGS
         primaryComboBox.setTooltip(new Tooltip("Select currency to flip with"));
@@ -589,7 +587,6 @@ public class Main extends Application implements ParseListener {
         leagueCB.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                LogManager.getInstance().log(getClass(), "Setting " + leagueCB.getValue() + " as new league.");
                 PropertyManager.getInstance().setLeague(leagueCB.getValue());
                 tradeManager.updateCurrencyValues();
                 updateTitle();

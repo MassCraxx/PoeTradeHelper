@@ -7,6 +7,7 @@ import de.crass.poetradehelper.PropertyManager;
 import de.crass.poetradehelper.model.CurrencyID;
 import de.crass.poetradehelper.web.HttpManager;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -21,7 +22,7 @@ public class PoeNinjaParser {
     private long updateDelay = 6 * 60 * 60 * 1000; // 6 hours
 
     // Currency - (CurrencyID<>Chaos Value)
-    private HashMap<CurrencyID, Float> currentRates;
+    private HashMap<CurrencyID, Float> currentRates = new HashMap<>();
 
     public PoeNinjaParser() {
         objectMapper = new ObjectMapper();
@@ -51,10 +52,12 @@ public class PoeNinjaParser {
                 json = HttpManager.getInstance().getJson(currencyURL, "?league=" + league);
             } catch (IOException e) {
                 LogManager.getInstance().log(getClass(), "IOException!\n" + e);
+            } catch (JSONException j){
+                LogManager.getInstance().log(getClass(), "JSONException!\n" + j);
             }
 
             if (json == null || json.length() == 0) {
-                LogManager.getInstance().log(getClass(), "Invalid response");
+                LogManager.getInstance().log(getClass(), "Invalid response from PoeNinja! API has been changed.");
                 return;
             }
 
@@ -96,9 +99,7 @@ public class PoeNinjaParser {
 
     public HashMap<CurrencyID, Float> getCurrentRates() {
         fetchRates(PropertyManager.getInstance().getCurrentLeague(), false);
-        if (currentRates == null) {
-            currentRates = new HashMap<>();
-        }
+
         return currentRates;
     }
 

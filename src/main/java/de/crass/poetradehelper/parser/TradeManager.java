@@ -23,6 +23,7 @@ public class TradeManager implements ParseListener {
     private ObservableList<CurrencyDeal> currentDeals;
     private ObservableList<CurrencyDeal> playerDeals;
     private PoeNinjaParser poeNinjaParser;
+
     private Comparator<? super CurrencyDeal> diffValueSorter = new Comparator<CurrencyDeal>() {
         @Override
         public int compare(CurrencyDeal o1, CurrencyDeal o2) {
@@ -50,10 +51,10 @@ public class TradeManager implements ParseListener {
     private ParseListener listener;
 
     public TradeManager() {
+        poeApiParser = new PoeApiParser();
+        poeNinjaParser = new PoeNinjaParser();
         webParser = new PoeTradeWebParser();
         webParser.setParseListener(this);
-        poeNinjaParser = new PoeNinjaParser();
-        poeApiParser = new PoeApiParser();
 
         currentDeals = FXCollections.observableArrayList();
         playerDeals = FXCollections.observableArrayList();
@@ -86,16 +87,16 @@ public class TradeManager implements ParseListener {
         webParser.updateCurrency(secondaryCurrencyID, true);
     }
 
-    public void parseDeals(boolean async){
+    public void parseDeals(boolean async) {
         // Cannot really be async, since working on observable lists
-        if(async){
+        if (async) {
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
                     parseDeals();
                 }
             });
-        } else{
+        } else {
             parseDeals();
         }
     }
@@ -290,8 +291,8 @@ public class TradeManager implements ParseListener {
                 float higherValue = (buyValue > sellValue ? buyValue : sellValue);
 
                 // If sell and buy value differ too much from each other, filter
-                if (Math.abs(buyValue - sellValue) > 0.5 * higherValue) {
-                    LogManager.getInstance().log(getClass(), "Filtered excessive offer: " + buyValue + " - " + sellValue);
+                if (Math.abs(buyValue - sellValue) > 0.75 * higherValue) {
+                    LogManager.getInstance().log(getClass(), "Filtered excessive offer for " + offer.getBuyID() + " - " + offer.getSellID() + ": " + buyValue + " - " + sellValue);
                     continue;
                 }
             }
@@ -349,8 +350,8 @@ public class TradeManager implements ParseListener {
         return poeNinjaParser.getCurrentValue(what, inWhat);
     }
 
-    public HashMap<CurrencyID, Float> getCurrencyValues() {
-        return poeNinjaParser.getCurrentRates();
+    public ObservableList<Map.Entry<CurrencyID, Float>> getCurrencyValues() {
+        return FXCollections.observableArrayList(poeNinjaParser.getCurrentRates().entrySet());
     }
 
     public ObservableList<CurrencyOffer> getBuyOffers(CurrencyID secondary) {

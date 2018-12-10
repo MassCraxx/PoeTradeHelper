@@ -1,5 +1,6 @@
 package de.crass.poetradehelper.web;
 
+import de.crass.poetradehelper.LogManager;
 import okhttp3.*;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -43,8 +44,13 @@ public class HttpManager {
         return new JSONObject(response.body().string());
     }
 
-    public JSONObject getJson(String fetchURL, String params) throws IOException {
-        return new JSONObject(get(fetchURL, params));
+    public JSONObject getJson(String fetchURL, String params) throws IOException, JSONException {
+        String json = get(fetchURL, params);
+        if(json.isEmpty()){
+            LogManager.getInstance().log(getClass(), "getJson from "+fetchURL+params+" was empty!");
+            return null;
+        }
+        return new JSONObject(json);
     }
 
     public String readAll(String url) throws IOException {
