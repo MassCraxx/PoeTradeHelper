@@ -51,6 +51,10 @@ public class PoeTradeWebParser {
     private boolean updating = false;
     private boolean cancel = false;
 
+    public PoeTradeWebParser(ParseListener listener) {
+        this();
+        setParseListener(listener);
+    }
 
     public PoeTradeWebParser() {
         reset();

@@ -21,11 +21,18 @@ public class PoeNinjaParser {
     private boolean useOfflineCache = true;
     private long updateDelay = 6 * 60 * 60 * 1000; // 6 hours
 
+    private PoeNinjaListener listener;
+
     // Currency - (CurrencyID<>Chaos Value)
     private HashMap<CurrencyID, Float> currentRates = new HashMap<>();
 
     public PoeNinjaParser() {
         objectMapper = new ObjectMapper();
+    }
+
+    public PoeNinjaParser(PoeNinjaListener listener) {
+        this();
+        this.listener = listener;
     }
 
     public void fetchRates(String league, boolean forceUpdate) {
@@ -39,6 +46,9 @@ public class PoeNinjaParser {
                 try {
                     LogManager.getInstance().log(getClass(), "Loading poe.ninja currency values from cache.");
                     currentRates = objectMapper.readValue(file, typeRef);
+                    if(listener != null){
+                        listener.onRatesFetched();
+                    }
                 } catch (Exception e) {
                     LogManager.getInstance().log(getClass(), "Error loading poe.ninja values from cache.");
                     fetchRates(league, true);
@@ -94,6 +104,10 @@ public class PoeNinjaParser {
                     LogManager.getInstance().log(getClass(), "Writing ninja cache failed!\n" + e);
                 }
             }
+
+            if(listener != null){
+                listener.onRatesFetched();
+            }
         }
     }
 
@@ -121,5 +135,13 @@ public class PoeNinjaParser {
         }
 
         return whatValue / inWhatValue;
+    }
+
+    public void registerListener(PoeNinjaListener ninjaListener) {
+        listener = ninjaListener;
+    }
+
+    public interface PoeNinjaListener{
+        void onRatesFetched();
     }
 }

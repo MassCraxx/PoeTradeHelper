@@ -6,6 +6,7 @@ import de.crass.poetradehelper.model.CurrencyDeal;
 import de.crass.poetradehelper.model.CurrencyID;
 import de.crass.poetradehelper.model.CurrencyOffer;
 import de.crass.poetradehelper.parser.ParseListener;
+import de.crass.poetradehelper.parser.PoeNinjaParser;
 import de.crass.poetradehelper.parser.TradeManager;
 import de.crass.poetradehelper.tts.PoeChatTTS;
 import de.crass.poetradehelper.ui.CurrencyContextMenu;
@@ -39,11 +40,12 @@ import javax.swing.*;
 import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.*;
 
-public class Main extends Application implements ParseListener {
+public class Main extends Application implements ParseListener, PoeNinjaParser.PoeNinjaListener {
 
     public static final String title = "PoeTradeHelper";
     public static final String versionText = "v0.4.4-SNAPSHOT";
@@ -179,6 +181,9 @@ public class Main extends Application implements ParseListener {
 
     private boolean currencyFilterChanged = false;
 
+    private static DecimalFormat dFormat = new DecimalFormat("0.##");
+    private static DecimalFormat valueFormat;
+
     public static void main(String[] args) {
         launch(args);
     }
@@ -208,7 +213,7 @@ public class Main extends Application implements ParseListener {
         LogManager.getInstance().setConsole(console);
 
         tradeManager = TradeManager.getInstance();
-        tradeManager.registerListener(this);
+        tradeManager.registerListener(this, this);
 
         poeChatTTS = new PoeChatTTS(new PoeChatTTS.Listener() {
             @Override
@@ -240,13 +245,22 @@ public class Main extends Application implements ParseListener {
 
     private int versionClicked = 0;
     private final String debugSecretValue = "foobar";
+
     private void setupUI() {
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+        symbols.setDecimalSeparator('.');
+        dFormat.setDecimalFormatSymbols(symbols);
+        dFormat.setRoundingMode(RoundingMode.HALF_UP);
+
+        valueFormat = (DecimalFormat) dFormat.clone();
+        valueFormat.applyPattern("0.00");
+
         version.setText(versionText);
         version.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
                 versionClicked++;
-                if(versionClicked%10 == 0){
+                if (versionClicked % 10 == 0) {
                     JOptionPane.showMessageDialog(null, "Bananarama!");
                     autoUpdate.setVisible(true);
                 }
@@ -278,7 +292,7 @@ public class Main extends Application implements ParseListener {
         updateButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                if(autoUpdateExecutor != null){
+                if (autoUpdateExecutor != null) {
                     stopUpdateTask();
                 }
                 if (tradeManager.isUpdating()) {
@@ -317,7 +331,7 @@ public class Main extends Application implements ParseListener {
                     @Override
                     public ObservableValue<Number> call(TableColumn.CellDataFeatures<CurrencyOffer, Number> param) {
                         int stock = param.getValue().getStock();
-                        if(stock < 0){
+                        if (stock < 0) {
                             return null;
                         }
                         return new SimpleFloatProperty(stock);
@@ -378,7 +392,7 @@ public class Main extends Application implements ParseListener {
             @Override
             public void handle(ActionEvent event) {
                 CurrencyID newValue = offerSecondary.getValue();
-                if(newValue != null) {
+                if (newValue != null) {
                     buyOfferTable.setItems(tradeManager.getBuyOffers(newValue));
                     sellOfferTable.setItems(tradeManager.getSellOffers(newValue));
                 }
@@ -396,6 +410,7 @@ public class Main extends Application implements ParseListener {
         valueTable.setRowFactory(tv -> new TableRow<Map.Entry<CurrencyID, Float>>() {
             @Override
             public void updateItem(Map.Entry<CurrencyID, Float> item, boolean empty) {
+                // updates on refresh
                 super.updateItem(item, empty);
                 if (item != null && PropertyManager.getInstance().getPrimaryCurrency().equals(item.getKey())) {
                     setStyle("-fx-background-color: -fx-accent;");
@@ -404,6 +419,8 @@ public class Main extends Application implements ParseListener {
                 }
             }
         });
+
+        valueTable.setContextMenu(new CurrencyContextMenu(valueTable));
 
         TableColumn<Map.Entry<CurrencyID, Float>, String> column = new TableColumn<>();
         column.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Map.Entry<CurrencyID, Float>, String>, ObservableValue<String>>() {
@@ -420,6 +437,18 @@ public class Main extends Application implements ParseListener {
                 return new SimpleFloatProperty(param.getValue().getValue());
             }
         });
+        column2.setCellFactory(tc -> new TableCell<Map.Entry<CurrencyID, Float>, Number>() {
+            @Override
+            protected void updateItem(Number number, boolean empty) {
+                super.updateItem(number, empty);
+                if (empty) {
+                    setText(null);
+                } else {
+                    setText(prettyFloat(number.floatValue(), valueFormat));
+                }
+            }
+        });
+
         column.setText("Currency");
         column.setPrefWidth(100);
         column.setMaxWidth(100);
@@ -431,17 +460,10 @@ public class Main extends Application implements ParseListener {
         valueTable.getColumns().clear();
         valueTable.getColumns().addAll(column, column2);
 
-        //FIXME: Dont create new lists all the time... also refresh on currency parsed callback
-        valueTable.setItems(tradeManager.getCurrencyValues());
-
-        valueTable.setContextMenu(new CurrencyContextMenu(valueTable));
-
         updateValuesButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 tradeManager.updateCurrencyValues();
-                valueTable.setItems(tradeManager.getCurrencyValues());
-                valueTable.refresh();
             }
         });
 
@@ -495,6 +517,7 @@ public class Main extends Application implements ParseListener {
                 CurrencyID newValue = primaryComboBox.getValue();
                 PropertyManager.getInstance().setPrimaryCurrency(newValue);
                 tradeManager.parseDeals(true);
+                valueTable.refresh();
             }
         });
 
@@ -716,9 +739,9 @@ public class Main extends Application implements ParseListener {
         autoUpdate.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                if(autoUpdate.isSelected()) {
+                if (autoUpdate.isSelected()) {
                     startUpdateTask();
-                } else{
+                } else {
                     stopUpdateTask();
                 }
             }
@@ -726,12 +749,12 @@ public class Main extends Application implements ParseListener {
 
         autoUpdate.setTooltip(new Tooltip("Invoke Update every " + PropertyManager.getInstance().getUpdateDelay() + " minutes."));
 
-        if(!debugSecretValue.equals(PropertyManager.getInstance().getProp("DEBUG", null))){
+        if (!debugSecretValue.equals(PropertyManager.getInstance().getProp("DEBUG", null))) {
             autoUpdate.setVisible(false);
         }
     }
 
-    private void calculateValue(){
+    private void calculateValue() {
         calculateValue(null);
     }
 
@@ -739,31 +762,30 @@ public class Main extends Application implements ParseListener {
         String inString = valueInputText.getText();
 
         boolean outputReversed = false;
-        if(inString == null || inString.isEmpty()){
+        if (inString == null || inString.isEmpty()) {
             inString = valueOutputText.getText();
             outputReversed = true;
         }
 
-        if(newText != null){
+        if (newText != null) {
             inString += newText;
         }
 
-        String result = "0";
+        String result = "";
         if (inString != null && !inString.isEmpty()) {
             try {
-                DecimalFormat format = new DecimalFormat("0.#");
-                float inAmount = format.parse(inString).floatValue();
-                if(outputReversed){
-                    result = prettyFloat(inAmount * tradeManager.getCurrencyValue(valueOutputCB.getValue(), valueInputCB.getValue()));
-                }else {
-                    result = prettyFloat(inAmount * tradeManager.getCurrencyValue(valueInputCB.getValue(), valueOutputCB.getValue()));
+                float inAmount = dFormat.parse(inString).floatValue();
+                if (outputReversed) {
+                    result = prettyFloat(inAmount * tradeManager.getCurrencyValue(valueOutputCB.getValue(), valueInputCB.getValue()), valueFormat);
+                } else {
+                    result = prettyFloat(inAmount * tradeManager.getCurrencyValue(valueInputCB.getValue(), valueOutputCB.getValue()), valueFormat);
                 }
             } catch (ParseException ignored) {
 
             }
         }
 
-        if(outputReversed){
+        if (outputReversed) {
             valueInputText.setText(result);
         } else {
             valueOutputText.setText(result);
@@ -798,7 +820,7 @@ public class Main extends Application implements ParseListener {
 
         updateButton.setText("Cancel");
 //        updatePlayerButton.setText("Cancel");
-        if(autoUpdate.isSelected()){
+        if (autoUpdate.isSelected()) {
             stopUpdateTask();
         }
     }
@@ -815,18 +837,35 @@ public class Main extends Application implements ParseListener {
 
         currencyFilterChanged = false;
 
-        if(autoUpdate.isSelected()){
+        if (autoUpdate.isSelected()) {
             startUpdateTask();
         }
     }
 
+    @Override
+    public void onRatesFetched() {
+        valueTable.setItems(tradeManager.getCurrencyValues());
+        TableColumn column = valueTable.getColumns().get(1);
+        column.setSortType(TableColumn.SortType.DESCENDING);
+        valueTable.getSortOrder().add(column);
+        valueTable.refresh();
+
+        calculateValue();
+    }
+
     public static String prettyFloat(float in) {
+        return prettyFloat(in, null);
+    }
+
+    public static String prettyFloat(float in, DecimalFormat format) {
         if (in == 0) {
             return "---";
         }
-        DecimalFormat df = new DecimalFormat("0.##");
-        df.setRoundingMode(RoundingMode.HALF_UP);
-        return String.valueOf(df.format(in));
+        if (format == null) {
+            format = dFormat;
+        }
+
+        return String.valueOf(format.format(in));
     }
 
     public static void setImage(String name, ImageView view) {
@@ -870,7 +909,7 @@ public class Main extends Application implements ParseListener {
     }
 
     private void stopUpdateTask() {
-        if(autoUpdateExecutor != null) {
+        if (autoUpdateExecutor != null) {
             autoUpdateExecutor.shutdownNow();
             autoUpdateExecutor = null;
         }

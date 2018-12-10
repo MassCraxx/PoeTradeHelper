@@ -53,8 +53,7 @@ public class TradeManager implements ParseListener {
     public TradeManager() {
         poeApiParser = new PoeApiParser();
         poeNinjaParser = new PoeNinjaParser();
-        webParser = new PoeTradeWebParser();
-        webParser.setParseListener(this);
+        webParser = new PoeTradeWebParser(this);
 
         currentDeals = FXCollections.observableArrayList();
         playerDeals = FXCollections.observableArrayList();
@@ -330,8 +329,9 @@ public class TradeManager implements ParseListener {
         return webParser.isUpdating();
     }
 
-    public void registerListener(ParseListener listener) {
+    public void registerListener(ParseListener listener, PoeNinjaParser.PoeNinjaListener ninjaListener) {
         this.listener = listener;
+        poeNinjaParser.registerListener(ninjaListener);
     }
 
     public void cancelUpdate() {
