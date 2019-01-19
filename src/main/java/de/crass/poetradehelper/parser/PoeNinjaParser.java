@@ -3,7 +3,6 @@ package de.crass.poetradehelper.parser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.crass.poetradehelper.LogManager;
-import de.crass.poetradehelper.PropertyManager;
 import de.crass.poetradehelper.model.CurrencyID;
 import de.crass.poetradehelper.web.HttpManager;
 import org.json.JSONArray;
@@ -112,8 +111,6 @@ public class PoeNinjaParser {
     }
 
     public HashMap<CurrencyID, Float> getCurrentRates() {
-        fetchRates(PropertyManager.getInstance().getCurrentLeague(), false);
-
         return currentRates;
     }
 

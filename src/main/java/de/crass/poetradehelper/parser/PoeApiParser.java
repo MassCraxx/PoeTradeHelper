@@ -3,7 +3,6 @@ package de.crass.poetradehelper.parser;
 import de.crass.poetradehelper.LogManager;
 import de.crass.poetradehelper.PropertyManager;
 import de.crass.poetradehelper.web.HttpManager;
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.json.JSONArray;

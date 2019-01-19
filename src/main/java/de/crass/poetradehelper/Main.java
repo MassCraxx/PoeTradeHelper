@@ -72,6 +72,9 @@ public class Main extends Application implements ParseListener, PoeNinjaParser.P
     private CheckBox filterWithoutAPI;
 
     @FXML
+    private CheckBox filterExcessive;
+
+    @FXML
     private CheckBox voiceActive;
 
     @FXML
@@ -210,11 +213,14 @@ public class Main extends Application implements ParseListener, PoeNinjaParser.P
         assert updateButton != null : "fx:id=\"updateButton\" was not injected: check your FXML file 'layout.fxml'.";
         assert version != null : "fx:id=\"version\" was not injected: check your FXML file 'layout.fxml'.";
 
+        // Setup console
         LogManager.getInstance().setConsole(console);
 
+        // Setup trade manager
         tradeManager = TradeManager.getInstance();
         tradeManager.registerListener(this, this);
 
+        // Setup TTS
         poeChatTTS = new PoeChatTTS(new PoeChatTTS.Listener() {
             @Override
             public void onShutDown() {
@@ -223,6 +229,7 @@ public class Main extends Application implements ParseListener, PoeNinjaParser.P
             }
         });
 
+        // Setup UI
         setupUI();
 
         LogManager.getInstance().log(getClass(), "Started");
@@ -261,7 +268,7 @@ public class Main extends Application implements ParseListener, PoeNinjaParser.P
             public void handle(MouseEvent event) {
                 versionClicked++;
                 if (versionClicked % 10 == 0) {
-                    JOptionPane.showMessageDialog(null, "Bananarama!");
+                    JOptionPane.showMessageDialog(null, "PoE Ninja will hate me for this...");
                     autoUpdate.setVisible(true);
                 }
             }
@@ -516,7 +523,7 @@ public class Main extends Application implements ParseListener, PoeNinjaParser.P
             public void handle(ActionEvent event) {
                 CurrencyID newValue = primaryComboBox.getValue();
                 PropertyManager.getInstance().setPrimaryCurrency(newValue);
-                tradeManager.parseDeals(true);
+                tradeManager.parseDeals();
                 valueTable.refresh();
             }
         });
@@ -526,7 +533,7 @@ public class Main extends Application implements ParseListener, PoeNinjaParser.P
             @Override
             public void handle(ActionEvent event) {
                 PropertyManager.getInstance().setFilterOutOfStock(filterInvalid.isSelected());
-                tradeManager.parseDeals(true);
+                tradeManager.parseDeals();
             }
         });
         filterInvalid.setSelected(PropertyManager.getInstance().getFilterOutOfStock());
@@ -536,10 +543,20 @@ public class Main extends Application implements ParseListener, PoeNinjaParser.P
             @Override
             public void handle(ActionEvent event) {
                 PropertyManager.getInstance().setFilterNoApi(filterWithoutAPI.isSelected());
-                tradeManager.parseDeals(true);
+                tradeManager.parseDeals();
             }
         });
         filterWithoutAPI.setSelected(PropertyManager.getInstance().getFilterNoApi());
+
+        filterExcessive.setTooltip(new Tooltip("Ignore all offers that have an insane buy to sell value ratio"));
+        filterExcessive.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                PropertyManager.getInstance().setFilterExcessive(filterExcessive.isSelected());
+                tradeManager.parseDeals();
+            }
+        });
+        filterExcessive.setSelected(PropertyManager.getInstance().getFilterExcessive());
 
         currencyFilterList.setItems(PropertyManager.getInstance().getFilterList());
         currencyFilterList.setTooltip(new Tooltip("Only offers for currency in this list will be fetched on update"));

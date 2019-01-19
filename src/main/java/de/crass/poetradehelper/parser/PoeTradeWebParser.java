@@ -92,6 +92,7 @@ public class PoeTradeWebParser {
         if (clear) {
             reset();
         }
+
         if(async) {
             Thread runThread = new Thread(() -> {
                 doUpdate(currencyList, clear);
