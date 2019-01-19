@@ -14,11 +14,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
-import static de.crass.poetradehelper.model.CurrencyID.*;
-
 /**
  * Created by mcrass on 19.07.2018.
  */
+@SuppressWarnings({"WeakerAccess", "FieldCanBeLocal", "unused"})
 public class PropertyManager {
     private static PropertyManager instance;
     // DEBUG
@@ -101,7 +100,7 @@ public class PropertyManager {
         updateDelay = Integer.parseInt(appProps.getProperty(UPDATE_DELAY_MINUTES, "5"));
     }
 
-    public void storeProperties() {
+    void storeProperties() {
         appProps.setProperty(LEAGUE_KEY, getCurrentLeague());
         appProps.setProperty(CURRENCY_LIST, currencyListToString(currencyFilterList));
         appProps.setProperty(PLAYER_LIST, listToString(playerList));
@@ -179,10 +178,6 @@ public class PropertyManager {
         appProps.setProperty(LEAGUE_KEY, league);
     }
 
-    public Properties getAppProps() {
-        return appProps;
-    }
-
     public void setProp(String key, String value) {
         appProps.setProperty(key, value);
     }
@@ -204,7 +199,7 @@ public class PropertyManager {
         if (list == null || list.isEmpty()) {
             return "";
         }
-        return Main.join(list, ",");
+        return Main.join(list);
     }
 
     public List<String> stringToList(String s) {
@@ -266,7 +261,7 @@ public class PropertyManager {
 
     public void resetFilterList() {
         currencyFilterList.clear();
-        currencyFilterList.addAll(defaultCurrencyFilterList);
+        currencyFilterList.addAll(stringToCurrencyList(defaultCurrencyFilterString));
     }
 
     public int getUpdateDelay() {
