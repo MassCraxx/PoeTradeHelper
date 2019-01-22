@@ -3,6 +3,7 @@ package de.crass.poetradehelper.parser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.crass.poetradehelper.LogManager;
+import de.crass.poetradehelper.PropertyManager;
 import de.crass.poetradehelper.model.CurrencyID;
 import de.crass.poetradehelper.web.HttpManager;
 import org.json.JSONArray;
@@ -14,7 +15,7 @@ import java.io.IOException;
 import java.util.HashMap;
 
 public class PoeNinjaParser {
-    public static final String currencyURL = "http://poe.ninja/api/Data/GetCurrencyOverview";
+    private static final String currencyURL = "http://poe.ninja/api/Data/GetCurrencyOverview";
     private final ObjectMapper objectMapper;
     private final File file = new File("poeninja.dat");
     private boolean useOfflineCache = true;
@@ -23,9 +24,9 @@ public class PoeNinjaParser {
     private PoeNinjaListener listener;
 
     // Currency - (CurrencyID<>Chaos Value)
-    private HashMap<CurrencyID, Float> currentRates = new HashMap<>();
+    private HashMap<CurrencyID, Float> currentRates;
 
-    public PoeNinjaParser() {
+    PoeNinjaParser() {
         objectMapper = new ObjectMapper();
     }
 
@@ -34,7 +35,7 @@ public class PoeNinjaParser {
         this.listener = listener;
     }
 
-    public void fetchRates(String league, boolean forceUpdate) {
+    void fetchRates(String league, boolean forceUpdate) {
         // If there is a file  and it is recent
         if (!forceUpdate && (useOfflineCache && file.exists() &&
                 file.lastModified() + updateDelay > System.currentTimeMillis())) {
@@ -110,11 +111,14 @@ public class PoeNinjaParser {
         }
     }
 
-    public HashMap<CurrencyID, Float> getCurrentRates() {
+    HashMap<CurrencyID, Float> getCurrentRates() {
+        if(currentRates == null){
+            fetchRates(PropertyManager.getInstance().getCurrentLeague(), false);
+        }
         return currentRates;
     }
 
-    public Float getCurrentCValueFor(CurrencyID id) {
+    Float getCurrentCValueFor(CurrencyID id) {
         if (id == CurrencyID.CHAOS) {
             return 1f;
         }
@@ -123,7 +127,7 @@ public class PoeNinjaParser {
         return value == null ? 0 : value;
     }
 
-    public Float getCurrentValue(CurrencyID what, CurrencyID inWhat) {
+    Float getCurrentValue(CurrencyID what, CurrencyID inWhat) {
         Float whatValue = getCurrentCValueFor(what);
         Float inWhatValue = getCurrentCValueFor(inWhat);
 
@@ -134,7 +138,7 @@ public class PoeNinjaParser {
         return whatValue / inWhatValue;
     }
 
-    public void registerListener(PoeNinjaListener ninjaListener) {
+    void registerListener(PoeNinjaListener ninjaListener) {
         listener = ninjaListener;
     }
 

@@ -47,96 +47,83 @@ public class PoeTradeWebParser {
     private final static Pattern OFFER_PATTERN_STOCK = Pattern.compile(
             "data-stock=\"(.+)\"");
 
-    private ParseListener parseListener;
+    private OfferParseListener parseListener;
     private boolean updating = false;
     private boolean cancel = false;
 
-    public PoeTradeWebParser(ParseListener listener) {
+    PoeTradeWebParser(OfferParseListener listener) {
         this();
         setParseListener(listener);
     }
 
-    public PoeTradeWebParser() {
+    private PoeTradeWebParser() {
         reset();
     }
 
-    public void reset() {
-        for(List<CurrencyOffer> list : currentOffers.values()){
+    void reset() {
+        for (List<CurrencyOffer> list : currentOffers.values()) {
             list.clear();
         }
 
-        for(List<CurrencyOffer> list : playerOffers.values()){
+        for (List<CurrencyOffer> list : playerOffers.values()) {
             list.clear();
         }
 //        currentOffers = new HashMap<>();
 //        playerOffers = new HashMap<>();
     }
 
-    public void updateCurrencies(List<CurrencyID> currencyList, boolean clear){
+    void updateCurrencies(List<CurrencyID> currencyList, boolean clear) {
         updateCurrencies(currencyList, clear, true);
     }
 
-    public void updateCurrencies(List<CurrencyID> currencyList, boolean clear, boolean async) {
+    void updateCurrencies(List<CurrencyID> currencyList, boolean clear, boolean async) {
         if (updating) {
             return;
         }
         if (parseListener != null) {
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    parseListener.onParsingStarted();
-                }
-            });
+            Platform.runLater(() -> parseListener.onParsingStarted());
         }
 
         if (clear) {
             reset();
         }
 
-        if(async) {
-            Thread runThread = new Thread(() -> {
-                doUpdate(currencyList, clear);
-            }, "PoeTradeWebParser");
+        if (async) {
+            Thread runThread = new Thread(() -> doUpdate(currencyList, clear), "PoeTradeWebParser");
 
             runThread.setDaemon(true);
             runThread.start();
-        } else{
+        } else {
             doUpdate(currencyList, clear);
         }
     }
 
-    public void doUpdate(List<CurrencyID> currencyList, boolean clear){
+    private void doUpdate(List<CurrencyID> currencyList, boolean clear) {
         updating = true;
         CurrencyID primaryCurrency = PropertyManager.getInstance().getPrimaryCurrency();
         for (CurrencyID secondaryCurrency : currencyList) {
             if (cancel) {
                 break;
             }
-
             if (!clear)
                 removeOffers(primaryCurrency, secondaryCurrency);
             fetchCurrencyOffers(primaryCurrency, secondaryCurrency, PropertyManager.getInstance().getCurrentLeague());
         }
 
         if (parseListener != null) {
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    parseListener.onParsingFinished();
-                }
-            });
+            Platform.runLater(() -> parseListener.onParsingFinished());
         }
         cancel = false;
         updating = false;
     }
 
-    public void updateCurrency(CurrencyID secondaryCurrencyID, boolean async) {
+    void updateCurrency(CurrencyID secondaryCurrencyID, boolean async) {
         List<CurrencyID> list = new LinkedList<>();
         list.add(secondaryCurrencyID);
         updateCurrencies(list, false, async);
     }
 
-    public void fetchCurrencyOffers(CurrencyID primary, CurrencyID secondary, String league) {
+    private void fetchCurrencyOffers(CurrencyID primary, CurrencyID secondary, String league) {
         try {
             // BUY
             fetchOffers(primary, secondary, league);
@@ -149,6 +136,7 @@ public class PoeTradeWebParser {
         }
     }
 
+    @SuppressWarnings("UnusedAssignment")
     private void fetchOffers(CurrencyID primary, CurrencyID secondary, String league) throws IOException, InterruptedException {
         String buyResponseBody;
         ObjectMapper objectMapper = new ObjectMapper();
@@ -231,12 +219,25 @@ public class PoeTradeWebParser {
 
     private void addOffer(CurrencyOffer offer) {
         Pair<CurrencyID, CurrencyID> key = new Pair<>(offer.getBuyID(), offer.getSellID());
-        if (PropertyManager.getInstance().getPlayerList().contains(offer.getPlayerName())) {
+        String offerPlayer = offer.getPlayerName();
+        boolean isPlayerOffer = false;
+        List<String> playerList = PropertyManager.getInstance().getPlayerList();
+        if (playerList != null && !playerList.isEmpty()) {
+            for (String playerName : playerList) {
+                if (offerPlayer.equalsIgnoreCase(playerName)) {
+                    isPlayerOffer = true;
+                    break;
+                }
+            }
+        }
+
+        if (isPlayerOffer) {
             //LogManager.getInstance().log(getClass(), "Found player offer " + offer.getPlayerName());
             List<CurrencyOffer> offers = playerOffers.get(key);
             if (offers == null) {
                 offers = new LinkedList<>();
             }
+//            LogManager.getInstance().log(getClass(), "AddOffer - Key: " + key + " Offer: " + offer.toString());
             offers.add(offer);
             playerOffers.put(key, offers);
         } else {
@@ -249,7 +250,7 @@ public class PoeTradeWebParser {
         }
     }
 
-    public void removeOffers(CurrencyID primary, CurrencyID secondary) {
+    private void removeOffers(CurrencyID primary, CurrencyID secondary) {
         Pair<CurrencyID, CurrencyID> key = new Pair<>(primary, secondary);
         clearListIfPossible(currentOffers.get(key));
         clearListIfPossible(playerOffers.get(key));
@@ -259,21 +260,21 @@ public class PoeTradeWebParser {
         clearListIfPossible(playerOffers.get(key));
     }
 
-    void clearListIfPossible(List list){
-        if(list != null && !list.isEmpty()){
+    private void clearListIfPossible(List list) {
+        if (list != null && !list.isEmpty()) {
             list.clear();
         }
     }
 
-    public HashMap<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> getCurrentOffers() {
+    HashMap<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> getCurrentOffers() {
         return currentOffers;
     }
 
-    public HashMap<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> getPlayerOffers() {
+    HashMap<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> getPlayerOffers() {
         return playerOffers;
     }
 
-    public void setParseListener(ParseListener parseListener) {
+    private void setParseListener(OfferParseListener parseListener) {
         this.parseListener = parseListener;
     }
 
@@ -281,11 +282,11 @@ public class PoeTradeWebParser {
         return updating;
     }
 
-    public void cancel() {
+    void cancel() {
         cancel = true;
     }
 
-    public static String getPoeTradeURL(String league, CurrencyID want, CurrencyID have) {
+    private static String getPoeTradeURL(String league, CurrencyID want, CurrencyID have) {
         return poeTradeCurrencyURL + getBuyQuery(league, want, have);
     }
 
@@ -297,9 +298,9 @@ public class PoeTradeWebParser {
         }
     }
 
-    public ObservableList<CurrencyOffer> getOffersFor(CurrencyID secondary, boolean sell) {
+    ObservableList<CurrencyOffer> getOffersFor(CurrencyID secondary, boolean sell) {
         Pair entry;
-        if(sell){
+        if (sell) {
             entry = new Pair<>(PropertyManager.getInstance().getPrimaryCurrency(), secondary);
         } else {
             entry = new Pair<>(secondary, PropertyManager.getInstance().getPrimaryCurrency());
@@ -307,10 +308,11 @@ public class PoeTradeWebParser {
 
         List<CurrencyOffer> offer = currentOffers.get(entry);
 
-        if (offer == null || offer.isEmpty()) {
-            updateCurrency(secondary, false);
-        }
-        offer = currentOffers.get(entry);
         return (ObservableList<CurrencyOffer>) offer;
+    }
+    public interface OfferParseListener {
+        void onParsingStarted();
+
+        void onParsingFinished();
     }
 }

@@ -6,7 +6,6 @@ package de.crass.poetradehelper;
 import de.crass.poetradehelper.model.CurrencyDeal;
 import de.crass.poetradehelper.model.CurrencyID;
 import de.crass.poetradehelper.model.CurrencyOffer;
-import de.crass.poetradehelper.parser.ParseListener;
 import de.crass.poetradehelper.parser.PoeNinjaParser;
 import de.crass.poetradehelper.parser.TradeManager;
 import de.crass.poetradehelper.tts.PoeChatTTS;
@@ -42,12 +41,9 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("unchecked")
-public class Main extends Application implements ParseListener, PoeNinjaParser.PoeNinjaListener {
+public class Main extends Application implements TradeManager.DealParseListener, PoeNinjaParser.PoeNinjaListener {
 
     private static final String title = "PoeTradeHelper";
     private static final String versionText = "v0.5-SNAPSHOT";
@@ -180,13 +176,12 @@ public class Main extends Application implements ParseListener, PoeNinjaParser.P
 
     private static Stage currentStage;
     private static PoeChatTTS poeChatTTS;
-    private static ScheduledExecutorService autoUpdateExecutor;
 
     private TradeManager tradeManager;
 
-    private boolean currencyFilterChanged = false;
+    public static boolean currencyFilterChanged = false;
 
-    private static DecimalFormat dFormat = new DecimalFormat("0.##");
+    private static DecimalFormat dFormat = new DecimalFormat("#0.##");
     private static DecimalFormat valueFormat;
 
     public static void main(String[] args) {
@@ -244,7 +239,9 @@ public class Main extends Application implements ParseListener, PoeNinjaParser.P
             poeChatTTS = null;
         }
 
-        stopUpdateTask();
+        if (tradeManager != null) {
+            tradeManager.release();
+        }
 
         LogManager.getInstance().log(getClass(), "Shutdown complete.");
     }
@@ -282,9 +279,6 @@ public class Main extends Application implements ParseListener, PoeNinjaParser.P
 
         updateButton.setTooltip(new Tooltip("Fetch offers from poe.trade for currency configured in settings"));
         updateButton.setOnAction(event -> {
-            if (autoUpdateExecutor != null) {
-                stopUpdateTask();
-            }
             if (tradeManager.isUpdating()) {
                 tradeManager.cancelUpdate();
                 updateButton.setDisable(true);
@@ -357,16 +351,18 @@ public class Main extends Application implements ParseListener, PoeNinjaParser.P
         sellOfferTable.getColumns().clear();
         sellOfferTable.getColumns().addAll(sellValueColumn, sellStockColumn, sellPlayerColumn);
 
-        offerSecondary.setItems(PropertyManager.getInstance().getFilterList());
+        offerSecondary.setItems(FXCollections.observableArrayList(CurrencyID.values()));
         offerSecondary.setOnAction(event -> {
             CurrencyID newValue = offerSecondary.getValue();
             if (newValue != null) {
-                buyOfferTable.setItems(tradeManager.getBuyOffers(newValue));
-                sellOfferTable.setItems(tradeManager.getSellOffers(newValue));
+                new Thread(() -> {
+                    buyOfferTable.setItems(tradeManager.getBuyOffers(newValue));
+                    sellOfferTable.setItems(tradeManager.getSellOffers(newValue));
+                }).start();
             }
         });
 
-        refreshBtn.setOnAction(event -> tradeManager.updateOffersForCurrency(offerSecondary.getValue()));
+        refreshBtn.setOnAction(event -> tradeManager.updateOffersForCurrency(offerSecondary.getValue(), true));
 
         // Value Tab
         valueTable.setRowFactory(tv -> new TableRow<Map.Entry<CurrencyID, Float>>() {
@@ -414,18 +410,15 @@ public class Main extends Application implements ParseListener, PoeNinjaParser.P
 
         updateValuesButton.setOnAction(event -> tradeManager.updateCurrencyValues());
 
-        ObservableList<CurrencyID> currencyList = FXCollections.observableArrayList(CurrencyID.values());
-        valueInputCB.setItems(currencyList);
+        ObservableList<CurrencyID> currencyInputList = FXCollections.observableArrayList(CurrencyID.values());
+        valueInputCB.setItems(currencyInputList);
         valueInputCB.setValue(CurrencyID.EXALTED);
-        valueOutputCB.setItems(currencyList);
+        valueOutputCB.setItems(currencyInputList);
         valueOutputCB.setValue(CurrencyID.CHAOS);
         valueOutputCB.setOnAction(event -> calculateValue());
         valueInputCB.setOnAction(event -> calculateValue());
 
-        valueInputText.setOnKeyTyped(event -> {
-//                calculateValue(event.getCharacter());
-            valueOutputText.setText("");
-        });
+        valueInputText.setOnKeyTyped(event -> valueOutputText.setText(""));
 
         valueOutputText.setOnKeyTyped(event -> valueInputText.setText(""));
 
@@ -433,7 +426,7 @@ public class Main extends Application implements ParseListener, PoeNinjaParser.P
 
         // SETTINGS
         primaryComboBox.setTooltip(new Tooltip("Select currency to flip with"));
-        primaryComboBox.setItems(currencyList);
+        primaryComboBox.setItems(currencyInputList);
         primaryComboBox.setValue(PropertyManager.getInstance().getPrimaryCurrency());
         primaryComboBox.setOnAction(event -> {
             CurrencyID newValue = primaryComboBox.getValue();
@@ -512,7 +505,13 @@ public class Main extends Application implements ParseListener, PoeNinjaParser.P
 
         leagueCB.setOnAction(event -> {
             PropertyManager.getInstance().setLeague(leagueCB.getValue());
-            tradeManager.updateCurrencyValues();
+            valueTable.getItems().clear();
+            buyOfferTable.getItems().clear();
+            sellOfferTable.getItems().clear();
+            playerDealList.getItems().clear();
+            currencyList.getItems().clear();
+
+            tradeManager.reset();
             updateTitle();
         });
 
@@ -604,17 +603,11 @@ public class Main extends Application implements ParseListener, PoeNinjaParser.P
         }
 
         // Auto Update checkbox
-        autoUpdate.setOnAction(event -> {
-            if (autoUpdate.isSelected()) {
-                startUpdateTask();
-            } else {
-                stopUpdateTask();
-            }
-        });
+        autoUpdate.setOnAction(event -> tradeManager.setAutoUpdate(autoUpdate.isSelected()));
 
         autoUpdate.setTooltip(new Tooltip("Invoke Update every " + PropertyManager.getInstance().getUpdateDelay() + " minutes."));
 
-        if (PropertyManager.getInstance().getProp("DEBUG", null) != null) {
+        if (PropertyManager.getInstance().getProp("DEBUG", null) == null) {
             autoUpdate.setVisible(false);
         }
     }
@@ -670,20 +663,35 @@ public class Main extends Application implements ParseListener, PoeNinjaParser.P
         currentStage.setTitle(title + " - " + PropertyManager.getInstance().getCurrentLeague() + " League");
     }
 
+    private long updateStart;
+
     @Override
-    public void onParsingStarted() {
+    public void onUpdateStarted() {
+        updateStart = System.currentTimeMillis();
+
         currencyList.setPlaceholder(new Label("Updating..."));
         playerDealList.setPlaceholder(new Label("Updating..."));
 
         updateButton.setText("Cancel");
 //        updatePlayerButton.setText("Cancel");
-        if (autoUpdate.isSelected()) {
-            stopUpdateTask();
-        }
+    }
+
+    @Override
+    public void onUpdateFinished() {
+        LogManager.getInstance().log(TradeManager.class, "Update took " + prettyFloat((System.currentTimeMillis() - updateStart) / 1000f) + " seconds");
+    }
+
+    private long parseStart;
+
+    @Override
+    public void onParsingStarted() {
+        parseStart = System.currentTimeMillis();
     }
 
     @Override
     public void onParsingFinished() {
+        LogManager.getInstance().log(TradeManager.class, "Parsing took " + prettyFloat((System.currentTimeMillis() - parseStart)) + " milliseconds");
+
         currencyList.setPlaceholder(new Label("No deals to show."));
         playerDealList.setPlaceholder(new Label("No deals to show. Is your player set in settings?"));
 
@@ -693,10 +701,6 @@ public class Main extends Application implements ParseListener, PoeNinjaParser.P
 //        updatePlayerButton.setDisable(false);
 
         currencyFilterChanged = false;
-
-        if (autoUpdate.isSelected()) {
-            startUpdateTask();
-        }
     }
 
     @Override
@@ -722,7 +726,7 @@ public class Main extends Application implements ParseListener, PoeNinjaParser.P
             format = dFormat;
         }
 
-        return String.valueOf(format.format(in));
+        return format.format(in);
     }
 
     public static void setImage(String name, ImageView view) {
@@ -746,21 +750,5 @@ public class Main extends Application implements ParseListener, PoeNinjaParser.P
         return result.toString();
     }
 
-    private void startUpdateTask() {
-        if (autoUpdateExecutor == null) {
-            autoUpdateExecutor = Executors.newSingleThreadScheduledExecutor();
-        }
-        int updateDelay = PropertyManager.getInstance().getUpdateDelay() * 60;
-        autoUpdateExecutor.schedule(() -> {
-            LogManager.getInstance().log("AutoUpdate", "Invoke Automatic Update");
-            TradeManager.getInstance().updateOffers(currencyFilterChanged, false);
-        }, updateDelay, TimeUnit.SECONDS);
-    }
 
-    private void stopUpdateTask() {
-        if (autoUpdateExecutor != null) {
-            autoUpdateExecutor.shutdownNow();
-            autoUpdateExecutor = null;
-        }
-    }
 }

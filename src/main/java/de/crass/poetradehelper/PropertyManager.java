@@ -9,10 +9,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * Created by mcrass on 19.07.2018.
@@ -44,6 +41,7 @@ public class PropertyManager {
     public static final String VOICE_AFK = "voice_read_afk";
     public static final String VOICE_RANDOMIZE = "voice_randomize_messages";
     public static final String UPDATE_DELAY_MINUTES = "auto_update_delay_minutes";
+    public static final String FILTER_MULTIPLE_TRANSACTIONS = "filter_multiple_transactions";
 
     // DEFAULTS
     private final String defaultLeague = "Standard";
@@ -55,7 +53,7 @@ public class PropertyManager {
     private final String defaultFilterExcessive = "true";
     private final String defaultExcessiveTreshold = "0.75";
 
-    private final String defaultCurrencyFilterString = "ALCHEMY,SCOURING,ALTERATION,REGAL,CHROMATIC,CHANCE,GCP,CHISEL,JEWELLER";
+    private final String defaultCurrencyFilterString = "ALCHEMY,SCOURING,ALTERATION,REGAL,CHROMATIC,GCP,CHISEL,JEWELLER,REGRET,FUSING";
 
     // Current Values
     private ObservableList<CurrencyID> currencyFilterList;
@@ -65,9 +63,10 @@ public class PropertyManager {
     private boolean filterNoApi;
     private boolean filterOutOfStock;
     private boolean filterExcessive;
-    private int updateDelay;
-    private double excessiveTreshold;
+    private float updateDelay;
+    private float excessiveTreshold;
     private String currentLeague;
+    private boolean filterMultipleTransactionDeals;
 
     private PropertyManager() {
         loadProperties();
@@ -95,9 +94,11 @@ public class PropertyManager {
         filterNoApi = Boolean.parseBoolean(appProps.getProperty(FILTER_NOAPI, defaultFilterStockOffers));
         filterOutOfStock = Boolean.parseBoolean(appProps.getProperty(FILTER_OUTOFSTOCK, defaultFilterInvalidStockOffers));
         filterExcessive = Boolean.parseBoolean(appProps.getProperty(FILTER_EXCESSIVE, defaultFilterExcessive));
-        excessiveTreshold = Double.parseDouble(appProps.getProperty(EXCESSIVE_TRESHOLD, defaultExcessiveTreshold));
+        excessiveTreshold = Float.parseFloat(appProps.getProperty(EXCESSIVE_TRESHOLD, defaultExcessiveTreshold));
 
-        updateDelay = Integer.parseInt(appProps.getProperty(UPDATE_DELAY_MINUTES, "5"));
+        filterMultipleTransactionDeals = Boolean.parseBoolean(appProps.getProperty(FILTER_MULTIPLE_TRANSACTIONS, "true"));
+
+        updateDelay = Float.parseFloat(appProps.getProperty(UPDATE_DELAY_MINUTES, "5"));
     }
 
     void storeProperties() {
@@ -112,6 +113,8 @@ public class PropertyManager {
         appProps.setProperty(EXCESSIVE_TRESHOLD, String.valueOf(excessiveTreshold));
 
         appProps.setProperty(UPDATE_DELAY_MINUTES, String.valueOf(updateDelay));
+
+        appProps.setProperty(FILTER_MULTIPLE_TRANSACTIONS, String.valueOf(filterMultipleTransactionDeals));
 
         try {
             appProps.store(new FileWriter(propFilename), "PoeTradeHelper Properties");
@@ -175,7 +178,7 @@ public class PropertyManager {
             return;
         }
         LogManager.getInstance().log(getClass(), "Setting " + league + " as new league.");
-        appProps.setProperty(LEAGUE_KEY, league);
+        currentLeague = league;
     }
 
     public void setProp(String key, String value) {
@@ -264,7 +267,7 @@ public class PropertyManager {
         currencyFilterList.addAll(stringToCurrencyList(defaultCurrencyFilterString));
     }
 
-    public int getUpdateDelay() {
+    public float getUpdateDelay() {
         return updateDelay;
     }
 
@@ -281,7 +284,15 @@ public class PropertyManager {
         return excessiveTreshold;
     }
 
-    public void setExcessiveTreshold(double excessiveTreshold) {
+    public void setExcessiveTreshold(float excessiveTreshold) {
         this.excessiveTreshold = excessiveTreshold;
+    }
+
+    public boolean getFilterMultipleTransactionDeals() {
+        return filterMultipleTransactionDeals;
+    }
+
+    public void setFilterMultipleTransactionDeals(boolean filterMultipleTransactionDeals) {
+        this.filterMultipleTransactionDeals = filterMultipleTransactionDeals;
     }
 }

@@ -13,22 +13,28 @@ import java.io.IOException;
 /**
  * Created by mcrass on 12.08.2018.
  */
-public class PoeApiParser {
+class PoeApiParser {
     private final static String leagueParseURL = "http://api.pathofexile.com/leagues";
     private final static String leagueParams = "?type=main&compact=1";
 
     private ObservableList<String> currentLeagues = FXCollections.observableArrayList();
 
-    public PoeApiParser() {
+    PoeApiParser() {
         updateLeagues();
     }
 
-    public void updateLeagues() {
+    private void updateLeagues() {
         try {
             currentLeagues.clear();
-
             LogManager.getInstance().log(PoeApiParser.class, "Fetching current leagues...");
-            JSONArray jsonArray = new JSONArray(HttpManager.getInstance().get(leagueParseURL, leagueParams));
+            String response = HttpManager.getInstance().get(leagueParseURL, leagueParams);
+            if(!response.startsWith("[")){
+                LogManager.getInstance().log(getClass(), "Fetching league failed! PoE under maintenance?");
+                currentLeagues.add("Standard");
+                return;
+            }
+
+            JSONArray jsonArray = new JSONArray(response);
             if (jsonArray.length() == 0) {
                 LogManager.getInstance().log(getClass(), "Error: Could not retrieve leagues.");
                 currentLeagues.add("Standard");
@@ -54,7 +60,7 @@ public class PoeApiParser {
         }
     }
 
-    public ObservableList<String> getCurrentLeagues() {
+    ObservableList<String> getCurrentLeagues() {
         if (currentLeagues.isEmpty()) {
             updateLeagues();
         }
