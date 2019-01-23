@@ -13,6 +13,7 @@ import javafx.util.Pair;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import static de.crass.poetradehelper.Main.currencyFilterChanged;
@@ -71,17 +72,8 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
 
     public void updateOffers(boolean clear) {
         if(!updating) {
-            stopUpdateTask();
-            updateOffers(clear, true);
-        } else {
-            LogManager.getInstance().log(getClass(), "Prevented update attempt while updating!");
-        }
-    }
-
-    private void updateOffers(boolean clear, boolean async) {
-        if (!updating) {
-            stopUpdateTask();
-            updateOffers(clear, async, PropertyManager.getInstance().getFilterList());
+            pauseUpdateTask();
+            updateOffers(clear, true, PropertyManager.getInstance().getFilterList());
         } else {
             LogManager.getInstance().log(getClass(), "Prevented update attempt while updating!");
         }
@@ -120,7 +112,7 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
     public void updatePlayerOffers() {
         if(!updating) {
             updating = true;
-            stopUpdateTask();
+            pauseUpdateTask();
 
             if (listener != null) {
                 listener.onUpdateStarted();
@@ -140,7 +132,7 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
     public void updateOffersForCurrency(CurrencyID secondaryCurrencyID, boolean async) {
         if(!updating) {
             updating = true;
-            stopUpdateTask();
+            pauseUpdateTask();
 
             if (listener != null) {
                 Platform.runLater(() -> listener.onUpdateStarted());
@@ -326,10 +318,6 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
                     listener.onParsingFinished();
                 }
                 updating = false;
-
-                if(autoUpdate){
-                    startUpdateTask();
-                }
             }
         });
     }
@@ -388,35 +376,59 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
     }
 
     @Override
-    public void onParsingStarted() {
+    public void onUpdateStarted() {
         updating = true;
     }
 
     @Override
-    public void onParsingFinished() {
+    public void onUpdateFinished() {
         poeNinjaParser.fetchRates(PropertyManager.getInstance().getCurrentLeague(), false);
         parseDeals();
+
+        if(autoUpdate){
+            startUpdateTask();
+        }
+
         if(listener != null){
             listener.onUpdateFinished();
         }
     }
 
+    ScheduledFuture autoUpdateFuture;
     private void startUpdateTask() {
         if (autoUpdateExecutor == null) {
             autoUpdateExecutor = Executors.newSingleThreadScheduledExecutor();
         }
         int updateDelay = (int) (PropertyManager.getInstance().getUpdateDelay() * 60);
-        autoUpdateExecutor.schedule(() -> {
+        autoUpdateFuture = autoUpdateExecutor.schedule(() -> {
             LogManager.getInstance().log("AutoUpdate", "Invoke Automatic Update");
-            TradeManager.getInstance().updateOffers(currencyFilterChanged, false);
+            TradeManager.getInstance().updateOffers(currencyFilterChanged, false, PropertyManager.getInstance().getFilterList());
         }, updateDelay, TimeUnit.SECONDS);
+        LogManager.getInstance().log(getClass(), "Auto Update scheduled.");
+        autoUpdate = true;
+    }
+
+    private void pauseUpdateTask(){
+        if (autoUpdateFuture != null) {
+            autoUpdateFuture.cancel(true);
+            LogManager.getInstance().log(getClass(), "Auto Update cancelled.");
+        }
     }
 
     private void stopUpdateTask() {
+        pauseUpdateTask();
         if (autoUpdateExecutor != null) {
-            autoUpdateExecutor.shutdownNow();
+            LogManager.getInstance().log(getClass(), "Auto Update shutdown.");
+            autoUpdateExecutor.shutdown();
+            try {
+                autoUpdateExecutor.awaitTermination(5,TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                LogManager.getInstance().log(getClass(), "Auto Update shutdownNow.");
+                autoUpdateExecutor.shutdownNow();
+            }
             autoUpdateExecutor = null;
         }
+        autoUpdate = false;
     }
 
     public boolean isUpdating() {
@@ -461,6 +473,7 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
     public ObservableList<CurrencyOffer> getSellOffers(CurrencyID secondary) {
         ObservableList<CurrencyOffer> result = webParser.getOffersFor(secondary, true);
         if (result == null || result.isEmpty()) {
+            //FIXME: Should be async
             updateOffersForCurrency(secondary, false);
             result = webParser.getOffersFor(secondary, true);
         }
@@ -469,13 +482,20 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
     }
 
     public void setAutoUpdate(boolean enabled) {
+        if(isUpdating()){
+            return;
+        }
+        LogManager.getInstance().log(getClass(), "Automatic Updates " + (enabled ? "en" : "dis") + "abled.");
+
         if (enabled) {
             startUpdateTask();
         } else {
             stopUpdateTask();
         }
-        autoUpdate = enabled;
-        LogManager.getInstance().log(getClass(), "Automatic Updates " + (enabled ? "en" : "dis") + "abled.");
+    }
+
+    public boolean isAutoUpdating() {
+        return autoUpdate;
     }
 
     public void release() {
@@ -486,6 +506,7 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
         webParser.reset();
         playerDeals.clear();
         currentDeals.clear();
+        poeNinjaParser.reset();
     }
 
     public interface DealParseListener {

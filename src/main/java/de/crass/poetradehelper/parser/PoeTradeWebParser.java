@@ -26,6 +26,8 @@ import java.util.regex.Pattern;
 import static de.crass.poetradehelper.PropertyManager.offlineMode;
 
 public class PoeTradeWebParser {
+    //TODO: Switch to (observable) sets
+    //TODO: https://stackoverflow.com/questions/1732348/regex-match-open-tags-except-xhtml-self-contained-tags
 
     private final static String poeTradeCurrencyURL = "http://currency.poe.trade/search";
     private HashMap<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> currentOffers = new HashMap<>();
@@ -68,8 +70,6 @@ public class PoeTradeWebParser {
         for (List<CurrencyOffer> list : playerOffers.values()) {
             list.clear();
         }
-//        currentOffers = new HashMap<>();
-//        playerOffers = new HashMap<>();
     }
 
     void updateCurrencies(List<CurrencyID> currencyList, boolean clear) {
@@ -81,7 +81,7 @@ public class PoeTradeWebParser {
             return;
         }
         if (parseListener != null) {
-            Platform.runLater(() -> parseListener.onParsingStarted());
+            Platform.runLater(() -> parseListener.onUpdateStarted());
         }
 
         if (clear) {
@@ -111,7 +111,7 @@ public class PoeTradeWebParser {
         }
 
         if (parseListener != null) {
-            Platform.runLater(() -> parseListener.onParsingFinished());
+            Platform.runLater(() -> parseListener.onUpdateFinished());
         }
         cancel = false;
         updating = false;
@@ -210,7 +210,7 @@ public class PoeTradeWebParser {
 
                     addOffer(offer);
                 } else {
-                    LogManager.getInstance().log(getClass(), "Only found " + offerMatcher.groupCount() + " groups... Insufficient data!");
+                    LogManager.getInstance().log(getClass(), "Only found " + offerMatcher.groupCount() + " groups in offer... Insufficient data!");
                 }
             } while (offerMatcher.find());
         }
@@ -241,10 +241,7 @@ public class PoeTradeWebParser {
             offers.add(offer);
             playerOffers.put(key, offers);
         } else {
-            ObservableList<CurrencyOffer> offers = (ObservableList<CurrencyOffer>) currentOffers.get(key);
-            if (offers == null) {
-                offers = FXCollections.observableArrayList();
-            }
+            ObservableList<CurrencyOffer> offers = getOffersFor(key, false);
             offers.add(offer);
             currentOffers.put(key, offers);
         }
@@ -299,20 +296,24 @@ public class PoeTradeWebParser {
     }
 
     ObservableList<CurrencyOffer> getOffersFor(CurrencyID secondary, boolean sell) {
-        Pair entry;
-        if (sell) {
-            entry = new Pair<>(PropertyManager.getInstance().getPrimaryCurrency(), secondary);
-        } else {
-            entry = new Pair<>(secondary, PropertyManager.getInstance().getPrimaryCurrency());
+        return getOffersFor(new Pair<>(PropertyManager.getInstance().getPrimaryCurrency(), secondary), !sell);
+    }
+
+    ObservableList<CurrencyOffer> getOffersFor(Pair<CurrencyID, CurrencyID> key, boolean invert) {
+        if (invert) {
+            key = new Pair<>(key.getValue(), key.getKey());
         }
 
-        List<CurrencyOffer> offer = currentOffers.get(entry);
-
-        return (ObservableList<CurrencyOffer>) offer;
+        List<CurrencyOffer> offers = currentOffers.get(key);
+        if (offers == null) {
+            // lists will be used in offers table, therefore must be observable
+            offers = FXCollections.observableArrayList();
+        }
+        return (ObservableList<CurrencyOffer>) offers;
     }
     public interface OfferParseListener {
-        void onParsingStarted();
+        void onUpdateStarted();
 
-        void onParsingFinished();
+        void onUpdateFinished();
     }
 }

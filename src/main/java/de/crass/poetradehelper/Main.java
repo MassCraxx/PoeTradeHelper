@@ -37,10 +37,7 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @SuppressWarnings("unchecked")
 public class Main extends Application implements TradeManager.DealParseListener, PoeNinjaParser.PoeNinjaListener {
@@ -239,8 +236,8 @@ public class Main extends Application implements TradeManager.DealParseListener,
             poeChatTTS = null;
         }
 
-        if (tradeManager != null) {
-            tradeManager.release();
+        if (TradeManager.getInstance() != null) {
+            TradeManager.getInstance().release();
         }
 
         LogManager.getInstance().log(getClass(), "Shutdown complete.");
@@ -351,14 +348,14 @@ public class Main extends Application implements TradeManager.DealParseListener,
         sellOfferTable.getColumns().clear();
         sellOfferTable.getColumns().addAll(sellValueColumn, sellStockColumn, sellPlayerColumn);
 
-        offerSecondary.setItems(FXCollections.observableArrayList(CurrencyID.values()));
+        ObservableList currencies = FXCollections.observableArrayList(CurrencyID.values());
+        currencies.sort(Comparator.comparing(Object::toString));
+        offerSecondary.setItems(currencies);
         offerSecondary.setOnAction(event -> {
             CurrencyID newValue = offerSecondary.getValue();
             if (newValue != null) {
-                new Thread(() -> {
-                    buyOfferTable.setItems(tradeManager.getBuyOffers(newValue));
-                    sellOfferTable.setItems(tradeManager.getSellOffers(newValue));
-                }).start();
+                buyOfferTable.setItems(tradeManager.getBuyOffers(newValue));
+                sellOfferTable.setItems(tradeManager.getSellOffers(newValue));
             }
         });
 
@@ -410,10 +407,9 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
         updateValuesButton.setOnAction(event -> tradeManager.updateCurrencyValues());
 
-        ObservableList<CurrencyID> currencyInputList = FXCollections.observableArrayList(CurrencyID.values());
-        valueInputCB.setItems(currencyInputList);
+        valueInputCB.setItems(currencies);
         valueInputCB.setValue(CurrencyID.EXALTED);
-        valueOutputCB.setItems(currencyInputList);
+        valueOutputCB.setItems(currencies);
         valueOutputCB.setValue(CurrencyID.CHAOS);
         valueOutputCB.setOnAction(event -> calculateValue());
         valueInputCB.setOnAction(event -> calculateValue());
@@ -426,7 +422,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
         // SETTINGS
         primaryComboBox.setTooltip(new Tooltip("Select currency to flip with"));
-        primaryComboBox.setItems(currencyInputList);
+        primaryComboBox.setItems(currencies);
         primaryComboBox.setValue(PropertyManager.getInstance().getPrimaryCurrency());
         primaryComboBox.setOnAction(event -> {
             CurrencyID newValue = primaryComboBox.getValue();
@@ -459,7 +455,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
         currencyFilterList.setItems(PropertyManager.getInstance().getFilterList());
         currencyFilterList.setTooltip(new Tooltip("Only offers for currency in this list will be fetched on update"));
 
-        currencyFilterCB.setItems(FXCollections.observableArrayList(CurrencyID.values()));
+        currencyFilterCB.setItems(currencies);
 
         addCurrencyFilterBtn.setTooltip(new Tooltip("Add selected currency to list"));
         addCurrencyFilterBtn.setOnAction(event -> {
@@ -603,7 +599,10 @@ public class Main extends Application implements TradeManager.DealParseListener,
         }
 
         // Auto Update checkbox
-        autoUpdate.setOnAction(event -> tradeManager.setAutoUpdate(autoUpdate.isSelected()));
+        autoUpdate.setOnAction(event -> {
+            tradeManager.setAutoUpdate(autoUpdate.isSelected());
+            autoUpdate.setSelected(tradeManager.isAutoUpdating());
+        });
 
         autoUpdate.setTooltip(new Tooltip("Invoke Update every " + PropertyManager.getInstance().getUpdateDelay() + " minutes."));
 

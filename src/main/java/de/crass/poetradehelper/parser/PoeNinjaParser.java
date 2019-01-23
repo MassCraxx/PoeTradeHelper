@@ -17,7 +17,9 @@ import java.util.HashMap;
 public class PoeNinjaParser {
     private static final String currencyURL = "http://poe.ninja/api/Data/GetCurrencyOverview";
     private final ObjectMapper objectMapper;
-    private final File file = new File("poeninja.dat");
+    private String cacheFileName = "_rates.dat";
+//    private final File file = new File("poeninja.dat");
+
     private boolean useOfflineCache = true;
     private long updateDelay = 6 * 60 * 60 * 1000; // 6 hours
 
@@ -37,15 +39,16 @@ public class PoeNinjaParser {
 
     void fetchRates(String league, boolean forceUpdate) {
         // If there is a file  and it is recent
-        if (!forceUpdate && (useOfflineCache && file.exists() &&
-                file.lastModified() + updateDelay > System.currentTimeMillis())) {
+        File cacheFile = new File(league + cacheFileName);
+        if (!forceUpdate && (useOfflineCache && cacheFile.exists() &&
+                cacheFile.lastModified() + updateDelay > System.currentTimeMillis())) {
 
             // If no current rates have been loaded before, load from cache
             if (currentRates == null || currentRates.isEmpty()) {
                 TypeReference<HashMap<CurrencyID, Float>> typeRef = new TypeReference<HashMap<CurrencyID, Float>>() {};
                 try {
                     LogManager.getInstance().log(getClass(), "Loading poe.ninja currency values from cache.");
-                    currentRates = objectMapper.readValue(file, typeRef);
+                    currentRates = objectMapper.readValue(cacheFile, typeRef);
                     if(listener != null){
                         listener.onRatesFetched();
                     }
@@ -97,9 +100,9 @@ public class PoeNinjaParser {
                 }
             }
 
-            if (!currentRates.isEmpty() && file.canWrite()) {
+            if (!currentRates.isEmpty()) {
                 try {
-                    objectMapper.writeValue(file, currentRates);
+                    objectMapper.writeValue(cacheFile, currentRates);
                 } catch (Exception e) {
                     LogManager.getInstance().log(getClass(), "Writing ninja cache failed!\n" + e);
                 }
@@ -140,6 +143,10 @@ public class PoeNinjaParser {
 
     void registerListener(PoeNinjaListener ninjaListener) {
         listener = ninjaListener;
+    }
+
+    public void reset() {
+        currentRates = null;
     }
 
     public interface PoeNinjaListener{
