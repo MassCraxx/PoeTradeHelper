@@ -67,9 +67,10 @@ public class PoeTradeWebParser {
             list.clear();
         }
 
-        for (List<CurrencyOffer> list : playerOffers.values()) {
-            list.clear();
-        }
+//        for (List<CurrencyOffer> list : playerOffers.values()) {
+//            list.clear();
+//        }
+        playerOffers.clear();
     }
 
     void updateCurrencies(List<CurrencyID> currencyList, boolean clear) {
@@ -219,7 +220,7 @@ public class PoeTradeWebParser {
 
     private void addOffer(CurrencyOffer offer) {
         Pair<CurrencyID, CurrencyID> key = new Pair<>(offer.getBuyID(), offer.getSellID());
-        String offerPlayer = offer.getPlayerName();
+        String offerPlayer = offer.getAccountName();
         boolean isPlayerOffer = false;
         List<String> playerList = PropertyManager.getInstance().getPlayerList();
         if (playerList != null && !playerList.isEmpty()) {
@@ -299,7 +300,7 @@ public class PoeTradeWebParser {
         return getOffersFor(new Pair<>(PropertyManager.getInstance().getPrimaryCurrency(), secondary), !sell);
     }
 
-    ObservableList<CurrencyOffer> getOffersFor(Pair<CurrencyID, CurrencyID> key, boolean invert) {
+    private ObservableList<CurrencyOffer> getOffersFor(Pair<CurrencyID, CurrencyID> key, boolean invert) {
         if (invert) {
             key = new Pair<>(key.getValue(), key.getKey());
         }

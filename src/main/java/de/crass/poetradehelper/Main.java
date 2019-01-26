@@ -483,13 +483,14 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
         ObservableList<String> playerList = PropertyManager.getInstance().getPlayerList();
         playerListView.setItems(playerList);
-        playerListView.setTooltip(new Tooltip("Offers from players in this list will be shown in PlayerOverview"));
+        playerListView.setTooltip(new Tooltip("Offers from account in this list will be shown in PlayerOverview"));
 
-        addPlayerButton.setTooltip(new Tooltip("Add player from TextField to list"));
+        addPlayerButton.setTooltip(new Tooltip("Add an account name from the text field to the list"));
         addPlayerButton.setOnAction(event -> {
             String newPlayer = playerField.getText();
             if (!newPlayer.isEmpty() && !playerList.contains(newPlayer))
                 playerList.add(newPlayer);
+                playerField.setText("");
         });
 
         removePlayerBtn.setTooltip(new Tooltip("Remove selected player from list"));
