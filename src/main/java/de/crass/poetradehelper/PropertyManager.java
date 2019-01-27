@@ -52,7 +52,7 @@ public class PropertyManager {
     private final String defaultFilterStockOffers = "false";
     private final String defaultFilterInvalidStockOffers = "true";
     private final String defaultFilterExcessive = "true";
-    private final String defaultExcessiveTreshold = "0.75";
+    private final String defaultExcessiveTreshold = "75";
 
     private final String defaultCurrencyFilterString = "ALCHEMY,SCOURING,ALTERATION,REGAL,CHROMATIC,GCP,CHISEL,JEWELLER,REGRET,FUSING";
     private final String defaultPrimaryCurrencyString = "ANCIENT,ANNULMENT,DIVINE,EXALTED,HARBINGER,MASTER";
