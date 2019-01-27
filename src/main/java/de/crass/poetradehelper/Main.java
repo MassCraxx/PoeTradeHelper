@@ -643,6 +643,8 @@ public class Main extends Application implements TradeManager.DealParseListener,
                         (voiceRandom.isSelected()));
             });
 
+            volumeLabel.setTooltip(new Tooltip("Set volume of the voice speaker"));
+
             int volume = PropertyManager.getInstance().getVoiceVolume();
             volumeLabel.setText(String.valueOf(volume) + " %");
             volumeSlider.setValue(volume);
@@ -655,9 +657,6 @@ public class Main extends Application implements TradeManager.DealParseListener,
                     poeChatTTS.testSpeech();
                 }
             });
-
-            volumeLabel.setTooltip(new Tooltip("Set volume of the voice speaker"));
-            volumeLabel.setText(String.valueOf(volume));
 
             poePath.setText(PropertyManager.getInstance().getPathOfExilePath());
         }
@@ -680,12 +679,12 @@ public class Main extends Application implements TradeManager.DealParseListener,
             }
         });
 
-        volumeLabel.setTooltip(new Tooltip("Set volume of the voice speaker"));
-        volumeLabel.setText(String.valueOf(updateDelay));
+        updateTime.setTooltip(new Tooltip("Set volume of the voice speaker"));
+        updateTime.setText(String.valueOf(updateDelay));
 
         if (PropertyManager.getInstance().getProp("DEBUG", null) == null) {
             autoUpdate.setVisible(false);
-            volumeLabel.setVisible(false);
+            updateTime.setVisible(false);
             updateSlider.setVisible(false);
         }
     }
