@@ -671,7 +671,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
         int updateDelay = PropertyManager.getInstance().getUpdateDelay();
         updateSlider.setValue(updateDelay);
-        updateSlider.valueProperty().addListener((observable, oldValue, newValue) -> updateTime.setText(String.valueOf(newValue.intValue()) + " m"));
+        updateSlider.valueProperty().addListener((observable, oldValue, newValue) -> updateTime.setText(String.valueOf(newValue.intValue()) + " min"));
         updateSlider.valueChangingProperty().addListener((observable, changeEnds, changeStarts) -> {
             if (changeEnds) {
                 int newUpdateDelay = (int) updateSlider.getValue();
@@ -680,7 +680,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
         });
 
         updateTime.setTooltip(new Tooltip("Set volume of the voice speaker"));
-        updateTime.setText(String.valueOf(updateDelay));
+        updateTime.setText(String.valueOf(updateDelay) + " min");
 
         if (PropertyManager.getInstance().getProp("DEBUG", null) == null) {
             autoUpdate.setVisible(false);
