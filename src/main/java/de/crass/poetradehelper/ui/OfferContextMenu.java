@@ -33,10 +33,12 @@ public class OfferContextMenu extends ContextMenu {
         MenuItem copyItem = new MenuItem("Whisper to Clipboard");
         copyItem.setOnAction(event -> {
             String playerName = getSelected().getPlayerName();
-            int buyAmount = (int) (isSellOffer(secondary.getValue()) ? getSelected().getBuyAmount() : getSelected().getSellAmount());
-            int sellAmount = (int) (isSellOffer(secondary.getValue()) ? getSelected().getSellAmount() : getSelected().getBuyAmount());
-            CurrencyID buyCurrency = isSellOffer(secondary.getValue()) ? getSelected().getBuyID() : getSelected().getSellID();
-            CurrencyID sellCurrency = isSellOffer(secondary.getValue()) ? getSelected().getSellID() : getSelected().getBuyID();
+
+            //Switcheroo, because chat comes from the opposite perspective
+            int buyAmount = (int) getSelected().getSellAmount();
+            int sellAmount = (int) getSelected().getBuyAmount();
+            CurrencyID buyCurrency = getSelected().getSellID();
+            CurrencyID sellCurrency = getSelected().getBuyID();
             String myString = "@" + playerName + " Hi, I'd like to buy your " +
                     buyAmount + " " +
                     buyCurrency.name().toLowerCase() + " for my " +
@@ -47,7 +49,6 @@ public class OfferContextMenu extends ContextMenu {
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             clipboard.setContents(stringSelection, null);
         });
-
 
         getItems().addAll(browserItem, copyItem);
     }
