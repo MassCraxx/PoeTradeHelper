@@ -354,7 +354,7 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
                 float higherValue = (buyValue > sellValue ? buyValue : sellValue);
 
                 // If sell and buy value differ too much from each other, filter
-                if (Math.abs(buyValue - sellValue) > PropertyManager.getInstance().getExcessiveTreshold() * higherValue) {
+                if (Math.abs(buyValue - sellValue) > (PropertyManager.getInstance().getExcessiveTreshold() / 100f) * higherValue) {
                     boolean isBuyOffer = PropertyManager.getInstance().getPrimaryCurrency().equals(offer.getSellID());
                     LogManager.getInstance().log(getClass(), "Filtered " + (isBuyOffer ? "buy" : "sell") + " offer for " + offer.getBuyID() + " - " + offer.getSellID() + ": " + buyValue + "c vs " + sellValue + "c");
                     continue;
@@ -394,12 +394,12 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
         }
     }
 
-    ScheduledFuture autoUpdateFuture;
+    private ScheduledFuture autoUpdateFuture;
     private void startUpdateTask() {
         if (autoUpdateExecutor == null) {
             autoUpdateExecutor = Executors.newSingleThreadScheduledExecutor();
         }
-        int updateDelay = (int) (PropertyManager.getInstance().getUpdateDelay() * 60);
+        int updateDelay = PropertyManager.getInstance().getUpdateDelay() * 60;
         autoUpdateFuture = autoUpdateExecutor.schedule(() -> {
             LogManager.getInstance().log("AutoUpdate", "Invoke Automatic Update");
             TradeManager.getInstance().updateOffers(currencyFilterChanged, false, PropertyManager.getInstance().getFilterList());
@@ -507,6 +507,11 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
         playerDeals.clear();
         currentDeals.clear();
         poeNinjaParser.reset();
+    }
+
+    public void removeDeal(CurrencyDeal deal) {
+        currentDeals.remove(deal);
+        playerDeals.remove(deal);
     }
 
     public interface DealParseListener {

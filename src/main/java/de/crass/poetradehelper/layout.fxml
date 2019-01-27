@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ComboBox?>
@@ -13,6 +14,7 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
@@ -20,6 +22,7 @@
 <?import javafx.scene.text.Text?>
 
 <!--suppress ALL -->
+
 <VBox prefHeight="650.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.crass.poetradehelper.Main">
     <children>
         <TabPane maxHeight="1.7976931348623157E308" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
@@ -114,52 +117,101 @@
                 </Tab>
                 <Tab text="Settings">
                     <content>
-                        <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                        <AnchorPane>
                             <children>
-                                <ComboBox fx:id="leagueCB" layoutX="50.0" layoutY="423.0" prefHeight="25.0" prefWidth="200.0" AnchorPane.leftAnchor="50.0" />
-                                <Text fill="#d8d8d8" layoutX="50.0" layoutY="411.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="League" AnchorPane.leftAnchor="50.0" />
-                                <AnchorPane layoutX="300.0" layoutY="238.0" maxWidth="1.7976931348623157E308" prefWidth="270.0" AnchorPane.rightAnchor="50.0">
-                                    <children>
-                                        <CheckBox fx:id="voiceReadChat" layoutY="54.0" mnemonicParsing="false" selected="true" text="Read Chat Messages" />
-                                        <CheckBox fx:id="voiceReadCurOffers" layoutY="79.0" mnemonicParsing="false" selected="true" text="Read Currency Offer PM" />
-                                        <CheckBox fx:id="voiceReadTradeOffers" layoutY="104.0" mnemonicParsing="false" selected="true" text="Read Trade Offers PM" />
-                                        <CheckBox fx:id="voiceReadAFK" layoutY="129.0" mnemonicParsing="false" selected="true" text="Notify on going AFK" />
-                                        <CheckBox fx:id="voiceRandom" layoutY="29.0" mnemonicParsing="false" selected="true" text="Randomize Messages" />
-                                        <CheckBox fx:id="voiceActive" layoutX="181.0" mnemonicParsing="false" text="Active" AnchorPane.rightAnchor="0.0" />
-                                        <Text fill="#d8d8d8" layoutY="10.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Read chat trade requests" AnchorPane.topAnchor="0.0" />
-                                        <ComboBox fx:id="speakerCB" layoutX="93.0" layoutY="200.0" prefHeight="25.0" prefWidth="175.0" />
-                                        <Slider fx:id="volumeSlider" layoutX="93.0" layoutY="248.0" prefHeight="14.0" prefWidth="145.0" value="100.0" />
-                                        <Label fx:id="volumeLabel" layoutX="242.0" layoutY="246.0" text="100" />
-                                        <Text fill="#d8d8d8" layoutX="2.0" layoutY="220.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Speaker" />
-                                        <Text fill="#d8d8d8" layoutY="260.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Volume" />
-                                        <Text fill="#d8d8d8" layoutY="180.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="PoE Path" />
-                                        <TextField fx:id="poePath" layoutX="93.0" layoutY="160.0" prefHeight="25.0" prefWidth="175.0" />
-                                    </children>
-                                </AnchorPane>
-                                <CheckBox fx:id="autoUpdate" layoutX="52.0" layoutY="473.0" mnemonicParsing="false" text="Auto Update 5min" />
-                        <AnchorPane layoutX="320.0" layoutY="21.0" prefHeight="200.0" prefWidth="270.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="15.0">
-                           <children>
-                                      <Button fx:id="addPlayerButton" mnemonicParsing="false" prefHeight="37.0" prefWidth="58.0" text="+" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
-                                      <ListView fx:id="playerListView" prefHeight="100.0" prefWidth="270.0" AnchorPane.bottomAnchor="30.0" />
-                                      <TextField fx:id="playerField" prefHeight="37.0" prefWidth="210.0" AnchorPane.topAnchor="30.0" />
-                                      <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Player Settings" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                      <Button fx:id="removePlayerBtn" mnemonicParsing="false" prefHeight="25.0" prefWidth="270.0" text="Remove" AnchorPane.bottomAnchor="0.0" />
-                           </children>
-                        </AnchorPane>
-                        <AnchorPane layoutX="50.0" layoutY="122.0" prefHeight="380.0" prefWidth="200.0" AnchorPane.leftAnchor="50.0" AnchorPane.topAnchor="15.0">
-                           <children>
-                                      <ComboBox fx:id="currencyFilterCB" prefHeight="37.0" prefWidth="140.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="30.0" />
-                                      <Button fx:id="addCurrencyFilterBtn" mnemonicParsing="false" prefHeight="37.0" prefWidth="58.0" text="+" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
-                                      <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Currency to check" AnchorPane.topAnchor="0.0" />
-                              <VBox prefHeight="310.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-                                 <children>
-                                            <ListView fx:id="currencyFilterList" prefHeight="233.0" prefWidth="200.0" />
-                                            <Button fx:id="removeCurrencyFilterBtn" mnemonicParsing="false" prefHeight="25.0" prefWidth="200.0" text="Remove" />
-                                            <Button fx:id="restoreCurrencyFilterBtn" mnemonicParsing="false" prefHeight="25.0" prefWidth="200.0" text="Restore Defaults" />
-                                 </children>
-                              </VBox>
-                           </children>
-                        </AnchorPane>
+                        <Accordion AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                          <panes>
+                            <TitledPane animated="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="General">
+                              <content>
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                       <children>
+                                          <AnchorPane layoutX="46.0" layoutY="41.0" prefHeight="172.0" prefWidth="270.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
+                                             <children>
+                                                        <Button fx:id="addPlayerButton" mnemonicParsing="false" prefHeight="37.0" prefWidth="58.0" text="+" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
+                                                        <ListView fx:id="playerListView" layoutY="63.0" prefHeight="70.0" prefWidth="270.0" AnchorPane.bottomAnchor="31.0" />
+                                                        <TextField fx:id="playerField" prefHeight="37.0" prefWidth="210.0" AnchorPane.topAnchor="30.0" />
+                                                        <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Player Accounts" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                        <Button fx:id="removePlayerBtn" mnemonicParsing="false" prefHeight="11.0" prefWidth="270.0" text="Remove" AnchorPane.bottomAnchor="0.0" />
+                                             </children>
+                                          </AnchorPane>
+                                          <AnchorPane layoutX="438.0" layoutY="34.0" prefWidth="270.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+                                             <children>
+                                                        <ComboBox fx:id="leagueCB" layoutY="21.0" prefHeight="25.0" prefWidth="200.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
+                                                        <Text fill="#d8d8d8" layoutX="12.0" layoutY="30.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="League" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                             </children>
+                                          </AnchorPane>
+                                          <AnchorPane layoutX="416.0" layoutY="22.0" prefWidth="270.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="90.0">
+                                             <children>
+                                                        <CheckBox fx:id="autoUpdate" mnemonicParsing="false" text="Auto Update" AnchorPane.leftAnchor="0.0" />
+                                                <Slider fx:id="updateSlider" blockIncrement="5.0" majorTickUnit="15.0" max="65.0" min="5.0" minorTickCount="1" value="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="30.0" />
+                                                <Label fx:id="updateTime" text="5 min" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="28.0" />
+                                             </children>
+                                          </AnchorPane>
+                                       </children>
+                                    </AnchorPane>
+                              </content>
+                            </TitledPane>
+                            <TitledPane animated="false" text="Parsing">
+                              <content>
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                       <children>
+                                          <AnchorPane prefWidth="270.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="5.0">
+                                             <children>
+                                                        <ComboBox fx:id="currencyFilterCB" prefWidth="140.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="30.0" />
+                                                        <Button fx:id="addCurrencyFilterBtn" mnemonicParsing="false" prefWidth="58.0" text="+" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
+                                                        <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Currency to check" AnchorPane.topAnchor="0.0" />
+                                                <VBox prefHeight="310.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="70.0">
+                                                   <children>
+                                                              <ListView fx:id="currencyFilterList" prefHeight="300.0" prefWidth="200.0" />
+                                                              <Button fx:id="removeCurrencyFilterBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="25.0" text="Remove" />
+                                                              <Button fx:id="restoreCurrencyFilterBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="25.0" text="Restore Defaults" />
+                                                   </children>
+                                                </VBox>
+                                             </children>
+                                          </AnchorPane>
+                                          <AnchorPane layoutX="438.0" layoutY="29.0" prefWidth="270.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+                                             <children>
+                                                <Text id="text-id" fill="#d8d8d8" layoutX="14.0" layoutY="30.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Excessive Filter Treshold" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                <Slider fx:id="excessiveTresholdSlider" blockIncrement="25.0" layoutY="27.0" minorTickCount="25" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="75.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="30.0" />
+                                                <Label fx:id="excessiveTresholdLabel" layoutX="200.0" layoutY="29.0" text="75 %" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="28.0" />
+                                                <CheckBox fx:id="filterMultiTrade" mnemonicParsing="false" text="Filter multiple transaction deals" AnchorPane.topAnchor="90.0" />
+                                             </children>
+                                          </AnchorPane>
+                                       </children>
+                                    </AnchorPane>
+                              </content>
+                            </TitledPane>
+                            <TitledPane animated="false" text="Text To Speech">
+                              <content>
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                       <children>
+                                                  <AnchorPane maxWidth="1.7976931348623157E308" prefWidth="270.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+                                                      <children>
+                                                          <CheckBox fx:id="voiceReadChat" layoutY="54.0" mnemonicParsing="false" selected="true" text="Read Chat Messages" />
+                                                          <CheckBox fx:id="voiceReadCurOffers" layoutY="79.0" mnemonicParsing="false" selected="true" text="Read Currency Offer PM" />
+                                                          <CheckBox fx:id="voiceReadTradeOffers" layoutY="104.0" mnemonicParsing="false" selected="true" text="Read Trade Offers PM" />
+                                                          <CheckBox fx:id="voiceReadAFK" layoutY="129.0" mnemonicParsing="false" selected="true" text="Notify on going AFK" />
+                                                          <CheckBox fx:id="voiceRandom" layoutY="29.0" mnemonicParsing="false" selected="true" text="Randomize Messages" />
+                                                          <CheckBox fx:id="voiceActive" layoutX="181.0" mnemonicParsing="false" text="Active" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0" />
+                                                          <Text fill="#d8d8d8" layoutX="-1.0" layoutY="14.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Read chat trade requests" AnchorPane.topAnchor="-2.0" />
+                                                          <ComboBox fx:id="speakerCB" layoutX="93.0" layoutY="199.0" prefHeight="25.0" prefWidth="175.0" AnchorPane.leftAnchor="150.0" AnchorPane.topAnchor="200.0" />
+                                                          <Slider fx:id="volumeSlider" layoutX="93.0" layoutY="248.0" prefHeight="18.0" prefWidth="150.0" value="100.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="207.0" />
+                                                          <Label fx:id="volumeLabel" layoutX="242.0" layoutY="246.0" text="100%" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="205.0" />
+                                                          <Text fill="#d8d8d8" layoutX="2.0" layoutY="220.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Speaker" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="205.0" />
+                                                          <Text fill="#d8d8d8" layoutY="260.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Volume" AnchorPane.rightAnchor="200.0" AnchorPane.topAnchor="205.0" />
+                                                          <Text fill="#d8d8d8" layoutY="180.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="PoE Path" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="165.0" />
+                                                          <TextField fx:id="poePath" layoutX="91.0" layoutY="160.0" prefHeight="31.0" prefWidth="513.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="160.0" />
+                                                <Text fill="#d8d8d8" layoutX="10.0" layoutY="231.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Shoutout Words" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="255.0" />
+                                                <TextField fx:id="voiceShoutoutWords" layoutX="150.0" layoutY="244.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="250.0" />
+                                                <Text fill="#d8d8d8" layoutX="10.0" layoutY="276.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Exclude Words" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="305.0" />
+                                                <TextField fx:id="voiceExcludeWords" layoutX="160.0" layoutY="254.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="300.0" />
+                                                      </children>
+                                                  </AnchorPane>
+                                       </children></AnchorPane>
+                              </content>
+                            </TitledPane>
+                          </panes>
+                        </Accordion>
                             </children>
                         </AnchorPane>
                     </content>

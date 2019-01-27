@@ -2,6 +2,7 @@ package de.crass.poetradehelper.tts;
 
 import de.crass.poetradehelper.LogManager;
 import de.crass.poetradehelper.PropertyManager;
+import javafx.scene.control.TextField;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -39,12 +40,14 @@ public class PoeChatTTS {
 
     private Thread watchDogThread;
     private WatchDog watchDog;
+    private TextField wordIncludeTextField;
+    private TextField wordExcludeTextField;
 
     public PoeChatTTS(Listener listener) {
         this(PropertyManager.getInstance().getPathOfExilePath(), listener);
     }
 
-    public PoeChatTTS(String path, Listener listener) {
+    private PoeChatTTS(String path, Listener listener) {
         setPath(path);
         this.listener = listener;
 
@@ -70,6 +73,29 @@ public class PoeChatTTS {
                 e.printStackTrace();
             }
             return;
+        }
+        else if (wordIncludeTextField !=null && !wordIncludeTextField.getText().isEmpty()) {
+            String[] includeWords = wordIncludeTextField.getText().split(",");
+            String[] excludeWords = wordExcludeTextField.getText().split(",");
+            boolean excluded = false;
+            for(String exWord : excludeWords){
+                if(newLine.contains(exWord)){
+                    excluded = true;
+                    break;
+                }
+            }
+            if(!excluded) {
+                for (String word : includeWords) {
+                    if (newLine.contains(word)) {
+                        try {
+                            textToSpeech("This chat message seems interesting!");
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        return;
+                    }
+                }
+            }
         }
 
         Pattern sayPattern = Pattern.compile("].+? (.+?): (.+)");
@@ -114,8 +140,6 @@ public class PoeChatTTS {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else {
-            //LogManager.getInstance().log(getClass(), "Could not match new line: " + newLine);
         }
     }
 
@@ -301,7 +325,7 @@ public class PoeChatTTS {
         return sb.toString();
     }
 
-    public void textToSpeech(String text) throws IOException {
+    private void textToSpeech(String text) throws IOException {
         LogManager.getInstance().log(getClass(), '\"' + text + '\"');
 
         String voiceParam = "";
@@ -377,6 +401,22 @@ public class PoeChatTTS {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void setWordIncludeTextField(TextField wordIncludeTextField) {
+        this.wordIncludeTextField = wordIncludeTextField;
+    }
+
+    private TextField getWordIncludeTextField() {
+        return wordIncludeTextField;
+    }
+
+    public void setWordExcludeTextField(TextField wordExcludeTextField) {
+        this.wordExcludeTextField = wordExcludeTextField;
+    }
+
+    private TextField getWordExcludeTextField() {
+        return wordExcludeTextField;
     }
 
     public enum InternetSlang {

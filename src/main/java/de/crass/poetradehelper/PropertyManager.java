@@ -63,8 +63,8 @@ public class PropertyManager {
     private boolean filterNoApi;
     private boolean filterOutOfStock;
     private boolean filterExcessive;
-    private float updateDelay;
-    private float excessiveTreshold;
+    private int updateDelay;
+    private int excessiveTreshold;
     private String currentLeague;
     private boolean filterMultipleTransactionDeals;
 
@@ -94,11 +94,11 @@ public class PropertyManager {
         filterNoApi = Boolean.parseBoolean(appProps.getProperty(FILTER_NOAPI, defaultFilterStockOffers));
         filterOutOfStock = Boolean.parseBoolean(appProps.getProperty(FILTER_OUTOFSTOCK, defaultFilterInvalidStockOffers));
         filterExcessive = Boolean.parseBoolean(appProps.getProperty(FILTER_EXCESSIVE, defaultFilterExcessive));
-        excessiveTreshold = Float.parseFloat(appProps.getProperty(EXCESSIVE_TRESHOLD, defaultExcessiveTreshold));
+        excessiveTreshold = Integer.parseInt(appProps.getProperty(EXCESSIVE_TRESHOLD, defaultExcessiveTreshold));
 
         filterMultipleTransactionDeals = Boolean.parseBoolean(appProps.getProperty(FILTER_MULTIPLE_TRANSACTIONS, "true"));
 
-        updateDelay = Float.parseFloat(appProps.getProperty(UPDATE_DELAY_MINUTES, "5"));
+        updateDelay = Integer.parseInt(appProps.getProperty(UPDATE_DELAY_MINUTES, "5"));
     }
 
     void storeProperties() {
@@ -267,7 +267,7 @@ public class PropertyManager {
         currencyFilterList.addAll(stringToCurrencyList(defaultCurrencyFilterString));
     }
 
-    public float getUpdateDelay() {
+    public int getUpdateDelay() {
         return updateDelay;
     }
 
@@ -280,11 +280,11 @@ public class PropertyManager {
         setLeague(defaultLeague);
     }
 
-    public double getExcessiveTreshold() {
+    public int getExcessiveTreshold() {
         return excessiveTreshold;
     }
 
-    public void setExcessiveTreshold(float excessiveTreshold) {
+    public void setExcessiveTreshold(int excessiveTreshold) {
         this.excessiveTreshold = excessiveTreshold;
     }
 

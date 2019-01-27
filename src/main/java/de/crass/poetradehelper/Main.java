@@ -11,6 +11,7 @@ import de.crass.poetradehelper.parser.TradeManager;
 import de.crass.poetradehelper.tts.PoeChatTTS;
 import de.crass.poetradehelper.ui.CurrencyContextMenu;
 import de.crass.poetradehelper.ui.MarketCell;
+import de.crass.poetradehelper.ui.OfferContextMenu;
 import de.crass.poetradehelper.ui.PlayerTradeCell;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -171,6 +172,27 @@ public class Main extends Application implements TradeManager.DealParseListener,
     @FXML
     private Button refreshBtn;
 
+    @FXML
+    private Slider updateSlider;
+
+    @FXML
+    private Label updateTime;
+
+    @FXML
+    private TextField voiceShoutoutWords;
+
+    @FXML
+    private TextField voiceExcludeWords;
+
+    @FXML
+    private Label excessiveTresholdLabel;
+
+    @FXML
+    private Slider excessiveTresholdSlider;
+
+    @FXML
+    private CheckBox filterMultiTrade;
+
     private static Stage currentStage;
     private static PoeChatTTS poeChatTTS;
 
@@ -245,6 +267,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
     private int versionClicked = 0;
 
+    //TODO: Tooltips
     private void setupUI() {
         DecimalFormatSymbols symbols = new DecimalFormatSymbols();
         symbols.setDecimalSeparator('.');
@@ -260,6 +283,8 @@ public class Main extends Application implements TradeManager.DealParseListener,
             if (versionClicked % 10 == 0) {
                 JOptionPane.showMessageDialog(null, "PoE Ninja will hate me for this...");
                 autoUpdate.setVisible(true);
+                updateTime.setVisible(true);
+                updateSlider.setVisible(true);
             }
         });
 
@@ -305,6 +330,18 @@ public class Main extends Application implements TradeManager.DealParseListener,
 //        });
 
         // Offer tab
+        ObservableList currencies = FXCollections.observableArrayList(CurrencyID.values());
+        currencies.sort(Comparator.comparing(Object::toString));
+        offerSecondary.setItems(currencies);
+        offerSecondary.setOnAction(event -> {
+            CurrencyID newValue = offerSecondary.getValue();
+            if (newValue != null) {
+                buyOfferTable.setItems(tradeManager.getBuyOffers(newValue));
+                sellOfferTable.setItems(tradeManager.getSellOffers(newValue));
+            }
+        });
+
+        // Buy table
         Callback<TableColumn.CellDataFeatures<CurrencyOffer, Number>, ObservableValue<Number>> stockCellFactory =
                 param -> {
                     int stock = param.getValue().getStock();
@@ -329,8 +366,14 @@ public class Main extends Application implements TradeManager.DealParseListener,
         playerColumn.setText("Playername");
         playerColumn.setCellValueFactory(playerCellFactory);
 
+//        TableColumn<CurrencyOffer, String> apiColumn = new TableColumn<>();
+//        apiColumn.setText("API");
+//        apiColumn.setCellValueFactory(param -> new SimpleStringProperty((param.getValue().getStock() < 0) ? "" : "X"));
+
         buyOfferTable.getColumns().clear();
         buyOfferTable.getColumns().addAll(valueColumn, stockColumn, playerColumn);
+
+        buyOfferTable.setContextMenu(new OfferContextMenu(buyOfferTable, offerSecondary));
 
         // Sell table
         TableColumn<CurrencyOffer, Number> sellValueColumn = new TableColumn<>();
@@ -345,21 +388,20 @@ public class Main extends Application implements TradeManager.DealParseListener,
         sellPlayerColumn.setText("Playername");
         sellPlayerColumn.setCellValueFactory(playerCellFactory);
 
+//        TableColumn<CurrencyOffer, String> sellApiColumn = new TableColumn<>();
+//        sellApiColumn.setText("API");
+//        sellApiColumn.setCellValueFactory(param -> new SimpleStringProperty((param.getValue().getStock() < 0) ? "" : "X"));
+
         sellOfferTable.getColumns().clear();
         sellOfferTable.getColumns().addAll(sellValueColumn, sellStockColumn, sellPlayerColumn);
+        sellOfferTable.setContextMenu(new OfferContextMenu(sellOfferTable, offerSecondary));
 
-        ObservableList currencies = FXCollections.observableArrayList(CurrencyID.values());
-        currencies.sort(Comparator.comparing(Object::toString));
-        offerSecondary.setItems(currencies);
-        offerSecondary.setOnAction(event -> {
-            CurrencyID newValue = offerSecondary.getValue();
-            if (newValue != null) {
-                buyOfferTable.setItems(tradeManager.getBuyOffers(newValue));
-                sellOfferTable.setItems(tradeManager.getSellOffers(newValue));
+
+        refreshBtn.setOnAction(event -> {
+            if(offerSecondary.getValue() != null) {
+                tradeManager.updateOffersForCurrency(offerSecondary.getValue(), true);
             }
         });
-
-        refreshBtn.setOnAction(event -> tradeManager.updateOffersForCurrency(offerSecondary.getValue(), true));
 
         // Value Tab
         valueTable.setRowFactory(tv -> new TableRow<Map.Entry<CurrencyID, Float>>() {
@@ -431,26 +473,46 @@ public class Main extends Application implements TradeManager.DealParseListener,
             valueTable.refresh();
         });
 
+        filterInvalid.setSelected(PropertyManager.getInstance().getFilterOutOfStock());
         filterInvalid.setTooltip(new Tooltip("Ignore all offers that do have a stock value but not enough on stock to sell"));
         filterInvalid.setOnAction(event -> {
             PropertyManager.getInstance().setFilterOutOfStock(filterInvalid.isSelected());
             tradeManager.parseDeals();
         });
-        filterInvalid.setSelected(PropertyManager.getInstance().getFilterOutOfStock());
 
+        filterWithoutAPI.setSelected(PropertyManager.getInstance().getFilterNoApi());
         filterWithoutAPI.setTooltip(new Tooltip("Ignore all offers that don't have stock information"));
         filterWithoutAPI.setOnAction(event -> {
             PropertyManager.getInstance().setFilterNoApi(filterWithoutAPI.isSelected());
             tradeManager.parseDeals();
         });
-        filterWithoutAPI.setSelected(PropertyManager.getInstance().getFilterNoApi());
 
+        filterExcessive.setSelected(PropertyManager.getInstance().getFilterExcessive());
         filterExcessive.setTooltip(new Tooltip("Ignore all offers that have an insane buy to sell value ratio"));
         filterExcessive.setOnAction(event -> {
             PropertyManager.getInstance().setFilterExcessive(filterExcessive.isSelected());
             tradeManager.parseDeals();
         });
-        filterExcessive.setSelected(PropertyManager.getInstance().getFilterExcessive());
+
+//        excessiveTresholdSlider.setTooltip(new Tooltip("Ignore all offers that have an insane buy to sell value ratio"));
+        int excessiveTreshold = PropertyManager.getInstance().getExcessiveTreshold();
+        excessiveTresholdSlider.setValue(excessiveTreshold);
+        excessiveTresholdLabel.setText(excessiveTreshold + " %");
+        excessiveTresholdSlider.valueProperty().addListener((observable, oldValue, newValue) -> excessiveTresholdLabel.setText(newValue.intValue() + " %"));
+        excessiveTresholdSlider.valueChangingProperty().addListener((observable, changeEnds, changeStarts) -> {
+            if (changeEnds) {
+                int newUpdateDelay = (int) excessiveTresholdSlider.getValue();
+                PropertyManager.getInstance().setExcessiveTreshold(newUpdateDelay);
+                tradeManager.parseDeals();
+            }
+        });
+
+//        filterMultiTrade.setTooltip(new Tooltip("Ignore all offers that have an insane buy to sell value ratio"));
+        filterMultiTrade.setSelected(PropertyManager.getInstance().getFilterMultipleTransactionDeals());
+        filterMultiTrade.setOnAction(event -> {
+            PropertyManager.getInstance().setFilterMultipleTransactionDeals(filterMultiTrade.isSelected());
+            tradeManager.parseDeals();
+        });
 
         currencyFilterList.setItems(PropertyManager.getInstance().getFilterList());
         currencyFilterList.setTooltip(new Tooltip("Only offers for currency in this list will be fetched on update"));
@@ -490,7 +552,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
             String newPlayer = playerField.getText();
             if (!newPlayer.isEmpty() && !playerList.contains(newPlayer))
                 playerList.add(newPlayer);
-                playerField.setText("");
+            playerField.setText("");
         });
 
         removePlayerBtn.setTooltip(new Tooltip("Remove selected player from list"));
@@ -514,6 +576,8 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
 
         // Setup Voice Controls
+        poeChatTTS.setWordIncludeTextField(voiceShoutoutWords);
+        poeChatTTS.setWordExcludeTextField(voiceExcludeWords);
         List<String> supportedVoices = poeChatTTS.getSupportedVoices();
         if (supportedVoices == null) {
             LogManager.getInstance().log(getClass(), "TTS is disabled: Balcon not found.");
@@ -526,6 +590,9 @@ public class Main extends Application implements TradeManager.DealParseListener,
                 if (voiceActive.isSelected()) {
                     poeChatTTS.startTTS();
                     poePath.setDisable(true);
+                    String newPath = poePath.getText();
+                    poeChatTTS.setPath(newPath);
+                    PropertyManager.getInstance().setPathOfExilePath(newPath);
                 } else {
                     poeChatTTS.stopTTS();
                     poePath.setDisable(false);
@@ -577,8 +644,9 @@ public class Main extends Application implements TradeManager.DealParseListener,
             });
 
             int volume = PropertyManager.getInstance().getVoiceVolume();
+            volumeLabel.setText(String.valueOf(volume) + " %");
             volumeSlider.setValue(volume);
-            volumeSlider.valueProperty().addListener((observable, oldValue, newValue) -> volumeLabel.setText(String.valueOf(newValue.intValue())));
+            volumeSlider.valueProperty().addListener((observable, oldValue, newValue) -> volumeLabel.setText(String.valueOf(newValue.intValue()) + " %"));
             volumeSlider.valueChangingProperty().addListener((observable, changeEnds, changeStarts) -> {
                 if (changeEnds) {
                     int newVolume = (int) volumeSlider.getValue();
@@ -592,11 +660,6 @@ public class Main extends Application implements TradeManager.DealParseListener,
             volumeLabel.setText(String.valueOf(volume));
 
             poePath.setText(PropertyManager.getInstance().getPathOfExilePath());
-            poePath.setOnKeyTyped(event -> {
-                String newPath = poePath.getText();
-                poeChatTTS.setPath(newPath);
-                PropertyManager.getInstance().setPathOfExilePath(newPath);
-            });
         }
 
         // Auto Update checkbox
@@ -607,8 +670,23 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
         autoUpdate.setTooltip(new Tooltip("Invoke Update every " + PropertyManager.getInstance().getUpdateDelay() + " minutes."));
 
+        int updateDelay = PropertyManager.getInstance().getUpdateDelay();
+        updateSlider.setValue(updateDelay);
+        updateSlider.valueProperty().addListener((observable, oldValue, newValue) -> updateTime.setText(String.valueOf(newValue.intValue()) + " m"));
+        updateSlider.valueChangingProperty().addListener((observable, changeEnds, changeStarts) -> {
+            if (changeEnds) {
+                int newUpdateDelay = (int) updateSlider.getValue();
+                PropertyManager.getInstance().setUpdateDelay(newUpdateDelay);
+            }
+        });
+
+        volumeLabel.setTooltip(new Tooltip("Set volume of the voice speaker"));
+        volumeLabel.setText(String.valueOf(updateDelay));
+
         if (PropertyManager.getInstance().getProp("DEBUG", null) == null) {
             autoUpdate.setVisible(false);
+            volumeLabel.setVisible(false);
+            updateSlider.setVisible(false);
         }
     }
 
@@ -681,16 +759,16 @@ public class Main extends Application implements TradeManager.DealParseListener,
         LogManager.getInstance().log(TradeManager.class, "Update took " + prettyFloat((System.currentTimeMillis() - updateStart) / 1000f) + " seconds");
     }
 
-    private long parseStart;
+    private long parseStartTime;
 
     @Override
     public void onParsingStarted() {
-        parseStart = System.currentTimeMillis();
+        parseStartTime = System.currentTimeMillis();
     }
 
     @Override
     public void onParsingFinished() {
-        LogManager.getInstance().log(TradeManager.class, "Parsing took " + prettyFloat((System.currentTimeMillis() - parseStart)) + " milliseconds");
+        LogManager.getInstance().log(TradeManager.class, "Parsing took " + prettyFloat((System.currentTimeMillis() - parseStartTime)) + " milliseconds");
 
         currencyList.setPlaceholder(new Label("No deals to show."));
         playerDealList.setPlaceholder(new Label("No deals to show. Is your player set in settings?"));

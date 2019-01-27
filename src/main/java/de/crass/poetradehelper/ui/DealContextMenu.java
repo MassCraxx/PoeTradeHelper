@@ -31,6 +31,9 @@ class DealContextMenu extends ContextMenu {
         MenuItem updatePlayerItem = new MenuItem("Update Player Offers");
         updatePlayerItem.setOnAction(event -> TradeManager.getInstance().updatePlayerOffers());
 
+        MenuItem removeItem = new MenuItem("Remove from Overview");
+        removeItem.setOnAction(event -> TradeManager.getInstance().removeDeal(deal));
+
         getItems().addAll(
                 buyValueItem,
                 sellValueItem,
@@ -39,6 +42,8 @@ class DealContextMenu extends ContextMenu {
                 sellItem,
                 new SeparatorMenuItem(),
                 updateItem,
-                updatePlayerItem);
+                updatePlayerItem,
+                new SeparatorMenuItem(),
+                removeItem);
     }
 }
