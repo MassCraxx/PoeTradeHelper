@@ -31,6 +31,7 @@ public class PropertyManager {
     public static final String FILTER_EXCESSIVE = "filter_excessive";
     public static final String EXCESSIVE_TRESHOLD = "excessive_treshold";
     public static final String CURRENCY_LIST = "currency_list";
+    public static final String PRIMARY_CURRENCY_LIST = "primary_currency_list";
     public static final String PLAYER_LIST = "player_list";
     public static final String POE_PATH = "poe_path";
     public static final String VOICE_VOLUME = "voice_volume";
@@ -54,9 +55,11 @@ public class PropertyManager {
     private final String defaultExcessiveTreshold = "0.75";
 
     private final String defaultCurrencyFilterString = "ALCHEMY,SCOURING,ALTERATION,REGAL,CHROMATIC,GCP,CHISEL,JEWELLER,REGRET,FUSING";
+    private final String defaultPrimaryCurrencyString = "ANCIENT,ANNULMENT,DIVINE,EXALTED,HARBINGER,MASTER";
 
     // Current Values
     private ObservableList<CurrencyID> currencyFilterList;
+    private ObservableList<CurrencyID> primaryCurrencyList;
     private ObservableList<String> playerList;
 
     private CurrencyID primaryCurrency;
@@ -88,6 +91,7 @@ public class PropertyManager {
         // Only converting on load and store
         currentLeague = appProps.getProperty(LEAGUE_KEY, defaultLeague);
         currencyFilterList = FXCollections.observableArrayList(stringToCurrencyList(appProps.getProperty(CURRENCY_LIST, defaultCurrencyFilterString)));
+        primaryCurrencyList = FXCollections.observableArrayList(stringToCurrencyList(appProps.getProperty(PRIMARY_CURRENCY_LIST, defaultPrimaryCurrencyString)));
         playerList = FXCollections.observableArrayList(stringToList(appProps.getProperty(PLAYER_LIST, null)));
         primaryCurrency = CurrencyID.valueOf(appProps.getProperty(PRIMARY_CURRENCY, defaultPrimary));
 
@@ -104,6 +108,7 @@ public class PropertyManager {
     void storeProperties() {
         appProps.setProperty(LEAGUE_KEY, getCurrentLeague());
         appProps.setProperty(CURRENCY_LIST, currencyListToString(currencyFilterList));
+        appProps.setProperty(PRIMARY_CURRENCY_LIST, currencyListToString(primaryCurrencyList));
         appProps.setProperty(PLAYER_LIST, listToString(playerList));
         appProps.setProperty(PRIMARY_CURRENCY, primaryCurrency.name());
 
@@ -294,5 +299,9 @@ public class PropertyManager {
 
     public void setFilterMultipleTransactionDeals(boolean filterMultipleTransactionDeals) {
         this.filterMultipleTransactionDeals = filterMultipleTransactionDeals;
+    }
+
+    ObservableList<CurrencyID> getPrimaryCurrencyList() {
+        return primaryCurrencyList;
     }
 }

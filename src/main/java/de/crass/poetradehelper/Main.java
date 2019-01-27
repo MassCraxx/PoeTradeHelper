@@ -464,7 +464,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
         // SETTINGS
         primaryComboBox.setTooltip(new Tooltip("Select currency to flip with"));
-        primaryComboBox.setItems(currencies);
+        primaryComboBox.setItems(PropertyManager.getInstance().getPrimaryCurrencyList());
         primaryComboBox.setValue(PropertyManager.getInstance().getPrimaryCurrency());
         primaryComboBox.setOnAction(event -> {
             CurrencyID newValue = primaryComboBox.getValue();
