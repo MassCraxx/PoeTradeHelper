@@ -101,13 +101,15 @@ public class PlayerTradeCell extends javafx.scene.control.ListCell<CurrencyDeal>
             }
 
             float playerBuyStock = deal.getPlayerBuyStock();
+            // buystock is for primary, but buy and sell values are for secondary
+            // deals are normalized to primary buy/sell == 1, therefore
+            // stock for primary is always > primaryPrice, otherwise it would not even show up.
             boolean playerHasBuyStock = true;
-            if (playerBuyStock > 0 && playerBuyStock < pBuy) {
-                playerBuy.setFill(Color.GRAY);
-                playerHasBuyStock = false;
-            } else {
+//            if (playerBuyStock > 0 && playerBuyStock < 1) {
+//                playerBuy.setFill(Color.GRAY);
+//                playerHasBuyStock = false;
+//            } else {
                 playerBuy.setFill(marketBuy.getFill());
-            }
 
             float playerSellStock = deal.getPlayerSellStock();
             boolean playerHasSellStock = true;
