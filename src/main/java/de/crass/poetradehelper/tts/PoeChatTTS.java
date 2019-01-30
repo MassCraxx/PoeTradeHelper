@@ -2,12 +2,10 @@ package de.crass.poetradehelper.tts;
 
 import de.crass.poetradehelper.LogManager;
 import de.crass.poetradehelper.PropertyManager;
+import de.crass.poetradehelper.model.CurrencyID;
 import javafx.scene.control.TextField;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
@@ -17,31 +15,59 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PoeChatTTS {
-    final private String logsFolder = "logs";
+    private static final String logsFolder = "logs";
+    private static final String bestVoiceEver = "ScanSoft Daniel_Full_22kHz";
 
     private Path path;
     private final Listener listener;
 
+    // 0 to 100
     private int volume = 100;
+    // -10 to 10
     private int speed = 0;
+
     private String voice;
 
     private boolean randomizeMessages = true;
-
     private boolean readAFK = true;
     private boolean readTradeRequests = true;
     private boolean readCurrencyRequests = true;
     private boolean readChatMessages = false;
+    private boolean readShoutout = true;
+    private boolean readShoutoutMessage = true;
 
-    private final String[] startPhrases = {"guess what", "check that out", "wait a second", "hold on", "what the fuck", "did you see", "listen"};
-    private final String[] names = {"someone", "some dude", "this cheeky scrub lord", "some guy with too much cash", "an exile"};
-    private final String[] endPhrases = {"congratulations", "good for you", "what a noob", "how fortunate"};
-    private String[] testPhrases = {"One", "Check", "Boom"};
+    private final String[] startPhrases = {
+            "guess what", "check that out", "wait a second", "hold on", "what the fuck", "did you see", "listen",
+            "DUDE", "nice", "hello there", "holy cow", "wonderful", "watch out"};
+    private final String[] names = {
+            "an exile", "someone", "some guy", "a player", "some dude", "this cheeky scrub lord", "this wannabe rockefeller"};
+    private final String[] attributes = {
+            "with too much cash", "here", "over there", "being generous"};
+    private final String[] endPhrases = {
+            "congratulations", "good for you", "what a noob", "how fortunate", "sweet", "savage", "radical", "groovay",
+            "awesome", "what you gonna do?"};
+
+    private String[] knownNames = {
+            "that same guy from before,", "someone who could not get enough" ,"some guy who came back"};
+
+    private String[] wantsBuyText = {
+            "wants to buy your", "wants your", "wants to trade your"};
+
+//    private String[] shoutOuts = {
+//            "this chat message seems interesting!", "something of interest got mentioned in the chat!"};
+    private String[] shoutOuts = {
+            "mentioned something of interest in the chat", "says something interesting in the chat"};
+
+    private String[] testPhrases = {
+            "One", "Check", "Boom", "Dude"};
 
     private Thread watchDogThread;
     private WatchDog watchDog;
     private TextField wordIncludeTextField;
     private TextField wordExcludeTextField;
+
+    private List<String> playersMet = new LinkedList<>();
+    private Process speechProcess;
 
     public PoeChatTTS(Listener listener) {
         this(PropertyManager.getInstance().getPathOfExilePath(), listener);
@@ -65,7 +91,7 @@ public class PoeChatTTS {
         setRandomizeMessages(Boolean.parseBoolean(proMan.getProp(PropertyManager.VOICE_RANDOMIZE, "true")));
     }
 
-    private void processNewLine(String newLine){
+    private void processNewLine(String newLine) {
         if (readAFK && newLine.contains("AFK mode is now ON.")) {
             try {
                 textToSpeech("You just went AFK!");
@@ -74,29 +100,6 @@ public class PoeChatTTS {
             }
             return;
         }
-        else if (wordIncludeTextField !=null && !wordIncludeTextField.getText().isEmpty()) {
-            String[] includeWords = wordIncludeTextField.getText().split(",");
-            String[] excludeWords = wordExcludeTextField.getText().split(",");
-            boolean excluded = false;
-            for(String exWord : excludeWords){
-                if(newLine.contains(exWord)){
-                    excluded = true;
-                    break;
-                }
-            }
-            if(!excluded) {
-                for (String word : includeWords) {
-                    if (newLine.contains(word)) {
-                        try {
-                            textToSpeech("This chat message seems interesting!");
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        return;
-                    }
-                }
-            }
-        }
 
         Pattern sayPattern = Pattern.compile("].+? (.+?): (.+)");
         Pattern currencyPattern = Pattern.compile("] @From (.+?): .+your \\d+ (.+) for my \\d+ (.+) i");
@@ -104,46 +107,128 @@ public class PoeChatTTS {
         Matcher matcher = currencyPattern.matcher(newLine);
 
         if (readCurrencyRequests && matcher.find() || readTradeRequests && (matcher = tradePattern.matcher(newLine)).find()) {
-            // Currency buy request
-            String buyCurrency = matcher.group(2);
-            String sellCurrency = matcher.group(3);
-
-            String ttsMessage;
-            if (randomizeMessages) {
-                ttsMessage = getRandomStartPhrase() + getRandomName() + " wants to buy your " + buyCurrency + " for " + sellCurrency + getRandomEndPhrase();
-            } else {
-                ttsMessage = "Someone wants to buy your " + buyCurrency + " for " + sellCurrency;
+            String playerName = matcher.group(1);
+            boolean playerKnown = false;
+            if (playersMet.contains(playerName)) {
+                playerKnown = true;
+            }else{
+                playersMet.add(playerName);
             }
+
+            // Currency buy request
+            String buyItem = matcher.group(2);
+            String sellItem = matcher.group(3);
+
+            String ttsMessage = getTradeMessage(buyItem, sellItem, playerKnown);
+
             try {
                 textToSpeech(ttsMessage);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else if (readChatMessages && ((matcher = sayPattern.matcher(newLine)).find())) {
+        } else if ((readChatMessages || (readShoutout && wordIncludeTextField != null && !wordIncludeTextField.getText().isEmpty()))
+                && ((matcher = sayPattern.matcher(newLine)).find())) {
+
             String name = readableName(matcher.group(1));
             // Name is a NPC, cancel.
             if (name == null) {
                 return;
             }
             String msg = matcher.group(2);
-            String verb = "says";
+            String[] words = msg.split("\\s+");
 
-            // Check if sent by player
-            if (newLine.contains("@To")) {
-                name = "you";
-                verb = "say";
+            if (readShoutout && wordIncludeTextField != null && !wordIncludeTextField.getText().isEmpty()) {
+                String[] includeWords = wordIncludeTextField.getText().split(",");
+                String[] excludeWords = wordExcludeTextField.getText().split(",");
+                boolean included = false;
+                boolean excluded = false;
+                for (String wordInMsg : words) {
+                    // If included found, skip included search
+                    if (!included) {
+                        for (String word : includeWords) {
+                            if (word.equalsIgnoreCase(wordInMsg)) {
+                                included = true;
+                                break;
+                            }
+                        }
+                        // if word was included, skip exclusion search for this i
+                        if (included) {
+                            continue;
+                        }
+                    }
+
+                    for (String exWord : excludeWords) {
+                        if (wordInMsg.equalsIgnoreCase(exWord)) {
+                            excluded = true;
+                        }
+                    }
+                    // if word was excluded, cancel search
+                    if (excluded) {
+                        break;
+                    }
+                }
+
+                if (included && !excluded) {
+                    readShoutoutMessage = newLine.length() < 125;
+                    if(readShoutoutMessage) {
+                        try {
+                            textToSpeech(name + " says " + convertSlangToSpoken(words));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        String speech = randomizeMessages ? getRandomStartPhrase()+ name + getRandomString(shoutOuts) : shoutOuts[0];
+                        try {
+                            textToSpeech(speech);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        return;
+                    }
+                }
             }
-            msg = convertSlangToSpoken(msg);
+            if (readChatMessages) {
+                String verb = "says";
 
-            try {
-                textToSpeech(name + ' ' + verb + ' ' + msg);
-            } catch (IOException e) {
-                e.printStackTrace();
+                // Check if sent by player
+                if (newLine.contains("@To")) {
+                    name = "you";
+                    verb = "say";
+                }
+                msg = convertSlangToSpoken(words);
+
+                try {
+                    textToSpeech(name + ' ' + verb + ' ' + msg);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
 
+    private String getTradeMessage(String buyItem, String sellItem, boolean playerKnown) {
+        String ttsMessage;
+        if (randomizeMessages) {
+            String name = getRandomName();
+            if (playerKnown) {
+                name = getRandomString(knownNames) + ' ';
+            }
+            ttsMessage = getRandomStartPhrase() + name + getRandomAttribute() + getRandomString(wantsBuyText) + " " + buyItem + " for his " + sellItem + getRandomEndPhrase();
+        } else {
+            String name = names[0] + ' ';
+            if (playerKnown) {
+                name = knownNames[0] + ' ';
+            }
+            // Someone wants to buy your alchemy for exalted
+            ttsMessage = name + wantsBuyText[0] + " " + buyItem + " for " + sellItem;
+        }
+        return ttsMessage;
+    }
+
     public void setVoice(String voice) {
+        if(voice != null) {
+            PropertyManager.getInstance().setProp(PropertyManager.VOICE_SPEAKER, voice);
+        }
         this.voice = voice;
     }
 
@@ -186,6 +271,15 @@ public class PoeChatTTS {
 //            LogManager.getInstance().log(getClass(), "Exception during checking voice support. " + e);
             return null;
         }
+
+        // If found and no voice set yet, set bestVoiceEver as voice.
+        if(voice == null && result.contains(bestVoiceEver)){
+            setVoice(bestVoiceEver);
+        } // Else set first found. Remove this for continuous checking for bestVoiceEver...
+        else if(voice == null && !result.isEmpty()){
+            setVoice(result.get(0));
+        }
+
         return result;
     }
 
@@ -215,9 +309,34 @@ public class PoeChatTTS {
         watchDogThread = new Thread(watchDog, "logWatcher");
         watchDogThread.start();
         LogManager.getInstance().log(getClass(), "TTS Watchdog started.");
+
+        // Possible bugfix for starting the watchdog....
+//        FileInputStream is = null;
+//        try {
+//            File logFile = new File(path+"/Client.txt");
+//            is = new FileInputStream(logFile);
+//            int read;
+//            while(is.available()>0){
+//                is.read();
+//            };
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } finally {
+//            if(is != null) {
+//                try {
+//                    is.close();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
     }
 
     public void stopTTS() {
+        if(speechProcess != null){
+            speechProcess.destroy();
+            speechProcess = null;
+        }
         watchDog.stop();
         watchDogThread.interrupt();
         watchDog = null;
@@ -243,7 +362,7 @@ public class PoeChatTTS {
     private String lastStartPhrase = "";
 
     private String getRandomStartPhrase() {
-        String phrase = getRandomString(startPhrases, 10);
+        String phrase = getRandomString(startPhrases, 20);
 
         if (phrase == null) {
             return "";
@@ -254,6 +373,23 @@ public class PoeChatTTS {
 
         lastStartPhrase = phrase;
         return phrase + ", ";
+
+    }
+
+    private String lastAttribute = "";
+
+    private String getRandomAttribute() {
+        String phrase = getRandomString(attributes, 10);
+
+        if (phrase == null) {
+            return "";
+        }
+        while (phrase.equals(lastAttribute)) {
+            phrase = getRandomString(attributes);
+        }
+
+        lastAttribute = phrase;
+        return phrase + ' ';
 
     }
 
@@ -277,14 +413,13 @@ public class PoeChatTTS {
     private String lastName;
 
     private String getRandomName() {
-
         String phrase;
         do {
             phrase = getRandomString(names);
         } while (phrase.equals(lastName));
 
         lastName = phrase;
-        return phrase;
+        return phrase + ' ';
     }
 
     private String readableName(String name) {
@@ -292,20 +427,16 @@ public class PoeChatTTS {
         if (name.contains(" ")) {
             return null;
         }
-        name = name.replace("_", " ");
+        name = name.replace('_', ' ');
         for (int i = 0; i < name.length(); i++) {
             if (!Character.UnicodeBlock.of(name.charAt(i)).equals(Character.UnicodeBlock.BASIC_LATIN)) {
-                return "Someone";
+                return names[0];
             }
         }
-        return name.replace("_", " ");
+        return name.replace('_', ' ');
     }
 
-    private String convertSlangToSpoken(String msg) {
-        msg = msg.replace("_", " ");
-
-        String[] words = msg.split("\\s+");
-
+    private String convertSlangToSpoken(String[] words) {
         StringBuilder sb = new StringBuilder();
 
         for (String word : words) {
@@ -326,19 +457,29 @@ public class PoeChatTTS {
     }
 
     private void textToSpeech(String text) throws IOException {
+        textToSpeech(text, false);
+    }
+
+    public void textToSpeech(String text, boolean interrupt) throws IOException {
         LogManager.getInstance().log(getClass(), '\"' + text + '\"');
+
+        if(interrupt && speechProcess != null && speechProcess.isAlive()){
+            speechProcess.destroy();
+        }
 
         String voiceParam = "";
         if (voice != null) {
             voiceParam = " -n " + voice;
         }
-        Runtime.getRuntime().exec("balcon -t \"" + text + "\"" + voiceParam + " -v " + volume + " -s " + speed);
+        speechProcess = Runtime.getRuntime().exec("balcon -t \"" + text + "\"" + voiceParam + " -v " + volume + " -s " + speed);
 
         // If not waiting here the order gets messed up
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        if(!interrupt) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -391,13 +532,13 @@ public class PoeChatTTS {
     }
 
     public void testSpeech() {
-        String text = getRandomString(endPhrases, 8);
-        if(text == null){
-            text = getRandomString(testPhrases);
+        String test = getRandomString(endPhrases, 8);
+        if (test == null) {
+            test = getRandomString(testPhrases);
         }
 
         try {
-            textToSpeech(text);
+            textToSpeech(test, true);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -419,6 +560,17 @@ public class PoeChatTTS {
         return wordExcludeTextField;
     }
 
+    public void randomTradeMessage() {
+        CurrencyID buy = CurrencyID.getRandom();
+        CurrencyID sell = CurrencyID.getRandom();
+        boolean known = Math.random() > 0.8;
+        try {
+            textToSpeech(getTradeMessage(buy.toString(), sell.toString(), known), true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public enum InternetSlang {
 
         SRY("sorry"),
@@ -434,7 +586,11 @@ public class PoeChatTTS {
         GJ("good job"),
         WP("well played"),
         HF("have fun"),
-        GL("good luck");
+        GL("good luck"),
+        LF("looking for"),
+        LFM("looking for member"),
+        WTB("want to buy"),
+        HIDEOUT("hide out");
 
         String spokenTerm;
 
@@ -464,11 +620,11 @@ public class PoeChatTTS {
     }
 
     public void setPath(String path) {
-        if(!path.endsWith(logsFolder)){
+        if (!path.endsWith(logsFolder)) {
             if (!path.endsWith("\\")) {
                 path += "\\";
             }
-            path +=logsFolder;
+            path += logsFolder;
         }
 
         this.path = Paths.get(path);

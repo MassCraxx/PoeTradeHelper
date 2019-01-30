@@ -55,4 +55,9 @@ public enum CurrencyID {
     public String toString() {
         return name().charAt(0) + name().substring(1).toLowerCase();
     }
+
+    public static CurrencyID getRandom(){
+        CurrencyID[] currencyIDS = values();
+        return currencyIDS[(int) Math.floor(Math.random() * currencyIDS.length)];
+    }
 }

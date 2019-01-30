@@ -28,6 +28,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
@@ -185,6 +186,12 @@ public class Main extends Application implements TradeManager.DealParseListener,
     private TextField voiceExcludeWords;
 
     @FXML
+    private Button voiceTestButton;
+
+    @FXML
+    private Text volumeTopicLabel;
+
+    @FXML
     private Label excessiveTresholdLabel;
 
     @FXML
@@ -266,6 +273,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
     }
 
     private int versionClicked = 0;
+    private int volumeClicked = 0;
 
     //TODO: Tooltips
     private void setupUI() {
@@ -605,7 +613,6 @@ public class Main extends Application implements TradeManager.DealParseListener,
                 String selected = speakerCB.getValue();
                 if (!selected.isEmpty()) {
                     poeChatTTS.setVoice(selected);
-                    PropertyManager.getInstance().setProp(PropertyManager.VOICE_SPEAKER, selected);
                 }
             });
 
@@ -657,6 +664,26 @@ public class Main extends Application implements TradeManager.DealParseListener,
                     poeChatTTS.testSpeech();
                 }
             });
+
+            // Who knew daniel was used in Pendulum's Bloodsugar?
+            volumeTopicLabel.setOnMouseClicked(event -> {
+                if(poeChatTTS.getVoice() != null && poeChatTTS.getVoice().contains("Daniel")) {
+                    String msg;
+                    volumeClicked++;
+                    if (volumeClicked >= 5) {
+                        msg = "Ok, Fuck it, I lied! It's Drum and Bass, what you gonna do!";
+                    } else {
+                        return;
+                    }
+                    try {
+                        poeChatTTS.textToSpeech(msg, true);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+
+            voiceTestButton.setOnAction(event -> poeChatTTS.randomTradeMessage());
 
             poePath.setText(PropertyManager.getInstance().getPathOfExilePath());
         }
@@ -720,15 +747,25 @@ public class Main extends Application implements TradeManager.DealParseListener,
     }
 
     private void setDisableVoiceControls() {
-        voiceActive.setTooltip(new Tooltip("Place balcon.exe next to the app to use this feature."));
+        String balconMissingText = "Place balcon.exe next to the app to enable this feature.";
         voiceActive.setDisable(true);
+        voiceActive.setTooltip(new Tooltip(balconMissingText));
         voiceReadTradeOffers.setDisable(true);
+        voiceReadTradeOffers.setTooltip(new Tooltip(balconMissingText));
         voiceReadChat.setDisable(true);
+        voiceReadChat.setTooltip(new Tooltip(balconMissingText));
         voiceReadCurOffers.setDisable(true);
+        voiceReadCurOffers.setTooltip(new Tooltip(balconMissingText));
         volumeLabel.setDisable(true);
+        volumeLabel.setTooltip(new Tooltip(balconMissingText));
         volumeSlider.setDisable(true);
+        volumeSlider.setTooltip(new Tooltip(balconMissingText));
         voiceReadAFK.setDisable(true);
+        voiceReadAFK.setTooltip(new Tooltip(balconMissingText));
         voiceRandom.setDisable(true);
+        voiceRandom.setTooltip(new Tooltip(balconMissingText));
+        voiceTestButton.setDisable(true);
+        voiceTestButton.setTooltip(new Tooltip(balconMissingText));
         poePath.setDisable(true);
     }
 
