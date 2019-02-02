@@ -101,14 +101,15 @@ public class PlayerTradeCell extends javafx.scene.control.ListCell<CurrencyDeal>
             }
 
             float playerBuyStock = deal.getPlayerBuyStock();
+            // buystock is for primary, but buy and sell values are for secondary
+            // deals are normalized to primary buy/sell == 1, therefore
+            // stock for primary is always > primaryPrice, otherwise it would not even show up.
             boolean playerHasBuyStock = true;
-            // buystock is primary, but buy is secondary
-            if (playerBuyStock > 0 && playerBuyStock < 1) {
-                playerBuy.setFill(Color.GRAY);
-                playerHasBuyStock = false;
-            } else {
+//            if (playerBuyStock > 0 && playerBuyStock < 1) {
+//                playerBuy.setFill(Color.GRAY);
+//                playerHasBuyStock = false;
+//            } else {
                 playerBuy.setFill(marketBuy.getFill());
-            }
 
             float playerSellStock = deal.getPlayerSellStock();
             boolean playerHasSellStock = true;
@@ -128,10 +129,16 @@ public class PlayerTradeCell extends javafx.scene.control.ListCell<CurrencyDeal>
                 }
                 buyTendency.setCache(true);
                 buyTendency.setCacheHint(CacheHint.SPEED);
+                if(!buyTendency.isVisible()) {
+                    buyTendency.setVisible(true);
+                }
 
                 handleIconEffects(buyTendency, playerHasBuyStock, pBuy, buy, currencyValue);
             } else {
-                buyTendency.setImage(null);
+                buyTendency.setCache(false);
+                if(buyTendency.isVisible()) {
+                    buyTendency.setVisible(false);
+                }
                 buyTendency.setEffect(null);
             }
 
@@ -143,10 +150,16 @@ public class PlayerTradeCell extends javafx.scene.control.ListCell<CurrencyDeal>
                 }
                 sellTendency.setCache(true);
                 sellTendency.setCacheHint(CacheHint.SPEED);
+                if(!sellTendency.isVisible()) {
+                    sellTendency.setVisible(true);
+                }
 
                 handleIconEffects(sellTendency, playerHasSellStock, pSell, sell, currencyValue);
             } else {
-                sellTendency.setImage(null);
+                sellTendency.setCache(false);
+                if(sellTendency.isVisible()) {
+                    sellTendency.setVisible(false);
+                }
                 sellTendency.setEffect(null);
             }
 

@@ -41,14 +41,15 @@ public class LogManager {
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
-                    String text = console.getText();
-                    console.setText(msg + '\n' + text);
+                    boolean firstMsg = console.getLength() == 0;
+                    console.appendText((firstMsg?"":'\n') + msg);
+                    console.setScrollTop(Double.MAX_VALUE); //this will scroll to the bottom
                 }
             });
         }
     }
 
-    public String getTime(){
+    public String getTime() {
         Date date = new Date();
         DateFormat formatter = new SimpleDateFormat("HH:mm:ss");
 //        formatter.setTimeZone(TimeZone.getTimeZone("UTC+1"));

@@ -32,6 +32,8 @@ public class WatchDog implements Runnable {
         try {
             watchService = FileSystems.getDefault().newWatchService();
             path.register(watchService, StandardWatchEventKinds.ENTRY_MODIFY);
+            // Possible Bugfix for starting the watchdog...
+//            onFileChanged(new File(path + File.separator + "Client.txt"));
             while (!stop) {
                 wk = watchService.take();
                 if(stop){
@@ -64,12 +66,10 @@ public class WatchDog implements Runnable {
             LogManager.getInstance().log(getClass(), "Shutting down.");
             if (wk != null) {
                 wk.cancel();
-                wk = null;
             }
             if (watchService != null) {
                 try {
                     watchService.close();
-                    watchService = null;
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -121,7 +121,7 @@ public class WatchDog implements Runnable {
         }
     }
 
-    public boolean isRunning() {
+    boolean isRunning() {
         return running;
     }
 
@@ -133,7 +133,7 @@ public class WatchDog implements Runnable {
         void onShutDown();
     }
 
-    public void stop(){
+    void stop(){
         stop = true;
     }
 }

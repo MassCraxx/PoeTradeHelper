@@ -46,4 +46,9 @@ public class CurrencyOffer {
     public int getStock() {
         return stock;
     }
+
+    @Override
+    public String toString() {
+        return "CurrencyOffer[" + getPlayerName() + ", buy " + getBuyAmount() + "x " + getBuyID() + ", sell " + getSellAmount() + "x " +getSellID()+"]";
+    }
 }

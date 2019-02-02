@@ -1,27 +1,27 @@
-package de.crass.poetradehelper;/**
- * Created by mcrass on 19.07.2018.
+package de.crass.poetradehelper;
+/*
+  Created by mcrass on 19.07.2018.
  */
 
 import de.crass.poetradehelper.model.CurrencyDeal;
 import de.crass.poetradehelper.model.CurrencyID;
 import de.crass.poetradehelper.model.CurrencyOffer;
-import de.crass.poetradehelper.parser.ParseListener;
+import de.crass.poetradehelper.parser.PoeNinjaParser;
+import de.crass.poetradehelper.parser.PoeTradeWebParser;
 import de.crass.poetradehelper.parser.TradeManager;
 import de.crass.poetradehelper.tts.PoeChatTTS;
 import de.crass.poetradehelper.ui.CurrencyContextMenu;
 import de.crass.poetradehelper.ui.MarketCell;
+import de.crass.poetradehelper.ui.OfferContextMenu;
 import de.crass.poetradehelper.ui.PlayerTradeCell;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -29,8 +29,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
@@ -39,14 +38,15 @@ import javax.swing.*;
 import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.util.*;
-import java.util.concurrent.*;
 
-public class Main extends Application implements ParseListener {
+@SuppressWarnings("unchecked")
+public class Main extends Application implements TradeManager.DealParseListener, PoeNinjaParser.PoeNinjaListener {
 
-    public static final String title = "PoeTradeHelper";
-    public static final String versionText = "v0.4.3";
+    private static final String title = "PoeTradeHelper";
+    private static final String versionText = "v0.5-SNAPSHOT";
 
     @FXML
     private ListView<CurrencyDeal> playerDealList;
@@ -68,6 +68,9 @@ public class Main extends Application implements ParseListener {
 
     @FXML
     private CheckBox filterWithoutAPI;
+
+    @FXML
+    private CheckBox filterExcessive;
 
     @FXML
     private CheckBox voiceActive;
@@ -157,6 +160,9 @@ public class Main extends Application implements ParseListener {
     private Button convertButton;
 
     @FXML
+    private Button openConversionInBrowser;
+
+    @FXML
     private CheckBox autoUpdate;
 
     @FXML
@@ -171,13 +177,42 @@ public class Main extends Application implements ParseListener {
     @FXML
     private Button refreshBtn;
 
+    @FXML
+    private Slider updateSlider;
+
+    @FXML
+    private Label updateTime;
+
+    @FXML
+    private TextField voiceShoutoutWords;
+
+    @FXML
+    private TextField voiceExcludeWords;
+
+    @FXML
+    private Button voiceTestButton;
+
+    @FXML
+    private Text volumeTopicLabel;
+
+    @FXML
+    private Label excessiveTresholdLabel;
+
+    @FXML
+    private Slider excessiveTresholdSlider;
+
+    @FXML
+    private CheckBox filterMultiTrade;
+
     private static Stage currentStage;
     private static PoeChatTTS poeChatTTS;
-    private static ScheduledExecutorService autoUpdateExecutor;
 
     private TradeManager tradeManager;
 
-    private boolean currencyFilterChanged = false;
+    public static boolean currencyFilterChanged = false;
+
+    private static DecimalFormat dFormat = new DecimalFormat("#0.##");
+    private static DecimalFormat valueFormat;
 
     public static void main(String[] args) {
         launch(args);
@@ -205,19 +240,20 @@ public class Main extends Application implements ParseListener {
         assert updateButton != null : "fx:id=\"updateButton\" was not injected: check your FXML file 'layout.fxml'.";
         assert version != null : "fx:id=\"version\" was not injected: check your FXML file 'layout.fxml'.";
 
+        // Setup console
         LogManager.getInstance().setConsole(console);
 
+        // Setup trade manager
         tradeManager = TradeManager.getInstance();
-        tradeManager.registerListener(this);
+        tradeManager.registerListener(this, this);
 
-        poeChatTTS = new PoeChatTTS(new PoeChatTTS.Listener() {
-            @Override
-            public void onShutDown() {
-                voiceActive.setSelected(false);
-                poePath.setDisable(false);
-            }
+        // Setup TTS
+        poeChatTTS = new PoeChatTTS(() -> {
+            voiceActive.setSelected(false);
+            poePath.setDisable(false);
         });
 
+        // Setup UI
         setupUI();
 
         LogManager.getInstance().log(getClass(), "Started");
@@ -233,62 +269,56 @@ public class Main extends Application implements ParseListener {
             poeChatTTS = null;
         }
 
-        stopUpdateTask();
+        if (TradeManager.getInstance() != null) {
+            TradeManager.getInstance().release();
+        }
 
         LogManager.getInstance().log(getClass(), "Shutdown complete.");
     }
 
     private int versionClicked = 0;
-    private final String debugSecretValue = "foobar";
+    private int volumeClicked = 0;
+
     private void setupUI() {
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+        symbols.setDecimalSeparator('.');
+        dFormat.setDecimalFormatSymbols(symbols);
+        dFormat.setRoundingMode(RoundingMode.HALF_UP);
+
+        valueFormat = (DecimalFormat) dFormat.clone();
+        valueFormat.applyPattern("0.00");
+
         version.setText(versionText);
-        version.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                versionClicked++;
-                if(versionClicked%10 == 0){
-                    JOptionPane.showMessageDialog(null, "Bananarama!");
-                    autoUpdate.setVisible(true);
-                }
+        version.setOnMouseClicked(event -> {
+            versionClicked++;
+            if (versionClicked % 10 == 0) {
+                JOptionPane.showMessageDialog(null, "PoE Ninja will hate me for this...");
+                autoUpdate.setVisible(true);
+                updateTime.setVisible(true);
+                updateSlider.setVisible(true);
             }
         });
 
         currencyList.setEditable(false);
-        currencyList.setCellFactory(new Callback<ListView<CurrencyDeal>, ListCell<CurrencyDeal>>() {
-            @Override
-            public ListCell<CurrencyDeal> call(ListView<CurrencyDeal> studentListView) {
-                return new MarketCell<>();
-            }
-        });
+        currencyList.setCellFactory(studentListView -> new MarketCell<>());
         currencyList.setItems(tradeManager.getCurrentDeals());
 
         playerDealList.setEditable(false);
-        playerDealList.setCellFactory(new Callback<ListView<CurrencyDeal>, ListCell<CurrencyDeal>>() {
-            @Override
-            public ListCell<CurrencyDeal> call(ListView<CurrencyDeal> studentListView) {
-                return new PlayerTradeCell();
-            }
-        });
+        playerDealList.setCellFactory(studentListView -> new PlayerTradeCell());
         playerDealList.setItems(tradeManager.getPlayerDeals());
 
         currencyList.setPlaceholder(new Label("Update to fill lists."));
         playerDealList.setPlaceholder(new Label("Update to fill lists."));
 
         updateButton.setTooltip(new Tooltip("Fetch offers from poe.trade for currency configured in settings"));
-        updateButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                if(autoUpdateExecutor != null){
-                    stopUpdateTask();
-                }
-                if (tradeManager.isUpdating()) {
-                    tradeManager.cancelUpdate();
-                    updateButton.setDisable(true);
+        updateButton.setOnAction(event -> {
+            if (tradeManager.isUpdating()) {
+                tradeManager.cancelUpdate();
+                updateButton.setDisable(true);
 //                    updatePlayerButton.setDisable(true);
-                } else {
-                    tradeManager.updateOffers(currencyFilterChanged);
+            } else {
+                tradeManager.updateOffers(currencyFilterChanged);
 //                    updatePlayerButton.setDisable(true);
-                }
             }
         });
 
@@ -311,35 +341,33 @@ public class Main extends Application implements ParseListener {
 //        });
 
         // Offer tab
+        ObservableList currencies = FXCollections.observableArrayList(CurrencyID.values());
+        currencies.sort(Comparator.comparing(Object::toString));
+        offerSecondary.setItems(currencies);
+        offerSecondary.setOnAction(event -> {
+            CurrencyID newValue = offerSecondary.getValue();
+            if (newValue != null) {
+                buyOfferTable.setItems(tradeManager.getBuyOffers(newValue));
+                sellOfferTable.setItems(tradeManager.getSellOffers(newValue));
+            }
+        });
 
+        // Buy table
         Callback<TableColumn.CellDataFeatures<CurrencyOffer, Number>, ObservableValue<Number>> stockCellFactory =
-                new Callback<TableColumn.CellDataFeatures<CurrencyOffer, Number>, ObservableValue<Number>>() {
-                    @Override
-                    public ObservableValue<Number> call(TableColumn.CellDataFeatures<CurrencyOffer, Number> param) {
-                        int stock = param.getValue().getStock();
-                        if(stock < 0){
-                            return null;
-                        }
-                        return new SimpleFloatProperty(stock);
+                param -> {
+                    int stock = param.getValue().getStock();
+                    if (stock < 0) {
+                        return null;
                     }
+                    return new SimpleFloatProperty(stock);
                 };
 
         Callback<TableColumn.CellDataFeatures<CurrencyOffer, String>, ObservableValue<String>> playerCellFactory =
-                new Callback<TableColumn.CellDataFeatures<CurrencyOffer, String>, ObservableValue<String>>() {
-                    @Override
-                    public ObservableValue<String> call(TableColumn.CellDataFeatures<CurrencyOffer, String> param) {
-                        return new SimpleStringProperty(param.getValue().getPlayerName());
-                    }
-                };
+                param -> new SimpleStringProperty(param.getValue().getPlayerName());
 
         TableColumn<CurrencyOffer, Number> valueColumn = new TableColumn<>();
         valueColumn.setText("Amount");
-        valueColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<CurrencyOffer, Number>, ObservableValue<Number>>() {
-            @Override
-            public ObservableValue<Number> call(TableColumn.CellDataFeatures<CurrencyOffer, Number> param) {
-                return new SimpleFloatProperty(param.getValue().getBuyAmount() / param.getValue().getSellAmount());
-            }
-        });
+        valueColumn.setCellValueFactory(param -> new SimpleFloatProperty(param.getValue().getBuyAmount() / param.getValue().getSellAmount()));
 
         TableColumn<CurrencyOffer, Number> stockColumn = new TableColumn<>();
         stockColumn.setText("Stock");
@@ -349,18 +377,19 @@ public class Main extends Application implements ParseListener {
         playerColumn.setText("Playername");
         playerColumn.setCellValueFactory(playerCellFactory);
 
+//        TableColumn<CurrencyOffer, String> apiColumn = new TableColumn<>();
+//        apiColumn.setText("API");
+//        apiColumn.setCellValueFactory(param -> new SimpleStringProperty((param.getValue().getStock() < 0) ? "" : "X"));
+
         buyOfferTable.getColumns().clear();
         buyOfferTable.getColumns().addAll(valueColumn, stockColumn, playerColumn);
+
+        buyOfferTable.setContextMenu(new OfferContextMenu(buyOfferTable, offerSecondary));
 
         // Sell table
         TableColumn<CurrencyOffer, Number> sellValueColumn = new TableColumn<>();
         sellValueColumn.setText("Amount");
-        sellValueColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<CurrencyOffer, Number>, ObservableValue<Number>>() {
-            @Override
-            public ObservableValue<Number> call(TableColumn.CellDataFeatures<CurrencyOffer, Number> param) {
-                return new SimpleFloatProperty(param.getValue().getSellAmount() / param.getValue().getBuyAmount());
-            }
-        });
+        sellValueColumn.setCellValueFactory(param -> new SimpleFloatProperty(param.getValue().getSellAmount() / param.getValue().getBuyAmount()));
 
         TableColumn<CurrencyOffer, Number> sellStockColumn = new TableColumn<>();
         sellStockColumn.setText("Stock");
@@ -370,25 +399,18 @@ public class Main extends Application implements ParseListener {
         sellPlayerColumn.setText("Playername");
         sellPlayerColumn.setCellValueFactory(playerCellFactory);
 
+//        TableColumn<CurrencyOffer, String> sellApiColumn = new TableColumn<>();
+//        sellApiColumn.setText("API");
+//        sellApiColumn.setCellValueFactory(param -> new SimpleStringProperty((param.getValue().getStock() < 0) ? "" : "X"));
+
         sellOfferTable.getColumns().clear();
         sellOfferTable.getColumns().addAll(sellValueColumn, sellStockColumn, sellPlayerColumn);
+        sellOfferTable.setContextMenu(new OfferContextMenu(sellOfferTable, offerSecondary));
 
-        offerSecondary.setItems(PropertyManager.getInstance().getFilterList());
-        offerSecondary.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                CurrencyID newValue = offerSecondary.getValue();
-                if(newValue != null) {
-                    buyOfferTable.setItems(tradeManager.getBuyOffers(newValue));
-                    sellOfferTable.setItems(tradeManager.getSellOffers(newValue));
-                }
-            }
-        });
 
-        refreshBtn.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                tradeManager.updateOffersForCurrency(offerSecondary.getValue());
+        refreshBtn.setOnAction(event -> {
+            if(offerSecondary.getValue() != null) {
+                tradeManager.updateOffersForCurrency(offerSecondary.getValue(), true);
             }
         });
 
@@ -396,6 +418,7 @@ public class Main extends Application implements ParseListener {
         valueTable.setRowFactory(tv -> new TableRow<Map.Entry<CurrencyID, Float>>() {
             @Override
             public void updateItem(Map.Entry<CurrencyID, Float> item, boolean empty) {
+                // updates on refresh
                 super.updateItem(item, empty);
                 if (item != null && PropertyManager.getInstance().getPrimaryCurrency().equals(item.getKey())) {
                     setStyle("-fx-background-color: -fx-accent;");
@@ -405,21 +428,25 @@ public class Main extends Application implements ParseListener {
             }
         });
 
+        valueTable.setContextMenu(new CurrencyContextMenu(valueTable));
+
         TableColumn<Map.Entry<CurrencyID, Float>, String> column = new TableColumn<>();
-        column.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Map.Entry<CurrencyID, Float>, String>, ObservableValue<String>>() {
+        column.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getKey().toString()));
+
+        TableColumn<Map.Entry<CurrencyID, Float>, Number> column2 = new TableColumn<>();
+        column2.setCellValueFactory(param -> new SimpleFloatProperty(param.getValue().getValue()));
+        column2.setCellFactory(tc -> new TableCell<Map.Entry<CurrencyID, Float>, Number>() {
             @Override
-            public ObservableValue<String> call(TableColumn.CellDataFeatures<Map.Entry<CurrencyID, Float>, String> param) {
-                return new SimpleStringProperty(param.getValue().getKey().toString());
+            protected void updateItem(Number number, boolean empty) {
+                super.updateItem(number, empty);
+                if (empty) {
+                    setText(null);
+                } else {
+                    setText(prettyFloat(number.floatValue(), valueFormat));
+                }
             }
         });
 
-        TableColumn<Map.Entry<CurrencyID, Float>, Number> column2 = new TableColumn<>();
-        column2.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Map.Entry<CurrencyID, Float>, Number>, ObservableValue<Number>>() {
-            @Override
-            public ObservableValue<Number> call(TableColumn.CellDataFeatures<Map.Entry<CurrencyID, Float>, Number> param) {
-                return new SimpleFloatProperty(param.getValue().getValue());
-            }
-        });
         column.setText("Currency");
         column.setPrefWidth(100);
         column.setMaxWidth(100);
@@ -431,173 +458,140 @@ public class Main extends Application implements ParseListener {
         valueTable.getColumns().clear();
         valueTable.getColumns().addAll(column, column2);
 
-        //FIXME: Dont create new lists all the time... also refresh on league change
-        valueTable.setItems(FXCollections.observableArrayList(tradeManager.getCurrencyValues().entrySet()));
+        updateValuesButton.setOnAction(event -> tradeManager.updateCurrencyValues());
 
-        valueTable.setContextMenu(new CurrencyContextMenu(valueTable));
-
-        updateValuesButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                tradeManager.updateCurrencyValues();
-                valueTable.setItems(FXCollections.observableArrayList(tradeManager.getCurrencyValues().entrySet()));
-                valueTable.refresh();
-            }
-        });
-
-        ObservableList<CurrencyID> currencyList = FXCollections.observableArrayList(CurrencyID.values());
-        valueInputCB.setItems(currencyList);
+        valueInputCB.setItems(currencies);
         valueInputCB.setValue(CurrencyID.EXALTED);
-        valueOutputCB.setItems(currencyList);
+        valueOutputCB.setItems(currencies);
         valueOutputCB.setValue(CurrencyID.CHAOS);
-        valueOutputCB.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                calculateValue();
-            }
-        });
-        valueInputCB.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                calculateValue();
-            }
-        });
+        valueOutputCB.setOnAction(event -> calculateValue());
+        valueInputCB.setOnAction(event -> calculateValue());
 
-        valueInputText.setOnKeyTyped(new EventHandler<KeyEvent>() {
-            @Override
-            public void handle(KeyEvent event) {
-//                calculateValue(event.getCharacter());
-                valueOutputText.setText("");
-            }
-        });
+        valueInputText.setOnKeyTyped(event -> valueOutputText.setText(""));
 
-        valueOutputText.setOnKeyTyped(new EventHandler<KeyEvent>() {
-            @Override
-            public void handle(KeyEvent event) {
-                valueInputText.setText("");
-            }
-        });
+        valueOutputText.setOnKeyTyped(event -> valueInputText.setText(""));
 
-        convertButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                calculateValue();
-            }
-        });
+        convertButton.setOnAction(event -> calculateValue());
 
-        calculateValue();
+        openConversionInBrowser.setOnAction(event -> PoeTradeWebParser.openInBrowser(PropertyManager.getInstance().getCurrentLeague(),
+                valueOutputCB.getValue(), valueInputCB.getValue()));
 
         // SETTINGS
         primaryComboBox.setTooltip(new Tooltip("Select currency to flip with"));
-        primaryComboBox.setItems(currencyList);
+        primaryComboBox.setItems(PropertyManager.getInstance().getPrimaryCurrencyList());
         primaryComboBox.setValue(PropertyManager.getInstance().getPrimaryCurrency());
-        primaryComboBox.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                CurrencyID newValue = primaryComboBox.getValue();
-                PropertyManager.getInstance().setPrimaryCurrency(newValue);
-                tradeManager.parseDeals(true);
-            }
+        primaryComboBox.setOnAction(event -> {
+            CurrencyID newValue = primaryComboBox.getValue();
+            PropertyManager.getInstance().setPrimaryCurrency(newValue);
+            tradeManager.parseDeals();
+            valueTable.refresh();
         });
 
-        filterInvalid.setTooltip(new Tooltip("Ignore all offers that do have a stock value but not enough on stock to sell"));
-        filterInvalid.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                PropertyManager.getInstance().setFilterOutOfStock(filterInvalid.isSelected());
-                tradeManager.parseDeals(true);
-            }
-        });
         filterInvalid.setSelected(PropertyManager.getInstance().getFilterOutOfStock());
+        filterInvalid.setTooltip(new Tooltip("Ignore all offers that do have a stock value but not enough on stock to sell"));
+        filterInvalid.setOnAction(event -> {
+            PropertyManager.getInstance().setFilterOutOfStock(filterInvalid.isSelected());
+            tradeManager.parseDeals();
+        });
 
+        filterWithoutAPI.setSelected(PropertyManager.getInstance().getFilterNoApi());
         filterWithoutAPI.setTooltip(new Tooltip("Ignore all offers that don't have stock information"));
-        filterWithoutAPI.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                PropertyManager.getInstance().setFilterNoApi(filterWithoutAPI.isSelected());
-                tradeManager.parseDeals(true);
+        filterWithoutAPI.setOnAction(event -> {
+            PropertyManager.getInstance().setFilterNoApi(filterWithoutAPI.isSelected());
+            tradeManager.parseDeals();
+        });
+
+        filterExcessive.setSelected(PropertyManager.getInstance().getFilterExcessive());
+        filterExcessive.setTooltip(new Tooltip("Ignore all offers that have an insane buy to sell value ratio"));
+        filterExcessive.setOnAction(event -> {
+            PropertyManager.getInstance().setFilterExcessive(filterExcessive.isSelected());
+            tradeManager.parseDeals();
+        });
+
+        excessiveTresholdSlider.setTooltip(new Tooltip("If Filter Excessive is active, trades where the buy and sell value difference exceeds given percent of the higher value. E.g. 50% means all offers will be ignored where buy and sell difference is more than 50% of the primary currency value"));
+        int excessiveTreshold = PropertyManager.getInstance().getExcessiveTreshold();
+        excessiveTresholdSlider.setValue(excessiveTreshold);
+        excessiveTresholdLabel.setText(excessiveTreshold + " %");
+        excessiveTresholdSlider.valueProperty().addListener((observable, oldValue, newValue) -> excessiveTresholdLabel.setText(newValue.intValue() + " %"));
+        excessiveTresholdSlider.valueChangingProperty().addListener((observable, changeEnds, changeStarts) -> {
+            if (changeEnds) {
+                int newUpdateDelay = (int) excessiveTresholdSlider.getValue();
+                PropertyManager.getInstance().setExcessiveTreshold(newUpdateDelay);
+                tradeManager.parseDeals();
             }
         });
-        filterWithoutAPI.setSelected(PropertyManager.getInstance().getFilterNoApi());
+
+        filterMultiTrade.setTooltip(new Tooltip("Skip updating currencies that would require multiple full inventories to trade against one unit of primary"));
+        filterMultiTrade.setSelected(PropertyManager.getInstance().getFilterMultipleTransactionDeals());
+        filterMultiTrade.setOnAction(event -> {
+            PropertyManager.getInstance().setFilterMultipleTransactionDeals(filterMultiTrade.isSelected());
+            tradeManager.parseDeals();
+        });
 
         currencyFilterList.setItems(PropertyManager.getInstance().getFilterList());
         currencyFilterList.setTooltip(new Tooltip("Only offers for currency in this list will be fetched on update"));
 
-        currencyFilterCB.setItems(FXCollections.observableArrayList(CurrencyID.values()));
+        currencyFilterCB.setItems(currencies);
 
         addCurrencyFilterBtn.setTooltip(new Tooltip("Add selected currency to list"));
-        addCurrencyFilterBtn.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                CurrencyID newCurrency = currencyFilterCB.getValue();
-                if (newCurrency != null) {
-                    List<CurrencyID> filterList = PropertyManager.getInstance().getFilterList();
-                    if (!filterList.contains(newCurrency)) {
-                        currencyFilterChanged = true;
-                        filterList.add(newCurrency);
-                    }
+        addCurrencyFilterBtn.setOnAction(event -> {
+            CurrencyID newCurrency = currencyFilterCB.getValue();
+            if (newCurrency != null) {
+                List<CurrencyID> filterList = PropertyManager.getInstance().getFilterList();
+                if (!filterList.contains(newCurrency)) {
+                    currencyFilterChanged = true;
+                    filterList.add(newCurrency);
                 }
             }
         });
 
         removeCurrencyFilterBtn.setTooltip(new Tooltip("Remove selected currency from list"));
-        removeCurrencyFilterBtn.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                CurrencyID focus = currencyFilterList.getFocusModel().getFocusedItem();
-                if (focus != null) {
-                    currencyFilterChanged = true;
-                    PropertyManager.getInstance().getFilterList().remove(focus);
-                }
+        removeCurrencyFilterBtn.setOnAction(event -> {
+            CurrencyID focus = currencyFilterList.getFocusModel().getFocusedItem();
+            if (focus != null) {
+                currencyFilterChanged = true;
+                PropertyManager.getInstance().getFilterList().remove(focus);
             }
         });
 
         restoreCurrencyFilterBtn.setTooltip(new Tooltip("Restore default currency list"));
-        restoreCurrencyFilterBtn.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                PropertyManager.getInstance().resetFilterList();
-            }
-        });
+        restoreCurrencyFilterBtn.setOnAction(event -> PropertyManager.getInstance().resetFilterList());
 
         ObservableList<String> playerList = PropertyManager.getInstance().getPlayerList();
         playerListView.setItems(playerList);
-        playerListView.setTooltip(new Tooltip("Offers from players in this list will be shown in PlayerOverview"));
+        playerListView.setTooltip(new Tooltip("Offers from account in this list will be shown in PlayerOverview"));
 
-        addPlayerButton.setTooltip(new Tooltip("Add player from TextField to list"));
-        addPlayerButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                String newPlayer = playerField.getText();
-                if (!newPlayer.isEmpty() && !playerList.contains(newPlayer))
-                    playerList.add(newPlayer);
-            }
+        addPlayerButton.setTooltip(new Tooltip("Add an account name from the text field to the list"));
+        addPlayerButton.setOnAction(event -> {
+            String newPlayer = playerField.getText();
+            if (!newPlayer.isEmpty() && !playerList.contains(newPlayer))
+                playerList.add(newPlayer);
+            playerField.setText("");
         });
 
         removePlayerBtn.setTooltip(new Tooltip("Remove selected player from list"));
-        removePlayerBtn.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                playerList.remove(playerListView.getFocusModel().getFocusedItem());
-            }
-        });
+        removePlayerBtn.setOnAction(event -> playerList.remove(playerListView.getFocusModel().getFocusedItem()));
 
         leagueCB.setTooltip(new Tooltip("Set Path of Exile league"));
         leagueCB.setItems(tradeManager.getLeagueList());
         leagueCB.setValue(PropertyManager.getInstance().getCurrentLeague());
 
-        leagueCB.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                LogManager.getInstance().log(getClass(), "Setting " + leagueCB.getValue() + " as new league.");
-                PropertyManager.getInstance().setLeague(leagueCB.getValue());
-                tradeManager.updateCurrencyValues();
-                updateTitle();
-            }
+        leagueCB.setOnAction(event -> {
+            PropertyManager.getInstance().setLeague(leagueCB.getValue());
+            valueTable.getItems().clear();
+            buyOfferTable.getItems().clear();
+            sellOfferTable.getItems().clear();
+            playerDealList.getItems().clear();
+            currencyList.getItems().clear();
+
+            tradeManager.reset();
+            updateTitle();
         });
 
 
         // Setup Voice Controls
+        poeChatTTS.setWordIncludeTextField(voiceShoutoutWords);
+        poeChatTTS.setWordExcludeTextField(voiceExcludeWords);
         List<String> supportedVoices = poeChatTTS.getSupportedVoices();
         if (supportedVoices == null) {
             LogManager.getInstance().log(getClass(), "TTS is disabled: Balcon not found.");
@@ -606,167 +600,152 @@ public class Main extends Application implements ParseListener {
             LogManager.getInstance().log(getClass(), "TTS is disabled: No supported voices found.");
             setDisableVoiceControls();
         } else {
-            voiceActive.setOnAction(new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent event) {
-                    if (voiceActive.isSelected()) {
-                        poeChatTTS.startTTS();
-                        poePath.setDisable(true);
-                    } else {
-                        poeChatTTS.stopTTS();
-                        poePath.setDisable(false);
-                    }
+            voiceActive.setOnAction(event -> {
+                if (voiceActive.isSelected()) {
+                    poeChatTTS.startTTS();
+                    poePath.setDisable(true);
+                    String newPath = poePath.getText();
+                    poeChatTTS.setPath(newPath);
+                    PropertyManager.getInstance().setPathOfExilePath(newPath);
+                } else {
+                    poeChatTTS.stopTTS();
+                    poePath.setDisable(false);
                 }
             });
 
             speakerCB.setItems(FXCollections.observableArrayList(supportedVoices));
             speakerCB.setValue(poeChatTTS.getVoice());
-            speakerCB.setOnAction(new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent event) {
-                    String selected = speakerCB.getValue();
-                    if (!selected.isEmpty()) {
-                        poeChatTTS.setVoice(selected);
-                        PropertyManager.getInstance().setProp(PropertyManager.VOICE_SPEAKER, selected);
-                    }
+            speakerCB.setOnAction(event -> {
+                String selected = speakerCB.getValue();
+                if (!selected.isEmpty()) {
+                    poeChatTTS.setVoice(selected);
                 }
             });
 
             voiceReadAFK.setSelected(poeChatTTS.isReadAFK());
-            voiceReadAFK.setOnAction(new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent event) {
-                    poeChatTTS.setReadAFK(voiceReadAFK.isSelected());
-                    PropertyManager.getInstance().setProp(PropertyManager.VOICE_AFK, String.valueOf(voiceReadAFK
-                            .isSelected()));
-                }
+            voiceReadAFK.setOnAction(event -> {
+                poeChatTTS.setReadAFK(voiceReadAFK.isSelected());
+                PropertyManager.getInstance().setProp(PropertyManager.VOICE_AFK, String.valueOf(voiceReadAFK
+                        .isSelected()));
             });
 
             voiceReadChat.setSelected(poeChatTTS.isReadChatMessages());
-            voiceReadChat.setOnAction(new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent event) {
-                    poeChatTTS.setReadChatMessages(voiceReadChat.isSelected());
-                    PropertyManager.getInstance().setProp(PropertyManager.VOICE_CHAT, String.valueOf(voiceReadChat
-                            .isSelected()));
-                }
+            voiceReadChat.setOnAction(event -> {
+                poeChatTTS.setReadChatMessages(voiceReadChat.isSelected());
+                PropertyManager.getInstance().setProp(PropertyManager.VOICE_CHAT, String.valueOf(voiceReadChat
+                        .isSelected()));
             });
 
             voiceReadCurOffers.setSelected(poeChatTTS.isReadCurrencyRequests());
-            voiceReadCurOffers.setOnAction(new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent event) {
-                    poeChatTTS.setReadCurrencyRequests(voiceReadCurOffers.isSelected());
-                    PropertyManager.getInstance().setProp(PropertyManager.VOICE_CURRENCY, String.valueOf(voiceReadCurOffers
-                            .isSelected()));
-                }
+            voiceReadCurOffers.setOnAction(event -> {
+                poeChatTTS.setReadCurrencyRequests(voiceReadCurOffers.isSelected());
+                PropertyManager.getInstance().setProp(PropertyManager.VOICE_CURRENCY, String.valueOf(voiceReadCurOffers
+                        .isSelected()));
             });
 
             voiceReadTradeOffers.setSelected(poeChatTTS.isReadTradeRequests());
-            voiceReadTradeOffers.setOnAction(new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent event) {
-                    poeChatTTS.setReadTradeRequests(voiceReadTradeOffers.isSelected());
-                    PropertyManager.getInstance().setProp(PropertyManager.VOICE_TRADE, String.valueOf(voiceReadTradeOffers.isSelected()));
-                }
+            voiceReadTradeOffers.setOnAction(event -> {
+                poeChatTTS.setReadTradeRequests(voiceReadTradeOffers.isSelected());
+                PropertyManager.getInstance().setProp(PropertyManager.VOICE_TRADE, String.valueOf(voiceReadTradeOffers.isSelected()));
             });
 
             voiceRandom.setSelected(poeChatTTS.isRandomizeMessages());
-            voiceRandom.setOnAction(new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent event) {
-                    poeChatTTS.setRandomizeMessages(voiceRandom.isSelected());
-                    PropertyManager.getInstance().setProp(PropertyManager.VOICE_RANDOMIZE, String.valueOf
-                            (voiceRandom.isSelected()));
+            voiceRandom.setOnAction(event -> {
+                poeChatTTS.setRandomizeMessages(voiceRandom.isSelected());
+                PropertyManager.getInstance().setProp(PropertyManager.VOICE_RANDOMIZE, String.valueOf
+                        (voiceRandom.isSelected()));
+            });
+
+            volumeLabel.setTooltip(new Tooltip("Set volume of the voice speaker"));
+
+            int volume = PropertyManager.getInstance().getVoiceVolume();
+            volumeLabel.setText(String.valueOf(volume) + " %");
+            volumeSlider.setValue(volume);
+            volumeSlider.valueProperty().addListener((observable, oldValue, newValue) -> volumeLabel.setText(String.valueOf(newValue.intValue()) + " %"));
+            volumeSlider.valueChangingProperty().addListener((observable, changeEnds, changeStarts) -> {
+                if (changeEnds) {
+                    int newVolume = (int) volumeSlider.getValue();
+                    poeChatTTS.setVolume(newVolume);
+                    PropertyManager.getInstance().setVoiceVolume(String.valueOf(newVolume));
+                    poeChatTTS.testSpeech();
                 }
             });
 
-            int volume = PropertyManager.getInstance().getVoiceVolume();
-            volumeSlider.setValue(volume);
-            volumeSlider.valueProperty().addListener(new ChangeListener<Number>() {
-                @Override
-                public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                    volumeLabel.setText(String.valueOf(newValue.intValue()));
-                }
-            });
-            volumeSlider.valueChangingProperty().addListener(new ChangeListener<Boolean>() {
-                @Override
-                public void changed(ObservableValue<? extends Boolean> observable, Boolean changeEnds, Boolean changeStarts) {
-                    if (changeEnds) {
-                        int newVolume = (int) volumeSlider.getValue();
-                        poeChatTTS.setVolume(newVolume);
-                        PropertyManager.getInstance().setVoiceVolume(String.valueOf(newVolume));
-                        poeChatTTS.testSpeech();
+            // Who knew daniel was used in Pendulum's Bloodsugar?
+            volumeTopicLabel.setOnMouseClicked(event -> {
+                if(poeChatTTS.getVoice() != null && poeChatTTS.getVoice().contains("Daniel")) {
+                    String msg;
+                    volumeClicked++;
+                    if (volumeClicked >= 5) {
+                        msg = "Ok, Fuck it, I lied! It's Drum and Bass, what you gonna do!";
+                    } else {
+                        return;
+                    }
+                    try {
+                        poeChatTTS.textToSpeech(msg, true);
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 }
             });
 
-            volumeLabel.setTooltip(new Tooltip("Set volume of the voice speaker"));
-            volumeLabel.setText(String.valueOf(volume));
+            voiceTestButton.setOnAction(event -> poeChatTTS.randomTradeMessage());
 
             poePath.setText(PropertyManager.getInstance().getPathOfExilePath());
-            poePath.setOnKeyTyped(new EventHandler<KeyEvent>() {
-                @Override
-                public void handle(KeyEvent event) {
-                    String newPath = poePath.getText();
-                    poeChatTTS.setPath(newPath);
-                    PropertyManager.getInstance().setPathOfExilePath(newPath);
-                }
-            });
         }
 
         // Auto Update checkbox
-        autoUpdate.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                if(autoUpdate.isSelected()) {
-                    startUpdateTask();
-                } else{
-                    stopUpdateTask();
-                }
-            }
+        autoUpdate.setOnAction(event -> {
+            tradeManager.setAutoUpdate(autoUpdate.isSelected());
+            autoUpdate.setSelected(tradeManager.isAutoUpdating());
         });
 
         autoUpdate.setTooltip(new Tooltip("Invoke Update every " + PropertyManager.getInstance().getUpdateDelay() + " minutes."));
 
-        if(!debugSecretValue.equals(PropertyManager.getInstance().getProp("DEBUG", null))){
+        int updateDelay = PropertyManager.getInstance().getUpdateDelay();
+        updateSlider.setValue(updateDelay);
+        updateSlider.valueProperty().addListener((observable, oldValue, newValue) -> updateTime.setText(String.valueOf(newValue.intValue()) + " min"));
+        updateSlider.valueChangingProperty().addListener((observable, changeEnds, changeStarts) -> {
+            if (changeEnds) {
+                int newUpdateDelay = (int) updateSlider.getValue();
+                PropertyManager.getInstance().setUpdateDelay(newUpdateDelay);
+            }
+        });
+
+        updateTime.setTooltip(new Tooltip("Set volume of the voice speaker"));
+        updateTime.setText(String.valueOf(updateDelay) + " min");
+
+        if (PropertyManager.getInstance().getProp("DEBUG", null) == null) {
             autoUpdate.setVisible(false);
+            updateTime.setVisible(false);
+            updateSlider.setVisible(false);
         }
     }
 
-    private void calculateValue(){
-        calculateValue(null);
-    }
-
-    private void calculateValue(String newText) {
+    private void calculateValue() {
         String inString = valueInputText.getText();
 
         boolean outputReversed = false;
-        if(inString == null || inString.isEmpty()){
+        if (inString == null || inString.isEmpty()) {
             inString = valueOutputText.getText();
             outputReversed = true;
         }
 
-        if(newText != null){
-            inString += newText;
-        }
-
-        String result = "0";
+        String result = "";
         if (inString != null && !inString.isEmpty()) {
             try {
-                DecimalFormat format = new DecimalFormat("0.#");
-                float inAmount = format.parse(inString).floatValue();
-                if(outputReversed){
-                    result = prettyFloat(inAmount * tradeManager.getCurrencyValue(valueOutputCB.getValue(), valueInputCB.getValue()));
-                }else {
-                    result = prettyFloat(inAmount * tradeManager.getCurrencyValue(valueInputCB.getValue(), valueOutputCB.getValue()));
+                float inAmount = dFormat.parse(inString).floatValue();
+                if (outputReversed) {
+                    result = prettyFloat(inAmount * tradeManager.getCurrencyValue(valueOutputCB.getValue(), valueInputCB.getValue()), valueFormat);
+                } else {
+                    result = prettyFloat(inAmount * tradeManager.getCurrencyValue(valueInputCB.getValue(), valueOutputCB.getValue()), valueFormat);
                 }
             } catch (ParseException ignored) {
 
             }
         }
 
-        if(outputReversed){
+        if (outputReversed) {
             valueInputText.setText(result);
         } else {
             valueOutputText.setText(result);
@@ -774,15 +753,25 @@ public class Main extends Application implements ParseListener {
     }
 
     private void setDisableVoiceControls() {
-        voiceActive.setTooltip(new Tooltip("Place balcon.exe next to the app to use this feature."));
+        String balconMissingText = "Place balcon.exe next to the app to enable this feature.";
         voiceActive.setDisable(true);
+        voiceActive.setTooltip(new Tooltip(balconMissingText));
         voiceReadTradeOffers.setDisable(true);
+        voiceReadTradeOffers.setTooltip(new Tooltip(balconMissingText));
         voiceReadChat.setDisable(true);
+        voiceReadChat.setTooltip(new Tooltip(balconMissingText));
         voiceReadCurOffers.setDisable(true);
+        voiceReadCurOffers.setTooltip(new Tooltip(balconMissingText));
         volumeLabel.setDisable(true);
+        volumeLabel.setTooltip(new Tooltip(balconMissingText));
         volumeSlider.setDisable(true);
+        volumeSlider.setTooltip(new Tooltip(balconMissingText));
         voiceReadAFK.setDisable(true);
+        voiceReadAFK.setTooltip(new Tooltip(balconMissingText));
         voiceRandom.setDisable(true);
+        voiceRandom.setTooltip(new Tooltip(balconMissingText));
+        voiceTestButton.setDisable(true);
+        voiceTestButton.setTooltip(new Tooltip(balconMissingText));
         poePath.setDisable(true);
     }
 
@@ -794,20 +783,35 @@ public class Main extends Application implements ParseListener {
         currentStage.setTitle(title + " - " + PropertyManager.getInstance().getCurrentLeague() + " League");
     }
 
+    private long updateStart;
+
     @Override
-    public void onParsingStarted() {
+    public void onUpdateStarted() {
+        updateStart = System.currentTimeMillis();
+
         currencyList.setPlaceholder(new Label("Updating..."));
         playerDealList.setPlaceholder(new Label("Updating..."));
 
         updateButton.setText("Cancel");
 //        updatePlayerButton.setText("Cancel");
-        if(autoUpdate.isSelected()){
-            stopUpdateTask();
-        }
+    }
+
+    @Override
+    public void onUpdateFinished() {
+        LogManager.getInstance().log(TradeManager.class, "Update took " + prettyFloat((System.currentTimeMillis() - updateStart) / 1000f) + " seconds");
+    }
+
+    private long parseStartTime;
+
+    @Override
+    public void onParsingStarted() {
+        parseStartTime = System.currentTimeMillis();
     }
 
     @Override
     public void onParsingFinished() {
+        LogManager.getInstance().log(TradeManager.class, "Parsing took " + prettyFloat((System.currentTimeMillis() - parseStartTime)) + " milliseconds");
+
         currencyList.setPlaceholder(new Label("No deals to show."));
         playerDealList.setPlaceholder(new Label("No deals to show. Is your player set in settings?"));
 
@@ -817,65 +821,54 @@ public class Main extends Application implements ParseListener {
 //        updatePlayerButton.setDisable(false);
 
         currencyFilterChanged = false;
+    }
 
-        if(autoUpdate.isSelected()){
-            startUpdateTask();
-        }
+    @Override
+    public void onRatesFetched() {
+        valueTable.setItems(tradeManager.getCurrencyValues());
+        TableColumn column = valueTable.getColumns().get(1);
+        column.setSortType(TableColumn.SortType.DESCENDING);
+        valueTable.getSortOrder().add(column);
+        valueTable.refresh();
+
+        calculateValue();
     }
 
     public static String prettyFloat(float in) {
+        return prettyFloat(in, null);
+    }
+
+    public static String prettyFloat(float in, DecimalFormat format) {
         if (in == 0) {
             return "---";
         }
-        DecimalFormat df = new DecimalFormat("0.##");
-        df.setRoundingMode(RoundingMode.HALF_UP);
-        return String.valueOf(df.format(in));
+        if (format == null) {
+            format = dFormat;
+        }
+
+        return format.format(in);
     }
 
     public static void setImage(String name, ImageView view) {
         try {
             final Image image = SwingFXUtils.toFXImage(ImageIO.read(Main.class.getResource(name)), null);
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    view.setImage(image);
-                }
-            });
+            Platform.runLater(() -> view.setImage(image));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public static String join(Collection col, String seperator) {
+    static String join(Collection col) {
         StringBuilder result = new StringBuilder();
 
         for (Iterator var3 = col.iterator(); var3.hasNext(); result.append((String) var3.next())) {
             if (result.length() != 0) {
-                result.append(seperator);
+                result.append(",");
             }
         }
 
         return result.toString();
     }
 
-    private void startUpdateTask() {
-        if (autoUpdateExecutor == null) {
-            autoUpdateExecutor = Executors.newSingleThreadScheduledExecutor();
-        }
-        int updateDelay = PropertyManager.getInstance().getUpdateDelay() * 60;
-        autoUpdateExecutor.schedule(new Runnable() {
-            @Override
-            public void run() {
-                LogManager.getInstance().log("AutoUpdate", "Invoke Automatic Update");
-                TradeManager.getInstance().updateOffers(currencyFilterChanged, false);
-            }
-        }, updateDelay, TimeUnit.SECONDS);
-    }
 
-    private void stopUpdateTask() {
-        if(autoUpdateExecutor != null) {
-            autoUpdateExecutor.shutdownNow();
-            autoUpdateExecutor = null;
-        }
-    }
 }

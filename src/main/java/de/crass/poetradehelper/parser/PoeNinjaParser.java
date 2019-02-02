@@ -7,6 +7,7 @@ import de.crass.poetradehelper.PropertyManager;
 import de.crass.poetradehelper.model.CurrencyID;
 import de.crass.poetradehelper.web.HttpManager;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -14,30 +15,43 @@ import java.io.IOException;
 import java.util.HashMap;
 
 public class PoeNinjaParser {
-    public static final String currencyURL = "http://poe.ninja/api/Data/GetCurrencyOverview";
+    private static final String currencyURL = "http://poe.ninja/api/Data/GetCurrencyOverview";
     private final ObjectMapper objectMapper;
-    private final File file = new File("poeninja.dat");
+    private String cacheFileName = "_rates.dat";
+//    private final File file = new File("poeninja.dat");
+
     private boolean useOfflineCache = true;
     private long updateDelay = 6 * 60 * 60 * 1000; // 6 hours
+
+    private PoeNinjaListener listener;
 
     // Currency - (CurrencyID<>Chaos Value)
     private HashMap<CurrencyID, Float> currentRates;
 
-    public PoeNinjaParser() {
+    PoeNinjaParser() {
         objectMapper = new ObjectMapper();
     }
 
-    public void fetchRates(String league, boolean forceUpdate) {
+    public PoeNinjaParser(PoeNinjaListener listener) {
+        this();
+        this.listener = listener;
+    }
+
+    void fetchRates(String league, boolean forceUpdate) {
         // If there is a file  and it is recent
-        if (!forceUpdate && (useOfflineCache && file.exists() &&
-                file.lastModified() + updateDelay > System.currentTimeMillis())) {
+        File cacheFile = new File(league + cacheFileName);
+        if (!forceUpdate && (useOfflineCache && cacheFile.exists() &&
+                cacheFile.lastModified() + updateDelay > System.currentTimeMillis())) {
 
             // If no current rates have been loaded before, load from cache
             if (currentRates == null || currentRates.isEmpty()) {
                 TypeReference<HashMap<CurrencyID, Float>> typeRef = new TypeReference<HashMap<CurrencyID, Float>>() {};
                 try {
                     LogManager.getInstance().log(getClass(), "Loading poe.ninja currency values from cache.");
-                    currentRates = objectMapper.readValue(file, typeRef);
+                    currentRates = objectMapper.readValue(cacheFile, typeRef);
+                    if(listener != null){
+                        listener.onRatesFetched();
+                    }
                 } catch (Exception e) {
                     LogManager.getInstance().log(getClass(), "Error loading poe.ninja values from cache.");
                     fetchRates(league, true);
@@ -51,10 +65,12 @@ public class PoeNinjaParser {
                 json = HttpManager.getInstance().getJson(currencyURL, "?league=" + league);
             } catch (IOException e) {
                 LogManager.getInstance().log(getClass(), "IOException!\n" + e);
+            } catch (JSONException j){
+                LogManager.getInstance().log(getClass(), "JSONException!\n" + j);
             }
 
             if (json == null || json.length() == 0) {
-                LogManager.getInstance().log(getClass(), "Invalid response");
+                LogManager.getInstance().log(getClass(), "Invalid response from PoeNinja! API has been changed.");
                 return;
             }
 
@@ -84,25 +100,28 @@ public class PoeNinjaParser {
                 }
             }
 
-            if (!currentRates.isEmpty() && file.canWrite()) {
+            if (!currentRates.isEmpty()) {
                 try {
-                    objectMapper.writeValue(file, currentRates);
+                    objectMapper.writeValue(cacheFile, currentRates);
                 } catch (Exception e) {
                     LogManager.getInstance().log(getClass(), "Writing ninja cache failed!\n" + e);
                 }
             }
+
+            if(listener != null){
+                listener.onRatesFetched();
+            }
         }
     }
 
-    public HashMap<CurrencyID, Float> getCurrentRates() {
-        fetchRates(PropertyManager.getInstance().getCurrentLeague(), false);
-        if (currentRates == null) {
-            currentRates = new HashMap<>();
+    HashMap<CurrencyID, Float> getCurrentRates() {
+        if(currentRates == null){
+            fetchRates(PropertyManager.getInstance().getCurrentLeague(), false);
         }
         return currentRates;
     }
 
-    public Float getCurrentCValueFor(CurrencyID id) {
+    Float getCurrentCValueFor(CurrencyID id) {
         if (id == CurrencyID.CHAOS) {
             return 1f;
         }
@@ -111,7 +130,7 @@ public class PoeNinjaParser {
         return value == null ? 0 : value;
     }
 
-    public Float getCurrentValue(CurrencyID what, CurrencyID inWhat) {
+    Float getCurrentValue(CurrencyID what, CurrencyID inWhat) {
         Float whatValue = getCurrentCValueFor(what);
         Float inWhatValue = getCurrentCValueFor(inWhat);
 
@@ -120,5 +139,17 @@ public class PoeNinjaParser {
         }
 
         return whatValue / inWhatValue;
+    }
+
+    void registerListener(PoeNinjaListener ninjaListener) {
+        listener = ninjaListener;
+    }
+
+    public void reset() {
+        currentRates = null;
+    }
+
+    public interface PoeNinjaListener{
+        void onRatesFetched();
     }
 }

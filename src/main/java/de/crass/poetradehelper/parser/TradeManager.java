@@ -11,11 +11,17 @@ import javafx.collections.ObservableList;
 import javafx.util.Pair;
 
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+
+import static de.crass.poetradehelper.Main.currencyFilterChanged;
 
 /**
  * Created by mcrass on 19.07.2018.
  */
-public class TradeManager implements ParseListener {
+public class TradeManager implements PoeTradeWebParser.OfferParseListener {
     private static TradeManager instance;
 
     private PoeApiParser poeApiParser;
@@ -23,37 +29,35 @@ public class TradeManager implements ParseListener {
     private ObservableList<CurrencyDeal> currentDeals;
     private ObservableList<CurrencyDeal> playerDeals;
     private PoeNinjaParser poeNinjaParser;
-    private Comparator<? super CurrencyDeal> diffValueSorter = new Comparator<CurrencyDeal>() {
-        @Override
-        public int compare(CurrencyDeal o1, CurrencyDeal o2) {
-            float o1Value = o1.getDiffValue();
-            float o2Value = o2.getDiffValue();
 
-            if (o1Value == o2Value) {
-                return 0;
-            }
-            return o1Value > o2Value ? -1 : 1;
+    private static ScheduledExecutorService autoUpdateExecutor;
+
+    private Comparator<? super CurrencyDeal> diffValueSorter = (Comparator<CurrencyDeal>) (o1, o2) -> {
+        float o1Value = o1.getDiffValue();
+        float o2Value = o2.getDiffValue();
+
+        if (o1Value == o2Value) {
+            return 0;
         }
+        return o1Value > o2Value ? -1 : 1;
     };
-    private Comparator<? super CurrencyDeal> playerDiffValueSorter = new Comparator<CurrencyDeal>() {
-        @Override
-        public int compare(CurrencyDeal o1, CurrencyDeal o2) {
-            float o1Value = o1.getPlayerDiffValue();
-            float o2Value = o2.getPlayerDiffValue();
+    private Comparator<? super CurrencyDeal> playerDiffValueSorter = (Comparator<CurrencyDeal>) (o1, o2) -> {
+        float o1Value = o1.getPlayerDiffValue();
+        float o2Value = o2.getPlayerDiffValue();
 
-            if (o1Value == o2Value) {
-                return 0;
-            }
-            return o1Value > o2Value ? -1 : 1;
+        if (o1Value == o2Value) {
+            return 0;
         }
+        return o1Value > o2Value ? -1 : 1;
     };
-    private ParseListener listener;
+    private DealParseListener listener;
+    private boolean updating = false;
+    private boolean autoUpdate = false;
 
-    public TradeManager() {
-        webParser = new PoeTradeWebParser();
-        webParser.setParseListener(this);
-        poeNinjaParser = new PoeNinjaParser();
+    private TradeManager() {
         poeApiParser = new PoeApiParser();
+        poeNinjaParser = new PoeNinjaParser();
+        webParser = new PoeTradeWebParser(this);
 
         currentDeals = FXCollections.observableArrayList();
         playerDeals = FXCollections.observableArrayList();
@@ -67,208 +71,267 @@ public class TradeManager implements ParseListener {
     }
 
     public void updateOffers(boolean clear) {
-        updateOffers(clear, true);
+        if(!updating) {
+            pauseUpdateTask();
+            updateOffers(clear, true, PropertyManager.getInstance().getFilterList());
+        } else {
+            LogManager.getInstance().log(getClass(), "Prevented update attempt while updating!");
+        }
     }
 
-    public void updateOffers(boolean clear, boolean async) {
-        webParser.updateCurrencies(PropertyManager.getInstance().getFilterList(), clear, async);
+    private void updateOffers(boolean clear, boolean async, List<CurrencyID> currencyIDs) {
+        if (!updating) {
+            updating = true;
+
+            if (listener != null) {
+                Platform.runLater(() -> listener.onUpdateStarted());
+            }
+
+            List<CurrencyID> currencyIDList;
+            if (PropertyManager.getInstance().getFilterMultipleTransactionDeals()) {
+                currencyIDList = new LinkedList<>();
+                for (CurrencyID currencyID : currencyIDs) {
+                    //only works for 20stack items
+                    float tradeAmount = poeNinjaParser.getCurrentValue(PropertyManager.getInstance().getPrimaryCurrency(), currencyID);
+                    if (tradeAmount <= 1200) {
+                        currencyIDList.add(currencyID);
+                    } else {
+                        LogManager.getInstance().log(getClass(), "Skipping fetch for " + currencyID + " since it would require multiple transactions.");
+                    }
+                }
+            } else {
+                currencyIDList = PropertyManager.getInstance().getFilterList();
+            }
+
+            webParser.updateCurrencies(currencyIDList, clear, async);
+        } else {
+            LogManager.getInstance().log(getClass(), "Prevented update attempt while updating!");
+        }
     }
 
     public void updatePlayerOffers() {
-        List<CurrencyID> list = new LinkedList<>();
-        for (CurrencyDeal deal : playerDeals) {
-            list.add(deal.getSecondaryCurrencyID());
-        }
-        webParser.updateCurrencies(list, false);
-    }
+        if(!updating) {
+            updating = true;
+            pauseUpdateTask();
 
-    public void updateOffersForCurrency(CurrencyID secondaryCurrencyID) {
-        webParser.updateCurrency(secondaryCurrencyID, true);
-    }
+            if (listener != null) {
+                listener.onUpdateStarted();
+            }
 
-    public void parseDeals(boolean async){
-        // Cannot really be async, since working on observable lists
-        if(async){
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    parseDeals();
-                }
-            });
-        } else{
-            parseDeals();
+            List<CurrencyID> list = new LinkedList<>();
+            for (CurrencyDeal deal : playerDeals) {
+                list.add(deal.getSecondaryCurrencyID());
+            }
+
+            webParser.updateCurrencies(list, false);
+        } else {
+            LogManager.getInstance().log(getClass(), "Prevented update attempt while updating!");
         }
     }
 
-    private void parseDeals() {
-        CurrencyID primaryCurrency = PropertyManager.getInstance().getPrimaryCurrency();
-        currentDeals.clear();
-        playerDeals.clear();
+    public void updateOffersForCurrency(CurrencyID secondaryCurrencyID, boolean async) {
+        if(!updating) {
+            updating = true;
+            pauseUpdateTask();
 
-        HashMap<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> marketOffers = webParser.getCurrentOffers();
-        HashSet<Pair<CurrencyID, CurrencyID>> processedKeys = new HashSet<>();
+            if (listener != null) {
+                Platform.runLater(() -> listener.onUpdateStarted());
+            }
 
-        if (marketOffers == null || marketOffers.isEmpty()) {
-            LogManager.getInstance().log(getClass(), "No offers to parse.");
-            return;
+            webParser.updateCurrency(secondaryCurrencyID, async);
+        } else {
+            LogManager.getInstance().log(getClass(), "Prevented update attempt while updating!");
         }
+    }
 
-        LogManager.getInstance().log(getClass(), "Parsing offers...");
+    public void parseDeals() {
+        Platform.runLater(() -> {
+            CurrencyID primaryCurrency = PropertyManager.getInstance().getPrimaryCurrency();
+            currentDeals.clear();
+            playerDeals.clear();
 
-        // Iterate through all combinations, check inverted offer, but every pair only once
-        for (Map.Entry<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> offerMap : marketOffers.entrySet()) {
-            Pair<CurrencyID, CurrencyID> key = offerMap.getKey();
-            Pair<CurrencyID, CurrencyID> invertedKey = new Pair<>(key.getValue(), key.getKey());
-
-            // If other way already processed
-            if (processedKeys.contains(invertedKey)) {
-                continue;
+            if (listener != null) {
+                listener.onParsingStarted();
             }
 
-            processedKeys.add(key);
+            HashMap<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> marketOffers = webParser.getCurrentOffers();
+            HashSet<Pair<CurrencyID, CurrencyID>> processedKeys = new HashSet<>();
 
-            CurrencyOffer bestMarketSellOffer;
-            CurrencyOffer bestMarketBuyOffer;
-
-            if (key.getKey() != primaryCurrency) {
-                // Check if offer actually contains primary
-                if (key.getValue() != primaryCurrency) {
-                    continue;
-                }
-
-                //Buy offer -> Sell offer
-                key = invertedKey;
-                invertedKey = offerMap.getKey();
-            }
-
-            CurrencyID secondaryCurrency = key.getValue();
-            float cValue = poeNinjaParser.getCurrentCValueFor(secondaryCurrency);
-
-            bestMarketSellOffer = getBestOffer(marketOffers.get(key));
-
-            bestMarketBuyOffer = getBestOffer(marketOffers.get(invertedKey));
-
-            int totalOffers = (marketOffers.get(key) == null ? 0 : marketOffers.get(key).size())
-                    + (marketOffers.get(invertedKey) == null ? 0 : marketOffers.get(invertedKey).size());
-
-            float marketSellPrice = 0;
-            if (bestMarketSellOffer != null) {
-                marketSellPrice = bestMarketSellOffer.getSellAmount();
-                marketSellPrice /= bestMarketSellOffer.getBuyAmount();
-            }
-
-            float marketBuyPrice = 0;
-            if (bestMarketBuyOffer != null) {
-                marketBuyPrice = bestMarketBuyOffer.getBuyAmount();
-                marketBuyPrice /= bestMarketBuyOffer.getSellAmount();
-            }
-
-            currentDeals.add(new CurrencyDeal(primaryCurrency, secondaryCurrency, cValue, totalOffers,
-                    marketBuyPrice,
-                    marketSellPrice));
-        }
-        currentDeals.sort(diffValueSorter);
-
-        // Parse Players
-        HashMap<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> playerOffers = webParser.getPlayerOffers();
-        HashSet<Pair<CurrencyID, CurrencyID>> processedPlayerKeys = new HashSet<>();
-        for (Map.Entry<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> offerMap : playerOffers.entrySet()) {
-            Pair<CurrencyID, CurrencyID> key = offerMap.getKey();
-            Pair<CurrencyID, CurrencyID> invertedKey = new Pair<>(key.getValue(), key.getKey());
-
-            // If other way already processed
-            if (processedPlayerKeys.contains(invertedKey)) {
-                continue;
-            }
-
-            processedPlayerKeys.add(key);
-
-            CurrencyOffer bestMarketSellOffer;
-            CurrencyOffer bestMarketBuyOffer;
-            CurrencyOffer playerSellOffer = null;
-            CurrencyOffer playerBuyOffer = null;
-
-            if (key.getKey() != primaryCurrency) {
-                // Check if offer actually contains primary
-                if (key.getValue() != primaryCurrency) {
-                    continue;
-                }
-                //Buy offer -> Sell offer
-                key = invertedKey;
-                invertedKey = offerMap.getKey();
-            }
-
-            CurrencyID secondaryCurrency = key.getValue();
-
-            if (playerOffers.get(key) != null) {
-                playerSellOffer = playerOffers.get(key).get(0);
-            }
-
-            List<CurrencyOffer> playerBuyOfferList = playerOffers.get(invertedKey);
-            if (playerBuyOfferList != null) {
-                playerBuyOffer = playerBuyOfferList.get(0);
-            }
-
-            bestMarketSellOffer = getBestOffer(marketOffers.get(key));
-
-            bestMarketBuyOffer = getBestOffer(marketOffers.get(invertedKey));
-
-            float playerSellPrice = 0;
-            float playerBuyPrice = 0;
-            int playerSellStock = 0;
-            int playerBuyStock = 0;
-            float marketSellPrice = 0;
-            float marketBuyPrice = 0;
-
-            if (bestMarketSellOffer != null) {
-                marketSellPrice = bestMarketSellOffer.getSellAmount();
-                marketSellPrice /= bestMarketSellOffer.getBuyAmount();
-            }
-
-            if (bestMarketBuyOffer != null) {
-                marketBuyPrice = bestMarketBuyOffer.getBuyAmount();
-                marketBuyPrice /= bestMarketBuyOffer.getSellAmount();
-            }
-
-            if (playerSellOffer != null) {
-                playerSellPrice = playerSellOffer.getSellAmount();
-                playerSellPrice /= playerSellOffer.getBuyAmount();
-
-                playerSellStock = playerSellOffer.getStock();
-            }
-
-            if (playerBuyOffer != null) {
-                playerBuyPrice = playerBuyOffer.getBuyAmount();
-                playerBuyPrice /= playerBuyOffer.getSellAmount();
-
-                playerBuyStock = playerBuyOffer.getStock();
-            }
-
-            float cValue = poeNinjaParser.getCurrentCValueFor(secondaryCurrency);
-            int totalOffers = -1;
-
-            if (playerBuyPrice > 0 || playerSellPrice > 0) {
-                playerDeals.add(new CurrencyDeal(primaryCurrency, secondaryCurrency, cValue, totalOffers, marketBuyPrice,
-                        marketSellPrice, playerBuyPrice, playerSellPrice, playerBuyStock, playerSellStock));
+            if (marketOffers == null || marketOffers.isEmpty()) {
+                LogManager.getInstance().log(TradeManager.class, "No offers to parse.");
             } else {
-                LogManager.getInstance().log(getClass(), "Player offer didnt contain shit!");
+                LogManager.getInstance().log(TradeManager.class, "Parsing offers...");
+
+                // Iterate through all combinations, check inverted offer, but every pair only once
+                for (Map.Entry<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> offerMap : marketOffers.entrySet()) {
+                    Pair<CurrencyID, CurrencyID> key = offerMap.getKey();
+                    Pair<CurrencyID, CurrencyID> invertedKey = new Pair<>(key.getValue(), key.getKey());
+
+                    // If other way already processed
+                    if (processedKeys.contains(invertedKey)) {
+                        continue;
+                    }
+
+                    processedKeys.add(key);
+
+                    CurrencyOffer bestMarketSellOffer;
+                    CurrencyOffer bestMarketBuyOffer;
+
+                    if (key.getKey() != primaryCurrency) {
+                        // Check if offer actually contains primary
+                        if (key.getValue() != primaryCurrency) {
+                            continue;
+                        }
+
+                        //Buy offer -> Sell offer
+                        key = invertedKey;
+                        invertedKey = offerMap.getKey();
+                    }
+
+                    CurrencyID secondaryCurrency = key.getValue();
+                    float cValue = poeNinjaParser.getCurrentCValueFor(secondaryCurrency);
+
+                    bestMarketSellOffer = getBestOffer(marketOffers.get(key));
+
+                    bestMarketBuyOffer = getBestOffer(marketOffers.get(invertedKey));
+
+                    int totalOffers = (marketOffers.get(key) == null ? 0 : marketOffers.get(key).size())
+                            + (marketOffers.get(invertedKey) == null ? 0 : marketOffers.get(invertedKey).size());
+
+                    float marketSellPrice = 0;
+                    if (bestMarketSellOffer != null) {
+                        marketSellPrice = bestMarketSellOffer.getSellAmount();
+                        marketSellPrice /= bestMarketSellOffer.getBuyAmount();
+                    }
+
+                    float marketBuyPrice = 0;
+                    if (bestMarketBuyOffer != null) {
+                        marketBuyPrice = bestMarketBuyOffer.getBuyAmount();
+                        marketBuyPrice /= bestMarketBuyOffer.getSellAmount();
+                    }
+
+                    currentDeals.add(new CurrencyDeal(primaryCurrency, secondaryCurrency, cValue, totalOffers,
+                            marketBuyPrice,
+                            marketSellPrice));
+                }
+                currentDeals.sort(diffValueSorter);
+
+                // Parse Players
+                HashMap<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> playerOffers = webParser.getPlayerOffers();
+                HashSet<Pair<CurrencyID, CurrencyID>> processedPlayerKeys = new HashSet<>();
+                for (Map.Entry<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> offerMap : playerOffers.entrySet()) {
+                    Pair<CurrencyID, CurrencyID> key = offerMap.getKey();
+                    Pair<CurrencyID, CurrencyID> invertedKey = new Pair<>(key.getValue(), key.getKey());
+
+                    // If other way already processed
+                    if (processedPlayerKeys.contains(invertedKey)) {
+                        continue;
+                    }
+
+                    processedPlayerKeys.add(key);
+
+                    CurrencyOffer bestMarketSellOffer;
+                    CurrencyOffer bestMarketBuyOffer;
+                    CurrencyOffer playerSellOffer = null;
+                    CurrencyOffer playerBuyOffer = null;
+
+                    if (key.getKey() != primaryCurrency) {
+                        // Check if offer actually contains primary
+                        if (key.getValue() != primaryCurrency) {
+                            continue;
+                        }
+                        //Buy offer -> Sell offer
+                        key = invertedKey;
+                        invertedKey = offerMap.getKey();
+                    }
+
+                    CurrencyID secondaryCurrency = key.getValue();
+
+                    if (playerOffers.get(key) != null) {
+                        if (playerOffers.get(key).isEmpty()) {
+                            LogManager.getInstance().log(TradeManager.class, "PlayerOffer for "+key+" was empty...");
+                        } else {
+                            playerSellOffer = playerOffers.get(key).get(0);
+                        }
+                    }
+
+                    List<CurrencyOffer> playerBuyOfferList = playerOffers.get(invertedKey);
+                    if (playerBuyOfferList != null) {
+                        if (playerBuyOfferList.isEmpty()) {
+                            LogManager.getInstance().log(TradeManager.class, "PlayerOffer for "+key+" was empty...");
+                        } else {
+                            playerBuyOffer = playerBuyOfferList.get(0);
+                        }
+                    }
+
+                    bestMarketSellOffer = getBestOffer(marketOffers.get(key));
+
+                    bestMarketBuyOffer = getBestOffer(marketOffers.get(invertedKey));
+
+                    float playerSellPrice = 0;
+                    float playerBuyPrice = 0;
+                    int playerSellStock = 0;
+                    int playerBuyStock = 0;
+                    float marketSellPrice = 0;
+                    float marketBuyPrice = 0;
+
+                    if (bestMarketSellOffer != null) {
+                        marketSellPrice = bestMarketSellOffer.getSellAmount();
+                        marketSellPrice /= bestMarketSellOffer.getBuyAmount();
+                    }
+
+                    if (bestMarketBuyOffer != null) {
+                        marketBuyPrice = bestMarketBuyOffer.getBuyAmount();
+                        marketBuyPrice /= bestMarketBuyOffer.getSellAmount();
+                    }
+
+                    if (playerSellOffer != null) {
+                        playerSellPrice = playerSellOffer.getSellAmount();
+                        playerSellPrice /= playerSellOffer.getBuyAmount();
+
+                        playerSellStock = playerSellOffer.getStock();
+                    }
+
+                    if (playerBuyOffer != null) {
+                        playerBuyPrice = playerBuyOffer.getBuyAmount();
+                        playerBuyPrice /= playerBuyOffer.getSellAmount();
+
+                        playerBuyStock = playerBuyOffer.getStock();
+                    }
+
+                    float cValue = poeNinjaParser.getCurrentCValueFor(secondaryCurrency);
+                    int totalOffers = -1;
+
+                    if (playerBuyPrice > 0 || playerSellPrice > 0) {
+                        playerDeals.add(new CurrencyDeal(primaryCurrency, secondaryCurrency, cValue, totalOffers, marketBuyPrice,
+                                marketSellPrice, playerBuyPrice, playerSellPrice, playerBuyStock, playerSellStock));
+                    }
+//                    else {
+//                        // Is logged before now. Needs further investigation...
+////                            LogManager.getInstance().log(TradeManager.class, "Player offer did not contain information...!");
+//                    }
+                }
+                playerDeals.sort(playerDiffValueSorter);
             }
-        }
-        playerDeals.sort(playerDiffValueSorter);
-        LogManager.getInstance().log(getClass(), "Finished");
+
+            if (listener != null) {
+                listener.onParsingFinished();
+            }
+            updating = false;
+        });
     }
 
-    public CurrencyOffer getBestOffer(List<CurrencyOffer> list) {
+    private CurrencyOffer getBestOffer(List<CurrencyOffer> list) {
         return getBestOffer(list,
                 PropertyManager.getInstance().getFilterNoApi(),
                 PropertyManager.getInstance().getFilterOutOfStock(),
                 PropertyManager.getInstance().getFilterExcessive());
     }
 
-    public CurrencyOffer getBestOffer(List<CurrencyOffer> list,
-                                      boolean filterStockOffers,
-                                      boolean filterValidStockOffers,
-                                      boolean filterExcessiveOffers) {
+    private CurrencyOffer getBestOffer(List<CurrencyOffer> list,
+                                       boolean filterStockOffers,
+                                       boolean filterValidStockOffers,
+                                       boolean filterExcessiveOffers) {
         CurrencyOffer bestOffer = null;
         if (list == null) {
             return null;
@@ -290,8 +353,9 @@ public class TradeManager implements ParseListener {
                 float higherValue = (buyValue > sellValue ? buyValue : sellValue);
 
                 // If sell and buy value differ too much from each other, filter
-                if (Math.abs(buyValue - sellValue) > 0.5 * higherValue) {
-                    LogManager.getInstance().log(getClass(), "Filtered excessive offer: " + buyValue + " - " + sellValue);
+                if (Math.abs(buyValue - sellValue) > (PropertyManager.getInstance().getExcessiveTreshold() / 100f) * higherValue) {
+                    boolean isBuyOffer = PropertyManager.getInstance().getPrimaryCurrency().equals(offer.getSellID());
+                    LogManager.getInstance().log(getClass(), "Filtered " + (isBuyOffer ? "buy" : "sell") + " offer for " + offer.getBuyID() + " - " + offer.getSellID() + ": " + buyValue + "c vs " + sellValue + "c");
                     continue;
                 }
             }
@@ -311,26 +375,68 @@ public class TradeManager implements ParseListener {
     }
 
     @Override
-    public void onParsingStarted() {
-        if (listener != null) {
-            listener.onParsingStarted();
-        }
+    public void onUpdateStarted() {
+        updating = true;
     }
 
     @Override
-    public void onParsingFinished() {
-        parseDeals(true);
-        if (listener != null) {
-            listener.onParsingFinished();
+    public void onUpdateFinished() {
+        poeNinjaParser.fetchRates(PropertyManager.getInstance().getCurrentLeague(), false);
+        parseDeals();
+
+        if(autoUpdate){
+            startUpdateTask();
+        }
+
+        if(listener != null){
+            listener.onUpdateFinished();
         }
     }
 
-    public boolean isUpdating() {
-        return webParser.isUpdating();
+    private ScheduledFuture autoUpdateFuture;
+    private void startUpdateTask() {
+        if (autoUpdateExecutor == null) {
+            autoUpdateExecutor = Executors.newSingleThreadScheduledExecutor();
+        }
+        int updateDelay = PropertyManager.getInstance().getUpdateDelay() * 60;
+        autoUpdateFuture = autoUpdateExecutor.schedule(() -> {
+            LogManager.getInstance().log("AutoUpdate", "Invoke Automatic Update");
+            TradeManager.getInstance().updateOffers(currencyFilterChanged, false, PropertyManager.getInstance().getFilterList());
+        }, updateDelay, TimeUnit.SECONDS);
+        LogManager.getInstance().log(getClass(), "Auto Update scheduled.");
+        autoUpdate = true;
     }
 
-    public void registerListener(ParseListener listener) {
+    private void pauseUpdateTask(){
+        if (autoUpdateFuture != null) {
+            autoUpdateFuture.cancel(true);
+            LogManager.getInstance().log(getClass(), "Auto Update cancelled.");
+        }
+    }
+
+    private void stopUpdateTask() {
+        pauseUpdateTask();
+        if (autoUpdateExecutor != null) {
+            LogManager.getInstance().log(getClass(), "Auto Update shutdown.");
+            autoUpdateExecutor.shutdown();
+            try {
+                autoUpdateExecutor.awaitTermination(5,TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                LogManager.getInstance().log(getClass(), "Auto Update shutdownNow.");
+                autoUpdateExecutor.shutdownNow();
+            }
+            autoUpdateExecutor = null;
+        }
+        autoUpdate = false;
+    }
+
+    public boolean isUpdating() {
+        return updating;
+    }
+
+    public void registerListener(DealParseListener listener, PoeNinjaParser.PoeNinjaListener ninjaListener) {
         this.listener = listener;
+        poeNinjaParser.registerListener(ninjaListener);
     }
 
     public void cancelUpdate() {
@@ -349,17 +455,71 @@ public class TradeManager implements ParseListener {
         return poeNinjaParser.getCurrentValue(what, inWhat);
     }
 
-    public HashMap<CurrencyID, Float> getCurrencyValues() {
-        return poeNinjaParser.getCurrentRates();
+    public ObservableList<Map.Entry<CurrencyID, Float>> getCurrencyValues() {
+        return FXCollections.observableArrayList(poeNinjaParser.getCurrentRates().entrySet());
     }
 
     public ObservableList<CurrencyOffer> getBuyOffers(CurrencyID secondary) {
-        return webParser.getOffersFor(secondary, false);
+        ObservableList<CurrencyOffer> result = webParser.getOffersFor(secondary, false);
+        if (result == null || result.isEmpty()) {
+            updateOffersForCurrency(secondary, false);
+            result = webParser.getOffersFor(secondary, false);
+        }
+        return result;
 //        return (ObservableList<CurrencyOffer>) webParser.getCurrentOffers().get(new Pair<>(secondary, PropertyManager.getInstance().getPrimaryCurrency()));
     }
 
     public ObservableList<CurrencyOffer> getSellOffers(CurrencyID secondary) {
-        return webParser.getOffersFor(secondary, true);
+        ObservableList<CurrencyOffer> result = webParser.getOffersFor(secondary, true);
+        if (result == null || result.isEmpty()) {
+            //FIXME: Should be async
+            updateOffersForCurrency(secondary, false);
+            result = webParser.getOffersFor(secondary, true);
+        }
+        return result;
 //        return (ObservableList<CurrencyOffer>) webParser.getCurrentOffers().get(new Pair<>(PropertyManager.getInstance().getPrimaryCurrency(), secondary));
+    }
+
+    public void setAutoUpdate(boolean enabled) {
+        if(isUpdating()){
+            return;
+        }
+        LogManager.getInstance().log(getClass(), "Automatic Updates " + (enabled ? "en" : "dis") + "abled.");
+
+        if (enabled) {
+            startUpdateTask();
+        } else {
+            stopUpdateTask();
+        }
+    }
+
+    public boolean isAutoUpdating() {
+        return autoUpdate;
+    }
+
+    public void release() {
+        stopUpdateTask();
+    }
+
+    public void reset() {
+        webParser.reset();
+        playerDeals.clear();
+        currentDeals.clear();
+        poeNinjaParser.reset();
+    }
+
+    public void removeDeal(CurrencyDeal deal) {
+        currentDeals.remove(deal);
+        playerDeals.remove(deal);
+    }
+
+    public interface DealParseListener {
+        void onUpdateStarted();
+
+        void onUpdateFinished();
+
+        void onParsingStarted();
+
+        void onParsingFinished();
     }
 }
