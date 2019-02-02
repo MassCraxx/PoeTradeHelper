@@ -46,7 +46,7 @@ import java.util.*;
 public class Main extends Application implements TradeManager.DealParseListener, PoeNinjaParser.PoeNinjaListener {
 
     private static final String title = "PoeTradeHelper";
-    private static final String versionText = "v0.5-SNAPSHOT";
+    private static final String versionText = "v0.5";
 
     @FXML
     private ListView<CurrencyDeal> playerDealList;
