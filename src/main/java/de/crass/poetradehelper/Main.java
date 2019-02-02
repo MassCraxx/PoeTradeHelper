@@ -7,6 +7,7 @@ import de.crass.poetradehelper.model.CurrencyDeal;
 import de.crass.poetradehelper.model.CurrencyID;
 import de.crass.poetradehelper.model.CurrencyOffer;
 import de.crass.poetradehelper.parser.PoeNinjaParser;
+import de.crass.poetradehelper.parser.PoeTradeWebParser;
 import de.crass.poetradehelper.parser.TradeManager;
 import de.crass.poetradehelper.tts.PoeChatTTS;
 import de.crass.poetradehelper.ui.CurrencyContextMenu;
@@ -159,6 +160,9 @@ public class Main extends Application implements TradeManager.DealParseListener,
     private Button convertButton;
 
     @FXML
+    private Button openConversionInBrowser;
+
+    @FXML
     private CheckBox autoUpdate;
 
     @FXML
@@ -275,7 +279,6 @@ public class Main extends Application implements TradeManager.DealParseListener,
     private int versionClicked = 0;
     private int volumeClicked = 0;
 
-    //TODO: Tooltips
     private void setupUI() {
         DecimalFormatSymbols symbols = new DecimalFormatSymbols();
         symbols.setDecimalSeparator('.');
@@ -470,6 +473,9 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
         convertButton.setOnAction(event -> calculateValue());
 
+        openConversionInBrowser.setOnAction(event -> PoeTradeWebParser.openInBrowser(PropertyManager.getInstance().getCurrentLeague(),
+                valueOutputCB.getValue(), valueInputCB.getValue()));
+
         // SETTINGS
         primaryComboBox.setTooltip(new Tooltip("Select currency to flip with"));
         primaryComboBox.setItems(PropertyManager.getInstance().getPrimaryCurrencyList());
@@ -502,7 +508,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
             tradeManager.parseDeals();
         });
 
-//        excessiveTresholdSlider.setTooltip(new Tooltip("Ignore all offers that have an insane buy to sell value ratio"));
+        excessiveTresholdSlider.setTooltip(new Tooltip("If Filter Excessive is active, trades where the buy and sell value difference exceeds given percent of the higher value. E.g. 50% means all offers will be ignored where buy and sell difference is more than 50% of the primary currency value"));
         int excessiveTreshold = PropertyManager.getInstance().getExcessiveTreshold();
         excessiveTresholdSlider.setValue(excessiveTreshold);
         excessiveTresholdLabel.setText(excessiveTreshold + " %");
@@ -515,7 +521,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
             }
         });
 
-//        filterMultiTrade.setTooltip(new Tooltip("Ignore all offers that have an insane buy to sell value ratio"));
+        filterMultiTrade.setTooltip(new Tooltip("Skip updating currencies that would require multiple full inventories to trade against one unit of primary"));
         filterMultiTrade.setSelected(PropertyManager.getInstance().getFilterMultipleTransactionDeals());
         filterMultiTrade.setOnAction(event -> {
             PropertyManager.getInstance().setFilterMultipleTransactionDeals(filterMultiTrade.isSelected());

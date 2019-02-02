@@ -14,6 +14,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+//IDEA: Notify on tendency change - Check after parsing every deal for tendency check? / Store tendency in deal?
 public class PoeChatTTS {
     private static final String logsFolder = "logs";
     private static final String bestVoiceEver = "ScanSoft Daniel_Full_22kHz";
@@ -45,7 +46,7 @@ public class PoeChatTTS {
             "with too much cash", "here", "over there", "being generous"};
     private final String[] endPhrases = {
             "congratulations", "good for you", "what a noob", "how fortunate", "sweet", "savage", "radical", "groovay",
-            "awesome", "what you gonna do?"};
+            "awesome", "what you gonna do?", "you are welcome"};
 
     private String[] knownNames = {
             "that same guy from before,", "someone who could not get enough" ,"some guy who came back"};
