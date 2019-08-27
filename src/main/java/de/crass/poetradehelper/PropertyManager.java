@@ -100,7 +100,7 @@ public class PropertyManager {
         filterExcessive = Boolean.parseBoolean(appProps.getProperty(FILTER_EXCESSIVE, defaultFilterExcessive));
         excessiveTreshold = Integer.parseInt(appProps.getProperty(EXCESSIVE_TRESHOLD, defaultExcessiveTreshold));
 
-        filterMultipleTransactionDeals = Boolean.parseBoolean(appProps.getProperty(FILTER_MULTIPLE_TRANSACTIONS, "true"));
+        filterMultipleTransactionDeals = Boolean.parseBoolean(appProps.getProperty(FILTER_MULTIPLE_TRANSACTIONS, "false"));
 
         updateDelay = Integer.parseInt(appProps.getProperty(UPDATE_DELAY_MINUTES, "5"));
     }

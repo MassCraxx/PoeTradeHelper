@@ -46,7 +46,7 @@ import java.util.*;
 public class Main extends Application implements TradeManager.DealParseListener, PoeNinjaParser.PoeNinjaListener {
 
     private static final String title = "PoeTradeHelper";
-    private static final String versionText = "v0.5";
+    private static final String versionText = "v0.5.1";
 
     @FXML
     private ListView<CurrencyDeal> playerDealList;
@@ -88,7 +88,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
     private Label version;
 
     @FXML
-    private ComboBox<String> speakerCB;
+    private ComboBox<String> voiceSpeakerCB;
 
     @FXML
     private Button addPlayerButton;
@@ -292,7 +292,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
         version.setOnMouseClicked(event -> {
             versionClicked++;
             if (versionClicked % 10 == 0) {
-                JOptionPane.showMessageDialog(null, "PoE Ninja will hate me for this...");
+                JOptionPane.showMessageDialog(null, "Automatic Update setting enabled! Please don't abuse this.");
                 autoUpdate.setVisible(true);
                 updateTime.setVisible(true);
                 updateSlider.setVisible(true);
@@ -376,6 +376,8 @@ public class Main extends Application implements TradeManager.DealParseListener,
         TableColumn<CurrencyOffer, String> playerColumn = new TableColumn<>();
         playerColumn.setText("Playername");
         playerColumn.setCellValueFactory(playerCellFactory);
+        playerColumn.setPrefWidth(150);
+
 
 //        TableColumn<CurrencyOffer, String> apiColumn = new TableColumn<>();
 //        apiColumn.setText("API");
@@ -398,6 +400,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
         TableColumn<CurrencyOffer, String> sellPlayerColumn = new TableColumn<>();
         sellPlayerColumn.setText("Playername");
         sellPlayerColumn.setCellValueFactory(playerCellFactory);
+        sellPlayerColumn.setPrefWidth(150);
 
 //        TableColumn<CurrencyOffer, String> sellApiColumn = new TableColumn<>();
 //        sellApiColumn.setText("API");
@@ -594,8 +597,12 @@ public class Main extends Application implements TradeManager.DealParseListener,
         poeChatTTS.setWordExcludeTextField(voiceExcludeWords);
         List<String> supportedVoices = poeChatTTS.getSupportedVoices();
         if (supportedVoices == null) {
-            LogManager.getInstance().log(getClass(), "TTS is disabled: Balcon not found.");
             setDisableVoiceControls();
+
+            voiceActive.setOnAction(event -> {
+                LogManager.getInstance().log(getClass(), "Balcon.exe not found! Download it and place it at the same location as this app to enable TTS notifications.");
+                voiceActive.setSelected(false);
+            });
         } else if (supportedVoices.isEmpty()) {
             LogManager.getInstance().log(getClass(), "TTS is disabled: No supported voices found.");
             setDisableVoiceControls();
@@ -613,10 +620,10 @@ public class Main extends Application implements TradeManager.DealParseListener,
                 }
             });
 
-            speakerCB.setItems(FXCollections.observableArrayList(supportedVoices));
-            speakerCB.setValue(poeChatTTS.getVoice());
-            speakerCB.setOnAction(event -> {
-                String selected = speakerCB.getValue();
+            voiceSpeakerCB.setItems(FXCollections.observableArrayList(supportedVoices));
+            voiceSpeakerCB.setValue(poeChatTTS.getVoice());
+            voiceSpeakerCB.setOnAction(event -> {
+                String selected = voiceSpeakerCB.getValue();
                 if (!selected.isEmpty()) {
                     poeChatTTS.setVoice(selected);
                 }
@@ -659,9 +666,9 @@ public class Main extends Application implements TradeManager.DealParseListener,
             volumeLabel.setTooltip(new Tooltip("Set volume of the voice speaker"));
 
             int volume = PropertyManager.getInstance().getVoiceVolume();
-            volumeLabel.setText(String.valueOf(volume) + " %");
+            volumeLabel.setText(volume + " %");
             volumeSlider.setValue(volume);
-            volumeSlider.valueProperty().addListener((observable, oldValue, newValue) -> volumeLabel.setText(String.valueOf(newValue.intValue()) + " %"));
+            volumeSlider.valueProperty().addListener((observable, oldValue, newValue) -> volumeLabel.setText(newValue.intValue() + " %"));
             volumeSlider.valueChangingProperty().addListener((observable, changeEnds, changeStarts) -> {
                 if (changeEnds) {
                     int newVolume = (int) volumeSlider.getValue();
@@ -700,11 +707,11 @@ public class Main extends Application implements TradeManager.DealParseListener,
             autoUpdate.setSelected(tradeManager.isAutoUpdating());
         });
 
-        autoUpdate.setTooltip(new Tooltip("Invoke Update every " + PropertyManager.getInstance().getUpdateDelay() + " minutes."));
+        autoUpdate.setTooltip(new Tooltip("Automatically fetches all offers after the given time interval."));
 
         int updateDelay = PropertyManager.getInstance().getUpdateDelay();
         updateSlider.setValue(updateDelay);
-        updateSlider.valueProperty().addListener((observable, oldValue, newValue) -> updateTime.setText(String.valueOf(newValue.intValue()) + " min"));
+        updateSlider.valueProperty().addListener((observable, oldValue, newValue) -> updateTime.setText(newValue.intValue() + " min"));
         updateSlider.valueChangingProperty().addListener((observable, changeEnds, changeStarts) -> {
             if (changeEnds) {
                 int newUpdateDelay = (int) updateSlider.getValue();
@@ -713,7 +720,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
         });
 
         updateTime.setTooltip(new Tooltip("Set volume of the voice speaker"));
-        updateTime.setText(String.valueOf(updateDelay) + " min");
+        updateTime.setText(updateDelay + " min");
 
         if (PropertyManager.getInstance().getProp("DEBUG", null) == null) {
             autoUpdate.setVisible(false);
@@ -754,7 +761,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
     private void setDisableVoiceControls() {
         String balconMissingText = "Place balcon.exe next to the app to enable this feature.";
-        voiceActive.setDisable(true);
+//        voiceActive.setDisable(true);
         voiceActive.setTooltip(new Tooltip(balconMissingText));
         voiceReadTradeOffers.setDisable(true);
         voiceReadTradeOffers.setTooltip(new Tooltip(balconMissingText));
@@ -772,6 +779,10 @@ public class Main extends Application implements TradeManager.DealParseListener,
         voiceRandom.setTooltip(new Tooltip(balconMissingText));
         voiceTestButton.setDisable(true);
         voiceTestButton.setTooltip(new Tooltip(balconMissingText));
+        voiceShoutoutWords.setDisable(true);
+        voiceExcludeWords.setDisable(true);
+        voiceSpeakerCB.setDisable(true);
+
         poePath.setDisable(true);
     }
 
@@ -813,7 +824,11 @@ public class Main extends Application implements TradeManager.DealParseListener,
         LogManager.getInstance().log(TradeManager.class, "Parsing took " + prettyFloat((System.currentTimeMillis() - parseStartTime)) + " milliseconds");
 
         currencyList.setPlaceholder(new Label("No deals to show."));
-        playerDealList.setPlaceholder(new Label("No deals to show. Is your player set in settings?"));
+        Label label = new Label("No deals to show. Is your currently selling player set in settings? Otherwise your offers may not be online yet.");
+        if(PropertyManager.getInstance().getPlayerList().isEmpty()){
+            label = new Label("Add your selling character's name to the list in Settings -> General to evaluate your current offers.");
+        }
+        playerDealList.setPlaceholder(label);
 
         updateButton.setText("Update All");
         updateButton.setDisable(false);

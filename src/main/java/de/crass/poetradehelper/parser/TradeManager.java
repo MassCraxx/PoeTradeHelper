@@ -96,7 +96,7 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
                     if (tradeAmount <= 1200) {
                         currencyIDList.add(currencyID);
                     } else {
-                        LogManager.getInstance().log(getClass(), "Skipping fetch for " + currencyID + " since it would require multiple transactions.");
+                        LogManager.getInstance().log(getClass(), "Skipping " + currencyID + " since it would require multiple trade transactions.");
                     }
                 }
             } else {
@@ -350,7 +350,7 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
             if (filterExcessiveOffers) {
                 float buyValue = poeNinjaParser.getCurrentCValueFor(offer.getBuyID()) * offer.getBuyAmount();
                 float sellValue = poeNinjaParser.getCurrentCValueFor(offer.getSellID()) * offer.getSellAmount();
-                float higherValue = (buyValue > sellValue ? buyValue : sellValue);
+                float higherValue = Math.max(buyValue, sellValue);
 
                 // If sell and buy value differ too much from each other, filter
                 if (Math.abs(buyValue - sellValue) > (PropertyManager.getInstance().getExcessiveTreshold() / 100f) * higherValue) {
