@@ -5,9 +5,12 @@ import okhttp3.*;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 public class HttpManager {
     private static HttpManager instance;
@@ -28,6 +31,9 @@ public class HttpManager {
                 .get()
                 .build();
         Response response = client.newCall(request).execute();
+        if(response.code() == 404 || !response.isSuccessful()){
+            return null;
+        }
         return response.body().string();
     }
 
@@ -46,16 +52,16 @@ public class HttpManager {
 
     public JSONObject getJson(String fetchURL, String params) throws IOException, JSONException {
         String json = get(fetchURL, params);
-        if(json.isEmpty()){
-            LogManager.getInstance().log(getClass(), "getJson from "+fetchURL+params+" was empty!");
+        if(json == null || json.isEmpty()){
+            LogManager.getInstance().log(getClass(), "getJson from "+fetchURL+params+" failed!");
             return null;
         }
         return new JSONObject(json);
     }
 
-    public String readAll(String url) throws IOException {
+    private String readAll(String url) throws IOException {
         try (InputStream is = new URL(url).openStream()) {
-            BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
+            BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
             StringBuilder sb = new StringBuilder();
             int cp;
             while ((cp = rd.read()) != -1) {

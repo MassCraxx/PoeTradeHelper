@@ -1,6 +1,8 @@
 package de.crass.poetradehelper;
 
 import de.crass.poetradehelper.model.CurrencyID;
+import javafx.application.Platform;
+import javafx.beans.value.ObservableStringValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -9,7 +11,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * Created by mcrass on 19.07.2018.
@@ -69,7 +74,10 @@ public class PropertyManager {
     private int updateDelay;
     private int excessiveTreshold;
     private String currentLeague;
+    private ObservableStringValue test;
     private boolean filterMultipleTransactionDeals;
+
+    private UICallback uiCallback;
 
     private PropertyManager() {
         loadProperties();
@@ -184,10 +192,13 @@ public class PropertyManager {
         }
         LogManager.getInstance().log(getClass(), "Setting " + league + " as new league.");
         currentLeague = league;
+
+        callbackUI(LEAGUE_KEY, league);
     }
 
     public void setProp(String key, String value) {
         appProps.setProperty(key, value);
+        callbackUI(key,value);
     }
 
     public String getProp(String key) {
@@ -281,8 +292,8 @@ public class PropertyManager {
     }
 
     public void resetLeague() {
-        JOptionPane.showMessageDialog(null, "League ended - resetting to " + defaultLeague+".");
-        setLeague(defaultLeague);
+        JOptionPane.showMessageDialog(null, "League ended - resetting to " + defaultLeague + ".");
+        callbackUI(LEAGUE_KEY, defaultLeague);
     }
 
     public int getExcessiveTreshold() {
@@ -303,5 +314,20 @@ public class PropertyManager {
 
     ObservableList<CurrencyID> getPrimaryCurrencyList() {
         return primaryCurrencyList;
+    }
+
+
+    private void callbackUI(String key, String value) {
+        if(uiCallback != null){
+            Platform.runLater(() -> uiCallback.onPropChanged(key, value));
+        }
+    }
+
+    public void setUICallback(UICallback call) {
+        uiCallback = call;
+    }
+
+    interface UICallback{
+        void onPropChanged(String key, String value);
     }
 }

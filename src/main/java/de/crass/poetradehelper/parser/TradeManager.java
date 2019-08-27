@@ -393,6 +393,13 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
         }
     }
 
+    @Override
+    public void onUpdateError() {
+        if(listener != null){
+            listener.onError();
+        }
+    }
+
     private ScheduledFuture autoUpdateFuture;
     private void startUpdateTask() {
         if (autoUpdateExecutor == null) {
@@ -521,5 +528,7 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
         void onParsingStarted();
 
         void onParsingFinished();
+
+        void onError();
     }
 }

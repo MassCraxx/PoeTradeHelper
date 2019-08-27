@@ -26,7 +26,7 @@ public class PoeNinjaParser {
     private PoeNinjaListener listener;
 
     // Currency - (CurrencyID<>Chaos Value)
-    private HashMap<CurrencyID, Float> currentRates;
+    private HashMap<CurrencyID, Float> currentRates = new HashMap<>();
 
     PoeNinjaParser() {
         objectMapper = new ObjectMapper();
@@ -47,7 +47,7 @@ public class PoeNinjaParser {
             if (currentRates == null || currentRates.isEmpty()) {
                 TypeReference<HashMap<CurrencyID, Float>> typeRef = new TypeReference<HashMap<CurrencyID, Float>>() {};
                 try {
-                    LogManager.getInstance().log(getClass(), "Loading poe.ninja currency values from cache.");
+                    LogManager.getInstance().log(getClass(), "Loading poe.ninja currency for league "+league+" values from cache.");
                     currentRates = objectMapper.readValue(cacheFile, typeRef);
                     if(listener != null){
                         listener.onRatesFetched();
@@ -59,63 +59,60 @@ public class PoeNinjaParser {
             }
         } else {
             // Fetch online
-            LogManager.getInstance().log(getClass(), "Fetching new currency values from poe.ninja.");
-            JSONObject json = null;
+            LogManager.getInstance().log(getClass(), "Fetching new currency values for league "+league+" from poe.ninja.");
+            JSONObject json;
             try {
                 json = HttpManager.getInstance().getJson(currencyURL, "?league=" + league);
-            } catch (IOException e) {
-                LogManager.getInstance().log(getClass(), "IOException!\n" + e);
-            } catch (JSONException j){
-                LogManager.getInstance().log(getClass(), "JSONException!\n" + j);
-            }
 
-            if (json == null || json.length() == 0) {
-                LogManager.getInstance().log(getClass(), "Invalid response from PoeNinja! API has been changed.");
-                return;
-            }
-
-            if(currentRates == null){
-                currentRates = new HashMap<>();
-            }
-
-            HashMap<String, Integer> ninjaToTradeIdMap = new HashMap<>();
-            JSONArray idArray = json.getJSONArray("currencyDetails");
-            for (Object currencyDetailsObject : idArray) {
-                if (currencyDetailsObject instanceof JSONObject) {
-                    JSONObject currencyDetails = (JSONObject) currencyDetailsObject;
-                    ninjaToTradeIdMap.put(currencyDetails.getString("name"), currencyDetails.getInt("poeTradeId"));
+                if (json == null || json.length() == 0) {
+                    LogManager.getInstance().log(getClass(), "Invalid response from PoeNinja! API has been changed.");
+                    return;
                 }
-            }
 
-            JSONArray array = json.getJSONArray("lines");
-            for (Object currencyObject : array) {
-                if (currencyObject instanceof JSONObject) {
-                    JSONObject currency = (JSONObject) currencyObject;
-                    String currencyName = currency.getString("currencyTypeName");
-                    CurrencyID id = CurrencyID.get(ninjaToTradeIdMap.get(currencyName));
-                    if (id != null) {
-                        float chaosValue = currency.getFloat("chaosEquivalent");
-                        currentRates.put(id, chaosValue);
+                HashMap<String, Integer> ninjaToTradeIdMap = new HashMap<>();
+                JSONArray idArray = json.getJSONArray("currencyDetails");
+                for (Object currencyDetailsObject : idArray) {
+                    if (currencyDetailsObject instanceof JSONObject) {
+                        JSONObject currencyDetails = (JSONObject) currencyDetailsObject;
+                        ninjaToTradeIdMap.put(currencyDetails.getString("name"), currencyDetails.getInt("poeTradeId"));
                     }
                 }
-            }
 
-            if (!currentRates.isEmpty()) {
-                try {
-                    objectMapper.writeValue(cacheFile, currentRates);
-                } catch (Exception e) {
-                    LogManager.getInstance().log(getClass(), "Writing ninja cache failed!\n" + e);
+                JSONArray array = json.getJSONArray("lines");
+                for (Object currencyObject : array) {
+                    if (currencyObject instanceof JSONObject) {
+                        JSONObject currency = (JSONObject) currencyObject;
+                        String currencyName = currency.getString("currencyTypeName");
+                        CurrencyID id = CurrencyID.get(ninjaToTradeIdMap.get(currencyName));
+                        if (id != null) {
+                            float chaosValue = currency.getFloat("chaosEquivalent");
+                            currentRates.put(id, chaosValue);
+                        }
+                    }
                 }
-            }
 
-            if(listener != null){
-                listener.onRatesFetched();
+                if (!currentRates.isEmpty()) {
+                    try {
+                        objectMapper.writeValue(cacheFile, currentRates);
+                    } catch (Exception e) {
+                        LogManager.getInstance().log(getClass(), "Writing ninja cache failed!\n" + e);
+                    }
+                }
+
+                if(listener != null){
+                    listener.onRatesFetched();
+                }
+            } catch (IOException e) {
+                LogManager.getInstance().log(getClass(), "Fetching rates from PoeNinja failed. No internet connection?");
+                e.printStackTrace();
+            } catch (JSONException j){
+                LogManager.getInstance().log(getClass(), "JSONException!\n" + j);
             }
         }
     }
 
     HashMap<CurrencyID, Float> getCurrentRates() {
-        if(currentRates == null){
+        if(currentRates == null || currentRates.isEmpty()){
             fetchRates(PropertyManager.getInstance().getCurrentLeague(), false);
         }
         return currentRates;
@@ -145,8 +142,8 @@ public class PoeNinjaParser {
         listener = ninjaListener;
     }
 
-    public void reset() {
-        currentRates = null;
+    void reset() {
+        currentRates.clear();
     }
 
     public interface PoeNinjaListener{

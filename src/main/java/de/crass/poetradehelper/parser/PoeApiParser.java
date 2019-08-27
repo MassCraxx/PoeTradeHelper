@@ -9,6 +9,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.UnknownHostException;
 
 /**
  * Created by mcrass on 12.08.2018.
@@ -24,46 +25,59 @@ class PoeApiParser {
     }
 
     private void updateLeagues() {
-        try {
-            currentLeagues.clear();
-            LogManager.getInstance().log(PoeApiParser.class, "Fetching current leagues...");
-            String response = HttpManager.getInstance().get(leagueParseURL, leagueParams);
-            if(!response.startsWith("[")){
-                LogManager.getInstance().log(getClass(), "Fetching league failed! PoE under maintenance?");
-                currentLeagues.add("Standard");
-                return;
-            }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    currentLeagues.clear();
+                    LogManager.getInstance().log(PoeApiParser.class, "Fetching current leagues...");
+                    String response = HttpManager.getInstance().get(leagueParseURL, leagueParams);
 
-            JSONArray jsonArray = new JSONArray(response);
-            if (jsonArray.length() == 0) {
-                LogManager.getInstance().log(getClass(), "Error: Could not retrieve leagues.");
-                currentLeagues.add("Standard");
-                return;
-            }
+                    if(response == null) {
+                        LogManager.getInstance().log(getClass(), "Fetching league failed! No connection to " + leagueParseURL);
+                        return;
+                    }else if(!response.startsWith("[")){
+                        LogManager.getInstance().log(getClass(), "Fetching league failed! PoE under maintenance?");
+                        currentLeagues.add("Standard");
+                        return;
+                    }
 
-            for (Object object : jsonArray) {
-                if (object instanceof JSONObject) {
-                    JSONObject json = (JSONObject) object;
-                    String league = json.getString("id");
-                    if (!league.contains("SSF")) {
-                        currentLeagues.add(league);
+                    JSONArray jsonArray = new JSONArray(response);
+                    if (jsonArray.length() == 0) {
+                        LogManager.getInstance().log(getClass(), "Error: Could not retrieve leagues.");
+                        currentLeagues.add("Standard");
+                        return;
+                    }
+
+                    for (Object object : jsonArray) {
+                        if (object instanceof JSONObject) {
+                            JSONObject json = (JSONObject) object;
+                            String league = json.getString("id");
+                            if (!league.contains("SSF")) {
+                                currentLeagues.add(league);
+                            }
+                        }
+                    }
+
+                    if (!currentLeagues.contains(PropertyManager.getInstance().getCurrentLeague())) {
+                        LogManager.getInstance().log(getClass(), "Saved league " + PropertyManager.getInstance().getCurrentLeague() + " is not valid anymore. Resetting to Standard.");
+                        PropertyManager.getInstance().resetLeague();
+                    }
+                } catch (IOException e) {
+                    if(e instanceof UnknownHostException){
+                        LogManager.getInstance().log(getClass(), "Fetching league failed! No connection to " + leagueParseURL);
+                    }else {
+                        e.printStackTrace();
                     }
                 }
             }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        if (!currentLeagues.contains(PropertyManager.getInstance().getCurrentLeague())) {
-            LogManager.getInstance().log(getClass(), "Saved league " + PropertyManager.getInstance().getCurrentLeague() + " is not valid anymore. Resetting to Standard.");
-            PropertyManager.getInstance().resetLeague();
-        }
+        }).start();
     }
 
     ObservableList<String> getCurrentLeagues() {
-        if (currentLeagues.isEmpty()) {
-            updateLeagues();
-        }
+//        if (currentLeagues.isEmpty()) {
+//            updateLeagues();
+//        }
         return currentLeagues;
     }
 }

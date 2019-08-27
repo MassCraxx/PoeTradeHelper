@@ -43,10 +43,10 @@ import java.text.ParseException;
 import java.util.*;
 
 @SuppressWarnings("unchecked")
-public class Main extends Application implements TradeManager.DealParseListener, PoeNinjaParser.PoeNinjaListener {
+public class Main extends Application implements TradeManager.DealParseListener, PoeNinjaParser.PoeNinjaListener, PropertyManager.UICallback {
 
     private static final String title = "PoeTradeHelper";
-    private static final String versionText = "v0.5.1";
+    private static final String versionText = "v0.5.2";
 
     @FXML
     private ListView<CurrencyDeal> playerDealList;
@@ -235,13 +235,11 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
     @FXML
     void initialize() {
-        assert console != null : "fx:id=\"console\" was not injected: check your FXML file 'layout.fxml'.";
-        assert currencyList != null : "fx:id=\"currencyList\" was not injected: check your FXML file 'layout.fxml'.";
-        assert updateButton != null : "fx:id=\"updateButton\" was not injected: check your FXML file 'layout.fxml'.";
-        assert version != null : "fx:id=\"version\" was not injected: check your FXML file 'layout.fxml'.";
-
         // Setup console
         LogManager.getInstance().setConsole(console);
+
+        // Prop man
+        PropertyManager.getInstance().setUICallback(this);
 
         // Setup trade manager
         tradeManager = TradeManager.getInstance();
@@ -298,6 +296,9 @@ public class Main extends Application implements TradeManager.DealParseListener,
                 updateSlider.setVisible(true);
             }
         });
+        ContextMenu vContext = new ContextMenu();
+        vContext.getItems().add(new MenuItem("by MassCraxx"));
+        version.setContextMenu(vContext);
 
         currencyList.setEditable(false);
         currencyList.setCellFactory(studentListView -> new MarketCell<>());
@@ -511,7 +512,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
             tradeManager.parseDeals();
         });
 
-        excessiveTresholdSlider.setTooltip(new Tooltip("If Filter Excessive is active, trades where the buy and sell value difference exceeds given percent of the higher value. E.g. 50% means all offers will be ignored where buy and sell difference is more than 50% of the primary currency value"));
+        excessiveTresholdSlider.setTooltip(new Tooltip("If \"Filter Excessive\" is active, all deals where the buy and sell value difference exceeds a given percentage of the higher value are ignored.\nE.g. 50% means all offers will be ignored where the buy and sell difference is more than 50% of the primary currency value"));
         int excessiveTreshold = PropertyManager.getInstance().getExcessiveTreshold();
         excessiveTresholdSlider.setValue(excessiveTreshold);
         excessiveTresholdLabel.setText(excessiveTreshold + " %");
@@ -535,6 +536,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
         currencyFilterList.setTooltip(new Tooltip("Only offers for currency in this list will be fetched on update"));
 
         currencyFilterCB.setItems(currencies);
+        currencyFilterCB.setPromptText("Add currency");
 
         addCurrencyFilterBtn.setTooltip(new Tooltip("Add selected currency to list"));
         addCurrencyFilterBtn.setOnAction(event -> {
@@ -577,19 +579,8 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
         leagueCB.setTooltip(new Tooltip("Set Path of Exile league"));
         leagueCB.setItems(tradeManager.getLeagueList());
-        leagueCB.setValue(PropertyManager.getInstance().getCurrentLeague());
 
-        leagueCB.setOnAction(event -> {
-            PropertyManager.getInstance().setLeague(leagueCB.getValue());
-            valueTable.getItems().clear();
-            buyOfferTable.getItems().clear();
-            sellOfferTable.getItems().clear();
-            playerDealList.getItems().clear();
-            currencyList.getItems().clear();
-
-            tradeManager.reset();
-            updateTitle();
-        });
+        leagueCB.setOnAction(event -> PropertyManager.getInstance().setLeague(leagueCB.getValue()));
 
 
         // Setup Voice Controls
@@ -820,9 +811,11 @@ public class Main extends Application implements TradeManager.DealParseListener,
     }
 
     @Override
-    public void onParsingFinished() {
-        LogManager.getInstance().log(TradeManager.class, "Parsing took " + prettyFloat((System.currentTimeMillis() - parseStartTime)) + " milliseconds");
+    public void onError() {
+        resetUI();
+    }
 
+    private void resetUI(){
         currencyList.setPlaceholder(new Label("No deals to show."));
         Label label = new Label("No deals to show. Is your currently selling player set in settings? Otherwise your offers may not be online yet.");
         if(PropertyManager.getInstance().getPlayerList().isEmpty()){
@@ -839,6 +832,13 @@ public class Main extends Application implements TradeManager.DealParseListener,
     }
 
     @Override
+    public void onParsingFinished() {
+        LogManager.getInstance().log(TradeManager.class, "Parsing took " + prettyFloat((System.currentTimeMillis() - parseStartTime)) + " milliseconds");
+
+        resetUI();
+    }
+
+    @Override
     public void onRatesFetched() {
         valueTable.setItems(tradeManager.getCurrencyValues());
         TableColumn column = valueTable.getColumns().get(1);
@@ -848,6 +848,23 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
         calculateValue();
     }
+
+    @Override
+    public void onPropChanged(String key, String value) {
+        if (PropertyManager.LEAGUE_KEY.equals(key)) {
+            leagueCB.setValue(value);
+            valueTable.getItems().clear();
+            buyOfferTable.getItems().clear();
+            sellOfferTable.getItems().clear();
+            playerDealList.getItems().clear();
+            currencyList.getItems().clear();
+
+            tradeManager.reset();
+            updateTitle();
+        }
+    }
+
+    // UTIL
 
     public static String prettyFloat(float in) {
         return prettyFloat(in, null);
@@ -884,6 +901,4 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
         return result.toString();
     }
-
-
 }

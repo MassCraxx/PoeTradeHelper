@@ -100,19 +100,40 @@ public class PoeTradeWebParser {
     }
 
     private void doUpdate(List<CurrencyID> currencyList, boolean clear) {
-        updating = true;
-        CurrencyID primaryCurrency = PropertyManager.getInstance().getPrimaryCurrency();
-        for (CurrencyID secondaryCurrency : currencyList) {
-            if (cancel) {
-                break;
-            }
-            if (!clear)
-                removeOffers(primaryCurrency, secondaryCurrency);
-            fetchCurrencyOffers(primaryCurrency, secondaryCurrency, PropertyManager.getInstance().getCurrentLeague());
-        }
+        try {
+            updating = true;
+            CurrencyID primaryCurrency = PropertyManager.getInstance().getPrimaryCurrency();
+            for (CurrencyID secondaryCurrency : currencyList) {
+                if (cancel) {
+                    break;
+                }
+                if (!clear)
+                    removeOffers(primaryCurrency, secondaryCurrency);
 
-        if (parseListener != null) {
-            Platform.runLater(() -> parseListener.onUpdateFinished());
+                // BUY
+                fetchOffers(primaryCurrency, secondaryCurrency, PropertyManager.getInstance().getCurrentLeague());
+
+                // SELL
+                fetchOffers(secondaryCurrency, primaryCurrency, PropertyManager.getInstance().getCurrentLeague());
+
+
+            }
+
+            if (parseListener != null) {
+                Platform.runLater(() -> parseListener.onUpdateFinished());
+            }
+        } catch (IOException e) {
+            LogManager.getInstance().log(getClass(), "Fetching offers failed. No internet connection?");
+            e.printStackTrace();
+
+            if (parseListener != null) {
+                Platform.runLater(() -> parseListener.onUpdateError());
+            }
+        } catch (InterruptedException i) {
+            i.printStackTrace();
+            if (parseListener != null) {
+                Platform.runLater(() -> parseListener.onUpdateFinished());
+            }
         }
         cancel = false;
         updating = false;
@@ -124,20 +145,6 @@ public class PoeTradeWebParser {
         updateCurrencies(list, false, async);
     }
 
-    private void fetchCurrencyOffers(CurrencyID primary, CurrencyID secondary, String league) {
-        try {
-            // BUY
-            fetchOffers(primary, secondary, league);
-
-            // SELL
-            fetchOffers(secondary, primary, league);
-
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @SuppressWarnings("UnusedAssignment")
     private void fetchOffers(CurrencyID primary, CurrencyID secondary, String league) throws IOException, InterruptedException {
         String buyResponseBody;
         ObjectMapper objectMapper = new ObjectMapper();
@@ -147,7 +154,7 @@ public class PoeTradeWebParser {
 
             buyResponseBody = HttpManager.getInstance().get(poeTradeCurrencyURL, getBuyQuery(league, primary, secondary));
 
-            if (writeCache) {
+            if (writeCache && buyResponseBody != null) {
                 objectMapper.writeValue(file, buyResponseBody);
             }
         } else {
@@ -158,6 +165,11 @@ public class PoeTradeWebParser {
                 LogManager.getInstance().log(getClass(), "No file found for: " + primary + " - " + secondary);
                 return;
             }
+        }
+
+        if (buyResponseBody == null) {
+            LogManager.getInstance().log(getClass(), "Fetching offers failed! No Internet connection?");
+            return;
         }
 
         Pair key = new Pair<>(secondary, primary);
@@ -194,18 +206,18 @@ public class PoeTradeWebParser {
                     if (!stockString.isEmpty()) {
                         Matcher stockMatcher = OFFER_PATTERN_STOCK.matcher(stockString);
                         if (stockMatcher.find()) {
-                            stock = Integer.valueOf(stockMatcher.group(1));
+                            stock = Integer.parseInt(stockMatcher.group(1));
                         }
                     }
-                    float sell = Float.valueOf(offerMatcher.group(3));
-                    float buy = Float.valueOf(offerMatcher.group(5));
+                    float sell = Float.parseFloat(offerMatcher.group(3));
+                    float buy = Float.parseFloat(offerMatcher.group(5));
 
                     CurrencyOffer offer = new CurrencyOffer(
                             offerMatcher.group(6),
                             offerMatcher.group(1),
-                            CurrencyID.get(Integer.valueOf(offerMatcher.group(2))),
+                            CurrencyID.get(Integer.parseInt(offerMatcher.group(2))),
                             sell,
-                            CurrencyID.get(Integer.valueOf(offerMatcher.group(4))),
+                            CurrencyID.get(Integer.parseInt(offerMatcher.group(4))),
                             buy,
                             stock);
 
@@ -312,9 +324,10 @@ public class PoeTradeWebParser {
         }
         return (ObservableList<CurrencyOffer>) offers;
     }
+
     public interface OfferParseListener {
         void onUpdateStarted();
-
         void onUpdateFinished();
+        void onUpdateError();
     }
 }
