@@ -579,6 +579,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
         leagueCB.setTooltip(new Tooltip("Set Path of Exile league"));
         leagueCB.setItems(tradeManager.getLeagueList());
+        leagueCB.setValue(PropertyManager.getInstance().getCurrentLeague());
 
         leagueCB.setOnAction(event -> PropertyManager.getInstance().setLeague(leagueCB.getValue()));
 

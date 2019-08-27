@@ -60,7 +60,7 @@ class PoeApiParser {
                     }
 
                     if (!currentLeagues.contains(PropertyManager.getInstance().getCurrentLeague())) {
-                        LogManager.getInstance().log(getClass(), "Saved league " + PropertyManager.getInstance().getCurrentLeague() + " is not valid anymore. Resetting to Standard.");
+                        LogManager.getInstance().log(PoeApiParser.class, "Saved league " + PropertyManager.getInstance().getCurrentLeague() + " is not valid anymore. Resetting to Standard.");
                         PropertyManager.getInstance().resetLeague();
                     }
                 } catch (IOException e) {

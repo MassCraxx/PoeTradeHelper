@@ -292,7 +292,7 @@ public class PropertyManager {
     }
 
     public void resetLeague() {
-        JOptionPane.showMessageDialog(null, "League ended - resetting to " + defaultLeague + ".");
+        JOptionPane.showMessageDialog(null, "League " + currentLeague + " ended - resetting to " + defaultLeague + ".");
         callbackUI(LEAGUE_KEY, defaultLeague);
     }
 
