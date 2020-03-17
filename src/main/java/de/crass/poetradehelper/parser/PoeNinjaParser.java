@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.util.HashMap;
 
 public class PoeNinjaParser {
-    private static final String currencyURL = "http://poe.ninja/api/Data/GetCurrencyOverview";
+    private static final String currencyURL = "https://poe.ninja/api/data/currencyoverview?type=Currency";
     private final ObjectMapper objectMapper;
     private String cacheFileName = "_rates.dat";
 //    private final File file = new File("poeninja.dat");
@@ -27,6 +27,7 @@ public class PoeNinjaParser {
 
     // Currency - (CurrencyID<>Chaos Value)
     private HashMap<CurrencyID, Float> currentRates = new HashMap<>();
+    private boolean noRatesAvailable = false;
 
     PoeNinjaParser() {
         objectMapper = new ObjectMapper();
@@ -58,14 +59,18 @@ public class PoeNinjaParser {
                 }
             }
         } else {
+            if(noRatesAvailable){
+                return;
+            }
             // Fetch online
             LogManager.getInstance().log(getClass(), "Fetching new currency values for league "+league+" from poe.ninja.");
             JSONObject json;
             try {
-                json = HttpManager.getInstance().getJson(currencyURL, "?league=" + league);
+                json = HttpManager.getInstance().getJson(currencyURL, "&league=" + league);
 
                 if (json == null || json.length() == 0) {
                     LogManager.getInstance().log(getClass(), "Invalid response from PoeNinja! API has been changed.");
+                    noRatesAvailable = true;
                     return;
                 }
 
@@ -106,7 +111,8 @@ public class PoeNinjaParser {
                 LogManager.getInstance().log(getClass(), "Fetching rates from PoeNinja failed. No internet connection?");
                 e.printStackTrace();
             } catch (JSONException j){
-                LogManager.getInstance().log(getClass(), "JSONException!\n" + j);
+                LogManager.getInstance().log(getClass(), currencyURL + " returned no valid JSON!\n");
+                noRatesAvailable = true;
             }
         }
     }

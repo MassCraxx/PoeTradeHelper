@@ -53,7 +53,7 @@ public class HttpManager {
     public JSONObject getJson(String fetchURL, String params) throws IOException, JSONException {
         String json = get(fetchURL, params);
         if(json == null || json.isEmpty()){
-            LogManager.getInstance().log(getClass(), "getJson from "+fetchURL+params+" failed!");
+            LogManager.getInstance().log(getClass(), "getJson from "+fetchURL+params+" failed! Response was empty.");
             return null;
         }
         return new JSONObject(json);

@@ -35,6 +35,7 @@ import javafx.util.Callback;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import java.io.File;
 import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
@@ -46,7 +47,7 @@ import java.util.*;
 public class Main extends Application implements TradeManager.DealParseListener, PoeNinjaParser.PoeNinjaListener, PropertyManager.UICallback {
 
     private static final String title = "PoeTradeHelper";
-    private static final String versionText = "v0.5.2";
+    private static final String versionText = "v0.6-SNAPSHOT";
 
     @FXML
     private ListView<CurrencyDeal> playerDealList;
@@ -342,7 +343,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
 //        });
 
         // Offer tab
-        ObservableList currencies = FXCollections.observableArrayList(CurrencyID.values());
+        ObservableList<CurrencyID> currencies = FXCollections.observableArrayList(CurrencyID.values());
         currencies.sort(Comparator.comparing(Object::toString));
         offerSecondary.setItems(currencies);
         offerSecondary.setOnAction(event -> {
@@ -592,7 +593,8 @@ public class Main extends Application implements TradeManager.DealParseListener,
             setDisableVoiceControls();
 
             voiceActive.setOnAction(event -> {
-                LogManager.getInstance().log(getClass(), "Balcon.exe not found! Download it and place it at the same location as this app to enable TTS notifications.");
+                File jarDir = new File("");
+                LogManager.getInstance().log(getClass(), "Balcon not found! To enable TTS notifications, download balcon.exe from http://balabolka.site/balcon.zip place it in " + jarDir.getAbsolutePath() + " and restart the application.");
                 voiceActive.setSelected(false);
             });
         } else if (supportedVoices.isEmpty()) {
@@ -842,7 +844,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
     @Override
     public void onRatesFetched() {
         valueTable.setItems(tradeManager.getCurrencyValues());
-        TableColumn column = valueTable.getColumns().get(1);
+        TableColumn<Map.Entry<CurrencyID, Float>,?> column = valueTable.getColumns().get(1);
         column.setSortType(TableColumn.SortType.DESCENDING);
         valueTable.getSortOrder().add(column);
         valueTable.refresh();
@@ -891,10 +893,10 @@ public class Main extends Application implements TradeManager.DealParseListener,
         }
     }
 
-    static String join(Collection col) {
+    static String join(Collection<?> col) {
         StringBuilder result = new StringBuilder();
 
-        for (Iterator var3 = col.iterator(); var3.hasNext(); result.append((String) var3.next())) {
+        for (Iterator<?> var3 = col.iterator(); var3.hasNext(); result.append((String) var3.next())) {
             if (result.length() != 0) {
                 result.append(",");
             }

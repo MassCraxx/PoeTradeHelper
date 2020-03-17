@@ -5,7 +5,10 @@ import de.crass.poetradehelper.PropertyManager;
 import de.crass.poetradehelper.model.CurrencyID;
 import javafx.scene.control.TextField;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
@@ -63,12 +66,14 @@ public class PoeChatTTS {
             "One", "Check", "Boom", "Dude"};
 
     private Thread watchDogThread;
-    private WatchDog watchDog;
+    private Runnable watchDog;
     private TextField wordIncludeTextField;
     private TextField wordExcludeTextField;
 
     private List<String> playersMet = new LinkedList<>();
     private Process speechProcess;
+    private boolean useLogTail = true;
+    private boolean isRunning = false;
 
     public PoeChatTTS(Listener listener) {
         this(PropertyManager.getInstance().getPathOfExilePath(), listener);
@@ -161,6 +166,7 @@ public class PoeChatTTS {
                     for (String exWord : excludeWords) {
                         if (wordInMsg.equalsIgnoreCase(exWord)) {
                             excluded = true;
+                            break;
                         }
                     }
                     // if word was excluded, cancel search
@@ -285,30 +291,56 @@ public class PoeChatTTS {
     }
 
     public void startTTS() {
-        watchDog = new WatchDog(path, new WatchDog.Listener() {
-            @Override
-            public void onFileChanged(File path) {
+        useLogTail = !Boolean.parseBoolean(PropertyManager.getInstance().getProp("tts_watchdog", "false"));
+        if(useLogTail){
+            path = path.resolve("Client.txt");
+            watchDog = new LogTailer(path.toFile(), true, new FileListener() {
+                @Override
+                public void onFileChanged(File path, boolean newFile) {
 
-            }
-
-            @Override
-            public void onNewLine(File file, String newLine) {
-                if (file.getName().contains("Worker")) {
-                    return;
                 }
-                processNewLine(newLine);
-            }
 
-            @Override
-            public void onShutDown() {
-                if (listener != null) {
-                    listener.onShutDown();
+                @Override
+                public void onNewLine(File file, String newLine) {
+                    if (file.getName().contains("Worker")) {
+                        return;
+                    }
+                    processNewLine(newLine);
                 }
-            }
-        });
 
+                @Override
+                public void onShutdown() {
+                    if (listener != null) {
+                        listener.onShutDown();
+                    }
+                }
+            });
+        } else {
+            watchDog = new WatchDog(path, new WatchDog.Listener() {
+                @Override
+                public void onFileChanged(File path) {
+
+                }
+
+                @Override
+                public void onNewLine(File file, String newLine) {
+                    if (file.getName().contains("Worker")) {
+                        return;
+                    }
+                    processNewLine(newLine);
+                }
+
+                @Override
+                public void onShutDown() {
+                    if (listener != null) {
+                        listener.onShutDown();
+                    }
+                }
+            });
+        }
         watchDogThread = new Thread(watchDog, "logWatcher");
         watchDogThread.start();
+        isRunning = true;
         LogManager.getInstance().log(getClass(), "TTS Watchdog started.");
 
         // Possible bugfix for starting the watchdog....
@@ -338,7 +370,7 @@ public class PoeChatTTS {
             speechProcess.destroy();
             speechProcess = null;
         }
-        watchDog.stop();
+        isRunning = false;
         watchDogThread.interrupt();
         watchDog = null;
         watchDogThread = null;
@@ -525,7 +557,7 @@ public class PoeChatTTS {
     }
 
     public boolean isActive() {
-        return watchDog != null && watchDog.isRunning();
+        return watchDog != null && isRunning;
     }
 
     public String getVoice() {
