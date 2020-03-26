@@ -47,7 +47,7 @@ import java.util.*;
 public class Main extends Application implements TradeManager.DealParseListener, PoeNinjaParser.PoeNinjaListener, PropertyManager.UICallback {
 
     private static final String title = "PoeTradeHelper";
-    private static final String versionText = "v0.6";
+    private static final String versionText = "v0.6.1";
 
     @FXML
     private ListView<CurrencyDeal> playerDealList;
@@ -376,7 +376,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
         stockColumn.setCellValueFactory(stockCellFactory);
 
         TableColumn<CurrencyOffer, String> playerColumn = new TableColumn<>();
-        playerColumn.setText("Playername");
+        playerColumn.setText("Character name");
         playerColumn.setCellValueFactory(playerCellFactory);
         playerColumn.setPrefWidth(150);
 
@@ -400,7 +400,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
         sellStockColumn.setCellValueFactory(stockCellFactory);
 
         TableColumn<CurrencyOffer, String> sellPlayerColumn = new TableColumn<>();
-        sellPlayerColumn.setText("Playername");
+        sellPlayerColumn.setText("Character");
         sellPlayerColumn.setCellValueFactory(playerCellFactory);
         sellPlayerColumn.setPrefWidth(150);
 
