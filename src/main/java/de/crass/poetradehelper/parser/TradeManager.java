@@ -10,6 +10,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.util.Pair;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -17,6 +18,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import static de.crass.poetradehelper.Main.currencyFilterChanged;
+import static de.crass.poetradehelper.Main.poeChatTTS;
 
 /**
  * Created by mcrass on 19.07.2018.
@@ -217,15 +219,30 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
                         marketBuyPrice /= bestMarketBuyOffer.getSellAmount();
                     }
 
-                    currentDeals.add(new CurrencyDeal(primaryCurrency, secondaryCurrency, cValue, totalOffers,
+                    CurrencyDeal deal = new CurrencyDeal(
+                            primaryCurrency,
+                            secondaryCurrency,
+                            cValue,
+                            totalOffers,
                             marketBuyPrice,
-                            marketSellPrice));
+                            marketSellPrice);
+
+                    if(bestMarketBuyOffer != null && bestMarketBuyOffer.getQueryID() != null && !bestMarketBuyOffer.getQueryID().isEmpty()){
+                        deal.setBuyQueryID(bestMarketBuyOffer.getQueryID());
+                    }
+
+                    if(bestMarketSellOffer != null && bestMarketSellOffer.getQueryID() != null && !bestMarketSellOffer.getQueryID().isEmpty()){
+                        deal.setSellQueryID(bestMarketSellOffer.getQueryID());
+                    }
+
+                    currentDeals.add(deal);
                 }
                 currentDeals.sort(diffValueSorter);
 
                 // Parse Players
                 HashMap<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> playerOffers = webParser.getPlayerOffers();
                 HashSet<Pair<CurrencyID, CurrencyID>> processedPlayerKeys = new HashSet<>();
+                boolean notified = false;
                 for (Map.Entry<Pair<CurrencyID, CurrencyID>, List<CurrencyOffer>> offerMap : playerOffers.entrySet()) {
                     Pair<CurrencyID, CurrencyID> key = offerMap.getKey();
                     Pair<CurrencyID, CurrencyID> invertedKey = new Pair<>(key.getValue(), key.getKey());
@@ -255,20 +272,22 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
                     CurrencyID secondaryCurrency = key.getValue();
 
                     if (playerOffers.get(key) != null) {
-                        if (playerOffers.get(key).isEmpty()) {
-                            LogManager.getInstance().log(TradeManager.class, "PlayerOffer for "+key+" was empty...");
-                        } else {
+                        if (!playerOffers.get(key).isEmpty()) {
                             playerSellOffer = playerOffers.get(key).get(0);
                         }
+//                        else {
+//                          LogManager.getInstance().log(TradeManager.class, "PlayerOffer for "+key+" was empty...");
+//                        }
                     }
 
                     List<CurrencyOffer> playerBuyOfferList = playerOffers.get(invertedKey);
                     if (playerBuyOfferList != null) {
-                        if (playerBuyOfferList.isEmpty()) {
-                            LogManager.getInstance().log(TradeManager.class, "PlayerOffer for "+key+" was empty...");
-                        } else {
+                        if (!playerBuyOfferList.isEmpty()) {
                             playerBuyOffer = playerBuyOfferList.get(0);
                         }
+//                        else {
+//                          LogManager.getInstance().log(TradeManager.class, "PlayerOffer for "+key+" was empty...");
+//                        }
                     }
 
                     bestMarketSellOffer = getBestOffer(marketOffers.get(key));
@@ -304,6 +323,18 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
                         playerBuyPrice /= playerBuyOffer.getSellAmount();
 
                         playerBuyStock = playerBuyOffer.getStock();
+                    }
+
+                    //FIXME
+                    if (!notified && poeChatTTS.isActive() && Boolean.parseBoolean(PropertyManager.getInstance().getProp("voice_notify_bad_tendency", "false"))) {
+                        if (marketBuyPrice > 0 && playerBuyPrice > 0 && playerBuyPrice > marketBuyPrice || marketSellPrice > 0 && playerSellPrice > 0 && playerSellPrice < marketSellPrice) {
+                            try {
+                                poeChatTTS.notifyBadTendency();
+                                notified = true;
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
                     }
 
                     float cValue = poeNinjaParser.getCurrentCValueFor(secondaryCurrency);

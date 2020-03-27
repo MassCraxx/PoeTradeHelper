@@ -12,8 +12,9 @@ import org.json.JSONObject;
 public class PoeTradeApiParser extends WebParser {
     public static final String IDENTIFIER = "pathofexile.com";
 
-    String poeTradeURL = "https://www.pathofexile.com/api/trade/exchange/";
-    String poeFetchURL = "https://www.pathofexile.com/api/trade/fetch/";
+    public static final String poeTradeURL = "https://www.pathofexile.com/api/trade/exchange/";
+    public static final String poeFetchURL = "https://www.pathofexile.com/api/trade/fetch/";
+    public static final String poeSearchURL = "https://www.pathofexile.com/trade/exchange/";
 
     PoeTradeApiParser(OfferParseListener listener) {
         super(listener);
@@ -48,6 +49,10 @@ public class PoeTradeApiParser extends WebParser {
             }
 
             String id = response.getString("id");
+            if (id == null || response.isNull("id") || id.isEmpty()) {
+                LogManager.getInstance().log(getClass(), "Fetching failed! id was null.");
+                return;
+            }
 
             StringBuilder query = new StringBuilder();
             boolean first = true;
@@ -85,6 +90,8 @@ public class PoeTradeApiParser extends WebParser {
                 int stock = price.getJSONObject("item").getInt("stock");
 
                 CurrencyOffer offer = new CurrencyOffer(charName, account, sellID, sellValue, buyID, buyValue, stock);
+                offer.setQueryId(id);
+
                 addOffer(offer);
             }
         } catch (Exception e) {
@@ -92,5 +99,9 @@ public class PoeTradeApiParser extends WebParser {
             LogManager.getInstance().log(getClass(), e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    public static String getSearchURL(String queryID) {
+        return poeSearchURL + PropertyManager.getInstance().getCurrentLeague() + '/' + queryID;
     }
 }

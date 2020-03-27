@@ -21,6 +21,9 @@ public class CurrencyDeal {
     private int playerSellStock;
     private String league;
 
+    private String buyQueryID;
+    private String sellQueryID;
+
     public CurrencyDeal(CurrencyID primaryCurrencyID,
                         CurrencyID secondaryCurrencyID,
                         float cValue,
@@ -124,5 +127,21 @@ public class CurrencyDeal {
 
     public String getLeague() {
         return league;
+    }
+
+    public String getBuyQueryID() {
+        return buyQueryID;
+    }
+
+    public void setBuyQueryID(String buyQueryID) {
+        this.buyQueryID = buyQueryID;
+    }
+
+    public String getSellQueryID() {
+        return sellQueryID;
+    }
+
+    public void setSellQueryID(String sellQueryID) {
+        this.sellQueryID = sellQueryID;
     }
 }

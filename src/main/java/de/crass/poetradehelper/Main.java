@@ -27,6 +27,11 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -36,20 +41,23 @@ import javafx.util.Callback;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.math.RoundingMode;
+import java.net.URI;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
+import java.util.List;
 import java.util.*;
 
 @SuppressWarnings("unchecked")
 public class Main extends Application implements TradeManager.DealParseListener, PoeNinjaParser.PoeNinjaListener, PropertyManager.UICallback {
 
     private static final String title = "PoeTradeHelper";
-    private static final String versionText = "v0.7-RC1";
+    private static final String versionText = "v0.7-SNAPSHOT";
 
     @FXML
     private ListView<CurrencyDeal> playerDealList;
@@ -211,7 +219,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
     private CheckBox filterMultiTrade;
 
     private static Stage currentStage;
-    private static PoeChatTTS poeChatTTS;
+    public static PoeChatTTS poeChatTTS;
 
     private TradeManager tradeManager;
 
@@ -354,13 +362,13 @@ public class Main extends Application implements TradeManager.DealParseListener,
         ObservableList<CurrencyID> currencies = FXCollections.observableArrayList(CurrencyID.getValues());
         currencies.sort(Comparator.comparing(Object::toString));
         offerSecondary.setItems(currencies);
-        offerSecondary.setOnAction(event -> {
+        offerSecondary.setOnAction(event -> new Thread(() -> {
             CurrencyID newValue = offerSecondary.getValue();
             if (newValue != null) {
                 buyOfferTable.setItems(tradeManager.getBuyOffers(newValue));
                 sellOfferTable.setItems(tradeManager.getSellOffers(newValue));
             }
-        });
+        }).start());
 
         // Buy table
         Callback<TableColumn.CellDataFeatures<CurrencyOffer, Number>, ObservableValue<Number>> stockCellFactory =
@@ -422,7 +430,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
 
         refreshBtn.setOnAction(event -> {
-            if(offerSecondary.getValue() != null) {
+            if (offerSecondary.getValue() != null) {
                 tradeManager.updateOffersForCurrency(offerSecondary.getValue(), true);
             }
         });
@@ -486,8 +494,10 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
         convertButton.setOnAction(event -> calculateValue());
 
-        openConversionInBrowser.setOnAction(event -> PoeTradeWebParser.openInBrowser(PropertyManager.getInstance().getCurrentLeague(),
-                valueOutputCB.getValue(), valueInputCB.getValue()));
+        //FIXME
+        openConversionInBrowser.setDisable(true);
+//        openConversionInBrowser.setOnAction(event -> Main.openInBrowser(PropertyManager.getInstance().getCurrentLeague(),
+////                valueOutputCB.getValue(), valueInputCB.getValue()));
 
         // SETTINGS
         primaryComboBox.setTooltip(new Tooltip("Select currency to flip with"));
@@ -686,7 +696,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
             // Who knew daniel was used in Pendulum's Bloodsugar?
             volumeTopicLabel.setOnMouseClicked(event -> {
-                if(poeChatTTS.getVoice() != null && poeChatTTS.getVoice().contains("Daniel")) {
+                if (poeChatTTS.getVoice() != null && poeChatTTS.getVoice().contains("Daniel")) {
                     String msg;
                     volumeClicked++;
                     if (volumeClicked >= 5) {
@@ -816,7 +826,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
             LogManager.getInstance().log(getClass(), "Error setting title.");
             return;
         }
-        currentStage.setTitle(title + " - " + PropertyManager.getInstance().getCurrentLeague() + " League");
+        currentStage.setTitle(title + " - " + PropertyManager.getInstance().getCurrentLeague() + " League - " + PropertyManager.getInstance().getProp("trade_data_source"));
     }
 
     private long updateStart;
@@ -849,10 +859,10 @@ public class Main extends Application implements TradeManager.DealParseListener,
         resetUI();
     }
 
-    private void resetUI(){
+    private void resetUI() {
         currencyList.setPlaceholder(new Label("No deals to show."));
         Label label = new Label("No deals to show. Is your currently selling player set in settings? Otherwise your offers may not be online yet.");
-        if(PropertyManager.getInstance().getPlayerList().isEmpty()){
+        if (PropertyManager.getInstance().getPlayerList().isEmpty()) {
             label = new Label("Add your selling character's name to the list in Settings -> General to evaluate your current offers.");
         }
         playerDealList.setPlaceholder(label);
@@ -868,7 +878,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
     @Override
     public void onParsingFinished() {
         float time = System.currentTimeMillis() - parseStartTime;
-        if(time > 1f) {
+        if (time > 1f) {
             LogManager.getInstance().log(TradeManager.class, "Parsing took " + prettyFloat(time) + " milliseconds");
         }
 
@@ -878,7 +888,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
     @Override
     public void onRatesFetched() {
         valueTable.setItems(tradeManager.getCurrencyValues());
-        TableColumn<Map.Entry<CurrencyID, Float>,?> column = valueTable.getColumns().get(1);
+        TableColumn<Map.Entry<CurrencyID, Float>, ?> column = valueTable.getColumns().get(1);
         column.setSortType(TableColumn.SortType.DESCENDING);
         valueTable.getSortOrder().add(column);
         valueTable.refresh();
@@ -891,18 +901,21 @@ public class Main extends Application implements TradeManager.DealParseListener,
         if (PropertyManager.LEAGUE_KEY.equals(key)) {
             leagueCB.setValue(value);
             resetUiItems();
-            updateTitle();
         }
     }
 
     private void resetUiItems() {
-        valueTable.getItems().clear();
-        buyOfferTable.getItems().clear();
-        sellOfferTable.getItems().clear();
-        playerDealList.getItems().clear();
-        currencyList.getItems().clear();
+        if (currentStage != null) {
+            valueTable.getItems().clear();
+            buyOfferTable.getItems().clear();
+            sellOfferTable.getItems().clear();
+            playerDealList.getItems().clear();
+            currencyList.getItems().clear();
 
-        tradeManager.reset();
+            tradeManager.reset();
+
+            updateTitle();
+        }
     }
 
     // UTIL
@@ -924,7 +937,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
     public static void setImage(String name, ImageView view) {
         URL url = Main.class.getResource(name);
-        if(url == null){
+        if (url == null) {
             url = Main.class.getResource("0.png");
         }
 
@@ -946,5 +959,35 @@ public class Main extends Application implements TradeManager.DealParseListener,
         }
 
         return result.toString();
+    }
+
+    public static void openInBrowser(String query) {
+        if(query == null || query.isEmpty() || query.equals("null")){
+            LogManager.getInstance().log(Main.class, "Could not open browser. Query was null!");
+            return;
+        }
+        URI uri = URI.create(PoeTradeApiParser.getSearchURL(query));
+
+        try {
+            Desktop.getDesktop().browse(uri);
+        } catch (Exception e) {
+            LogManager.getInstance().log(PoeTradeWebParser.class, "Error opening browser. " + e);
+        }
+    }
+
+    public static void openInBrowser(CurrencyOffer offer) {
+        URI uri;
+        if (offer.getQueryID() != null && !offer.getQueryID().isEmpty()) {
+            openInBrowser(offer.getQueryID());
+            return;
+        } else {
+            uri = URI.create(PoeTradeWebParser.getSearchURL(offer.getSellID(), offer.getBuyID()));
+        }
+
+        try {
+            Desktop.getDesktop().browse(uri);
+        } catch (Exception e) {
+            LogManager.getInstance().log(PoeTradeWebParser.class, "Error opening browser. " + e);
+        }
     }
 }

@@ -2,7 +2,6 @@ package de.crass.poetradehelper.ui;
 
 import de.crass.poetradehelper.Main;
 import de.crass.poetradehelper.model.CurrencyDeal;
-import de.crass.poetradehelper.parser.PoeTradeWebParser;
 import de.crass.poetradehelper.parser.TradeManager;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -14,13 +13,16 @@ import javafx.scene.control.SeparatorMenuItem;
 class DealContextMenu extends ContextMenu {
 
     DealContextMenu(CurrencyDeal deal) {
-        String league = deal.getLeague();
+        MenuItem nameItem = new MenuItem(deal.getSecondaryCurrencyID().getDisplayName());
 
+        String league = deal.getLeague();
         MenuItem buyItem = new MenuItem("Open Buy Offers");
-        buyItem.setOnAction(event -> PoeTradeWebParser.openInBrowser(league, deal.getPrimaryCurrencyID(), deal.getSecondaryCurrencyID()));
+//        buyItem.setOnAction(event -> Main.openInBrowser(league, deal.getPrimaryCurrencyID(), deal.getSecondaryCurrencyID()));
+        buyItem.setOnAction(event -> Main.openInBrowser(deal.getBuyQueryID()));
 
         MenuItem sellItem = new MenuItem("Open Sell Offers");
-        sellItem.setOnAction(event -> PoeTradeWebParser.openInBrowser(league, deal.getSecondaryCurrencyID(), deal.getPrimaryCurrencyID()));
+//        sellItem.setOnAction(event -> Main.openInBrowser(league, deal.getSecondaryCurrencyID(), deal.getPrimaryCurrencyID()));
+        sellItem.setOnAction(event -> Main.openInBrowser(deal.getSellQueryID()));
 
         MenuItem buyValueItem = new MenuItem("Market Buy Value: " + Main.prettyFloat(deal.getcValue() * deal.getBuyAmount()) + "c");
         MenuItem sellValueItem = new MenuItem("Market Sell Value: " + Main.prettyFloat(deal.getcValue() * deal.getSellAmount()) + "c");
@@ -35,6 +37,8 @@ class DealContextMenu extends ContextMenu {
         removeItem.setOnAction(event -> TradeManager.getInstance().removeDeal(deal));
 
         getItems().addAll(
+                nameItem,
+                new SeparatorMenuItem(),
                 buyValueItem,
                 sellValueItem,
                 new SeparatorMenuItem(),

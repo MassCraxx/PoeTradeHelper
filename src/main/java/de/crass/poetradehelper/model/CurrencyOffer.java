@@ -9,6 +9,7 @@ public class CurrencyOffer {
     private float buyAmount;
     private int stock;
     private boolean isPlayerOffer = false;
+    private String queryID;
 
     public CurrencyOffer(String username, String accountName, CurrencyID sellID, float sellValue, CurrencyID buyID, float buyValue, int stock) {
         this.playerName = username;
@@ -59,5 +60,13 @@ public class CurrencyOffer {
 
     public void setPlayerOffer(boolean playerOffer) {
         isPlayerOffer = playerOffer;
+    }
+
+    public void setQueryId(String id){
+        queryID = id;
+    }
+
+    public String getQueryID() {
+        return queryID;
     }
 }

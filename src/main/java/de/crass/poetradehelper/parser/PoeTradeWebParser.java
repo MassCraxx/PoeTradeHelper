@@ -2,16 +2,15 @@ package de.crass.poetradehelper.parser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.crass.poetradehelper.LogManager;
+import de.crass.poetradehelper.PropertyManager;
 import de.crass.poetradehelper.model.CurrencyID;
 import de.crass.poetradehelper.model.CurrencyOffer;
 import de.crass.poetradehelper.web.HttpManager;
 import javafx.util.Pair;
 
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.net.URLEncoder;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -137,15 +136,7 @@ public class PoeTradeWebParser extends WebParser{
         return updating;
     }
 
-    private static String getPoeTradeURL(String league, CurrencyID want, CurrencyID have) {
-        return poeTradeCurrencyURL + getBuyQuery(league, want, have);
-    }
-
-    public static void openInBrowser(String league, CurrencyID want, CurrencyID have) {
-        try {
-            Desktop.getDesktop().browse(URI.create(getPoeTradeURL(league, want, have)));
-        } catch (Exception e) {
-            LogManager.getInstance().log(PoeTradeWebParser.class, "Error opening browser. " + e);
-        }
+    public static String getSearchURL(CurrencyID want, CurrencyID have) {
+        return poeTradeCurrencyURL + getBuyQuery(PropertyManager.getInstance().getCurrentLeague(), want, have);
     }
 }

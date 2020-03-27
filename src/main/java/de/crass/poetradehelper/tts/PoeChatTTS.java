@@ -65,6 +65,8 @@ public class PoeChatTTS {
     private String[] testPhrases = {
             "One", "Check", "Boom", "Dude"};
 
+    private final String[] badTendencyPhrases = {"Update your offers"};
+
     private Thread watchDogThread;
     private Runnable watchDog;
     private TextField wordIncludeTextField;
@@ -602,6 +604,10 @@ public class PoeChatTTS {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void notifyBadTendency() throws IOException {
+        textToSpeech(getRandomString(badTendencyPhrases));
     }
 
     public enum InternetSlang {

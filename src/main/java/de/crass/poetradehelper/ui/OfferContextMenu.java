@@ -1,9 +1,9 @@
 package de.crass.poetradehelper.ui;
 
+import de.crass.poetradehelper.Main;
 import de.crass.poetradehelper.PropertyManager;
 import de.crass.poetradehelper.model.CurrencyID;
 import de.crass.poetradehelper.model.CurrencyOffer;
-import de.crass.poetradehelper.parser.PoeTradeWebParser;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -24,9 +24,9 @@ public class OfferContextMenu extends ContextMenu {
 
         browserItem.setOnAction(event -> {
             if (isSellOffer(secondary.getValue())) {
-                PoeTradeWebParser.openInBrowser(PropertyManager.getInstance().getCurrentLeague(), secondary.getValue(), PropertyManager.getInstance().getPrimaryCurrency());
+                Main.openInBrowser(getSelected());
             } else {
-                PoeTradeWebParser.openInBrowser(PropertyManager.getInstance().getCurrentLeague(), PropertyManager.getInstance().getPrimaryCurrency(), secondary.getValue());
+                Main.openInBrowser(getSelected());
             }
         });
 
