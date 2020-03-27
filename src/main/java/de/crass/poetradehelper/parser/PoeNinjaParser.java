@@ -1,6 +1,5 @@
 package de.crass.poetradehelper.parser;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.crass.poetradehelper.LogManager;
 import de.crass.poetradehelper.PropertyManager;
@@ -18,7 +17,6 @@ public class PoeNinjaParser {
     private static final String currencyURL = "https://poe.ninja/api/data/currencyoverview?type=Currency";
     private final ObjectMapper objectMapper;
     private String cacheFileName = "_rates.dat";
-//    private final File file = new File("poeninja.dat");
 
     private boolean useOfflineCache = true;
     private long updateDelay = 6 * 60 * 60 * 1000; // 6 hours
@@ -46,13 +44,10 @@ public class PoeNinjaParser {
 
             // If no current rates have been loaded before, load from cache
             if (currentRates == null || currentRates.isEmpty()) {
-                TypeReference<HashMap<CurrencyID, Float>> typeRef = new TypeReference<HashMap<CurrencyID, Float>>() {};
+                //TypeReference<HashMap<CurrencyID, Float>> typeRef = new TypeReference<HashMap<CurrencyID, Float>>() {};
                 try {
                     LogManager.getInstance().log(getClass(), "Loading poe.ninja currency for league "+league+" values from cache.");
-                    currentRates = objectMapper.readValue(cacheFile, typeRef);
-                    if(listener != null){
-                        listener.onRatesFetched();
-                    }
+                    parseJson(objectMapper.readValue(cacheFile, JSONObject.class));
                 } catch (Exception e) {
                     LogManager.getInstance().log(getClass(), "Error loading poe.ninja values from cache.");
                     fetchRates(league, true);
@@ -74,46 +69,50 @@ public class PoeNinjaParser {
                     return;
                 }
 
-                HashMap<String, Integer> ninjaToTradeIdMap = new HashMap<>();
-                JSONArray idArray = json.getJSONArray("currencyDetails");
-                for (Object currencyDetailsObject : idArray) {
-                    if (currencyDetailsObject instanceof JSONObject) {
-                        JSONObject currencyDetails = (JSONObject) currencyDetailsObject;
-                        ninjaToTradeIdMap.put(currencyDetails.getString("name"), currencyDetails.getInt("poeTradeId"));
-                    }
+                try {
+                    objectMapper.writeValue(cacheFile, json.toString());
+                } catch (Exception e) {
+                    LogManager.getInstance().log(getClass(), "Writing ninja cache failed!\n" + e);
                 }
 
-                JSONArray array = json.getJSONArray("lines");
-                for (Object currencyObject : array) {
-                    if (currencyObject instanceof JSONObject) {
-                        JSONObject currency = (JSONObject) currencyObject;
-                        String currencyName = currency.getString("currencyTypeName");
-                        CurrencyID id = CurrencyID.get(ninjaToTradeIdMap.get(currencyName));
-                        if (id != null) {
-                            float chaosValue = currency.getFloat("chaosEquivalent");
-                            currentRates.put(id, chaosValue);
-                        }
-                    }
-                }
-
-                if (!currentRates.isEmpty()) {
-                    try {
-                        objectMapper.writeValue(cacheFile, currentRates);
-                    } catch (Exception e) {
-                        LogManager.getInstance().log(getClass(), "Writing ninja cache failed!\n" + e);
-                    }
-                }
-
-                if(listener != null){
-                    listener.onRatesFetched();
-                }
+                parseJson(json);
             } catch (IOException e) {
                 LogManager.getInstance().log(getClass(), "Fetching rates from PoeNinja failed. No internet connection?");
                 e.printStackTrace();
             } catch (JSONException j){
-                LogManager.getInstance().log(getClass(), currencyURL + " returned no valid JSON!\n");
+                LogManager.getInstance().log(getClass(), currencyURL + "&league=" + league + " returned no valid JSON!\n");
+                j.printStackTrace();
                 noRatesAvailable = true;
             }
+        }
+    }
+
+    private void parseJson(JSONObject json) {
+        JSONArray idArray = json.getJSONArray("currencyDetails");
+        for (Object currencyDetailsObject : idArray) {
+            if (currencyDetailsObject instanceof JSONObject) {
+                JSONObject currencyDetails = (JSONObject) currencyDetailsObject;
+                if(currencyDetails.get("tradeId") != null && currencyDetails.getInt("poeTradeId") > 0 && !currencyDetails.get("tradeId").equals(JSONObject.NULL)) {
+                    new CurrencyID(currencyDetails).store();
+                }
+            }
+        }
+
+        JSONArray array = json.getJSONArray("lines");
+        for (Object currencyObject : array) {
+            if (currencyObject instanceof JSONObject) {
+                JSONObject currency = (JSONObject) currencyObject;
+                String currencyName = currency.getString("currencyTypeName");
+                CurrencyID id = CurrencyID.getByDisplayName(currencyName);
+                if (id != null) {
+                    float chaosValue = currency.getFloat("chaosEquivalent");
+                    currentRates.put(id, chaosValue);
+                }
+            }
+        }
+
+        if(listener != null){
+            listener.onRatesFetched();
         }
     }
 
@@ -125,7 +124,7 @@ public class PoeNinjaParser {
     }
 
     Float getCurrentCValueFor(CurrencyID id) {
-        if (id == CurrencyID.CHAOS) {
+        if (id.getTradeID().equals("chaos")) {
             return 1f;
         }
         Float value = getCurrentRates().get(id);

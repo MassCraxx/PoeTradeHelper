@@ -1,41 +1,31 @@
 package de.crass.poetradehelper.model;
 
-public enum CurrencyID {
-    ALTERATION(1),
-    FUSING(2),
-    ALCHEMY(3),
-    CHAOS(4),
-    GCP(5),
-    EXALTED(6),
-    CHROMATIC(7),
-    JEWELLER(8),
-    CHANCE(9),
-    CHISEL(10),
-    SCOURING(11),
-    BLESSED(12),
-    REGRET(13),
-    REGAL(14),
-    DIVINE(15),
-    VAAL(16),
-    WISDOM(17),
-    PORTAL(18),
-    ETERNAL(26),
-    PERANDUS(27),
-    SILVER(35),
-    APPRENTICE(45),
-    JOURNEYMAN(46),
-    MASTER(47),
-    ANNULMENT(513),
-    BINDING(514),
-    HORIZONS(515),
-    HARBINGER(516),
-    ENGINEERS(517),
-    ANCIENT(518);
+import org.json.JSONObject;
 
-    private final int id;
+import java.util.LinkedList;
+import java.util.List;
 
-    CurrencyID(int ID) {
+public class CurrencyID {
+    private int id;
+    private String tradeID;
+    private String displayName;
+
+    static List<CurrencyID> values = new LinkedList<>();
+
+    public CurrencyID(JSONObject object){
+        id = object.getInt("poeTradeId");
+        displayName = object.getString("name");
+        tradeID = object.getString("tradeId");
+    }
+
+    public CurrencyID(int ID, String tradeID, String displayName) {
         id = ID;
+        this.tradeID = tradeID;
+        this.displayName = displayName;
+    }
+
+    public void store(){
+        values.add(this);
     }
 
     public int getID() {
@@ -43,7 +33,7 @@ public enum CurrencyID {
     }
 
     public static CurrencyID get(int ID) {
-        for (CurrencyID id : values()) {
+        for (CurrencyID id : getValues()) {
             if (id.getID() == ID) {
                 return id;
             }
@@ -51,13 +41,63 @@ public enum CurrencyID {
         return null;
     }
 
+    public static CurrencyID getByTradeID(String ID) {
+        for (CurrencyID id : getValues()) {
+            if (id.getTradeID().equals(ID)) {
+                return id;
+            }
+        }
+
+        if (ID.equals("exa")) {
+            return new CurrencyID(6, "exa", "Exalted Orb");
+        }
+        return null;
+    }
+
+    public static CurrencyID getByDisplayName(String ID) {
+        for (CurrencyID id : getValues()) {
+            if (id.getDisplayName().equals(ID)) {
+                return id;
+            }
+        }
+        return null;
+    }
+
+    public static List<CurrencyID> getValues() {
+//        if (values == null || values.isEmpty()){
+//            TradeManager.getInstance().updateCurrencyValues();
+//        }
+        return values;
+    }
+
     @Override
     public String toString() {
-        return name().charAt(0) + name().substring(1).toLowerCase();
+        return displayName;
     }
 
     public static CurrencyID getRandom(){
-        CurrencyID[] currencyIDS = values();
-        return currencyIDS[(int) Math.floor(Math.random() * currencyIDS.length)];
+        return values.get((int) Math.floor(Math.random() * values.size()));
+    }
+
+    public String getTradeID() {
+        return tradeID;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        CurrencyID that = (CurrencyID) o;
+        return this.id == that.id || this.tradeID.equals(that.tradeID);
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
     }
 }

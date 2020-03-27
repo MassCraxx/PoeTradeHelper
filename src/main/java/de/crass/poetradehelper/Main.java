@@ -47,7 +47,7 @@ import java.util.*;
 public class Main extends Application implements TradeManager.DealParseListener, PoeNinjaParser.PoeNinjaListener, PropertyManager.UICallback {
 
     private static final String title = "PoeTradeHelper";
-    private static final String versionText = "v0.6.1";
+    private static final String versionText = "v0.7-SNAPSHOT";
 
     @FXML
     private ListView<CurrencyDeal> playerDealList;
@@ -236,6 +236,8 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
     @FXML
     void initialize() {
+        //TODO: Somehow fetch available items before prop man starts up
+
         // Setup console
         LogManager.getInstance().setConsole(console);
 
@@ -343,7 +345,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
 //        });
 
         // Offer tab
-        ObservableList<CurrencyID> currencies = FXCollections.observableArrayList(CurrencyID.values());
+        ObservableList<CurrencyID> currencies = FXCollections.observableArrayList(CurrencyID.getValues());
         currencies.sort(Comparator.comparing(Object::toString));
         offerSecondary.setItems(currencies);
         offerSecondary.setOnAction(event -> {
@@ -466,9 +468,9 @@ public class Main extends Application implements TradeManager.DealParseListener,
         updateValuesButton.setOnAction(event -> tradeManager.updateCurrencyValues());
 
         valueInputCB.setItems(currencies);
-        valueInputCB.setValue(CurrencyID.EXALTED);
+        valueInputCB.setValue(CurrencyID.getByTradeID("exa"));
         valueOutputCB.setItems(currencies);
-        valueOutputCB.setValue(CurrencyID.CHAOS);
+        valueOutputCB.setValue(CurrencyID.getByTradeID("chaos"));
         valueOutputCB.setOnAction(event -> calculateValue());
         valueInputCB.setOnAction(event -> calculateValue());
 

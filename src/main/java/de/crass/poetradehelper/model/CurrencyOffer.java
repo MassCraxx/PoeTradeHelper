@@ -8,6 +8,7 @@ public class CurrencyOffer {
     private CurrencyID buyID;
     private float buyAmount;
     private int stock;
+    private boolean isPlayerOffer = false;
 
     public CurrencyOffer(String username, String accountName, CurrencyID sellID, float sellValue, CurrencyID buyID, float buyValue, int stock) {
         this.playerName = username;
@@ -50,5 +51,13 @@ public class CurrencyOffer {
     @Override
     public String toString() {
         return "CurrencyOffer[" + getPlayerName() + ", buy " + getBuyAmount() + "x " + getBuyID() + ", sell " + getSellAmount() + "x " +getSellID()+"]";
+    }
+
+    public boolean isPlayerOffer() {
+        return isPlayerOffer;
+    }
+
+    public void setPlayerOffer(boolean playerOffer) {
+        isPlayerOffer = playerOffer;
     }
 }

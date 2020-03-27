@@ -25,7 +25,7 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
     private static TradeManager instance;
 
     private PoeApiParser poeApiParser;
-    private PoeTradeWebParser webParser;
+    private WebParser webParser;
     private ObservableList<CurrencyDeal> currentDeals;
     private ObservableList<CurrencyDeal> playerDeals;
     private PoeNinjaParser poeNinjaParser;
@@ -57,8 +57,13 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
     private TradeManager() {
         poeApiParser = new PoeApiParser();
         poeNinjaParser = new PoeNinjaParser();
-        webParser = new PoeTradeWebParser(this);
+        poeNinjaParser.fetchRates(PropertyManager.getInstance().getCurrentLeague(), false);
 
+        if (Boolean.parseBoolean(PropertyManager.getInstance().getProp("use_api_parser", "false"))) {
+            webParser = new PoeTradeApiParser(this);
+        } else {
+            webParser = new PoeTradeWebParser(this);
+        }
         currentDeals = FXCollections.observableArrayList();
         playerDeals = FXCollections.observableArrayList();
     }
@@ -80,6 +85,11 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
     }
 
     private void updateOffers(boolean clear, boolean async, List<CurrencyID> currencyIDs) {
+        if(currencyIDs == null || currencyIDs.isEmpty()){
+            LogManager.getInstance().log(getClass(), "No Currency selected. Check your parsing settings!");
+            return;
+        }
+
         if (!updating) {
             updating = true;
 
@@ -177,9 +187,9 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
                     CurrencyOffer bestMarketSellOffer;
                     CurrencyOffer bestMarketBuyOffer;
 
-                    if (key.getKey() != primaryCurrency) {
+                    if (!key.getKey().equals(primaryCurrency)) {
                         // Check if offer actually contains primary
-                        if (key.getValue() != primaryCurrency) {
+                        if (!key.getValue().equals(primaryCurrency)) {
                             continue;
                         }
 
@@ -235,9 +245,9 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
                     CurrencyOffer playerSellOffer = null;
                     CurrencyOffer playerBuyOffer = null;
 
-                    if (key.getKey() != primaryCurrency) {
+                    if (!key.getKey().equals(primaryCurrency)) {
                         // Check if offer actually contains primary
-                        if (key.getValue() != primaryCurrency) {
+                        if (!key.getValue().equals(primaryCurrency)) {
                             continue;
                         }
                         //Buy offer -> Sell offer
@@ -317,7 +327,6 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
             if (listener != null) {
                 listener.onParsingFinished();
             }
-            updating = false;
         });
     }
 
@@ -337,6 +346,12 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
             return null;
         }
         for (CurrencyOffer offer : list) {
+            // Skip player offers
+
+            if(offer.isPlayerOffer()){
+                continue;
+            }
+
             // Return most top offer that meets filter requirements
 
             if (filterStockOffers && offer.getStock() < 0) {
@@ -391,6 +406,8 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
         if(listener != null){
             listener.onUpdateFinished();
         }
+
+        updating = false;
     }
 
     @Override
@@ -398,9 +415,11 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
         if(listener != null){
             listener.onError();
         }
+
+        updating = false;
     }
 
-    private ScheduledFuture autoUpdateFuture;
+    private ScheduledFuture<?> autoUpdateFuture;
     private void startUpdateTask() {
         if (autoUpdateExecutor == null) {
             autoUpdateExecutor = Executors.newSingleThreadScheduledExecutor();

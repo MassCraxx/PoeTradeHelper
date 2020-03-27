@@ -41,9 +41,9 @@ public class OfferContextMenu extends ContextMenu {
             CurrencyID sellCurrency = getSelected().getBuyID();
             String myString = "@" + playerName + " Hi, I'd like to buy your " +
                     buyAmount + " " +
-                    buyCurrency.name().toLowerCase() + " for my " +
+                    buyCurrency.getDisplayName() + " for my " +
                     sellAmount + " " +
-                    sellCurrency.name().toLowerCase() + " in " +
+                    sellCurrency.getDisplayName() + " in " +
                     PropertyManager.getInstance().getCurrentLeague() + ".";
             StringSelection stringSelection = new StringSelection(myString);
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();

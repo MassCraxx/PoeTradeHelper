@@ -51,7 +51,7 @@ public class PropertyManager {
 
     // DEFAULTS
     private final String defaultLeague = "Standard";
-    private final String defaultPrimary = "EXALTED";
+    private final String defaultPrimary = "exa";
     private final String defaultPoePath = "C:\\Program Files (x86)\\Grinding Gear Games\\Path of Exile\\";
 
     private final String defaultFilterStockOffers = "false";
@@ -59,8 +59,8 @@ public class PropertyManager {
     private final String defaultFilterExcessive = "true";
     private final String defaultExcessiveTreshold = "75";
 
-    private final String defaultCurrencyFilterString = "ALCHEMY,SCOURING,ALTERATION,REGAL,CHROMATIC,GCP,CHISEL,JEWELLER,REGRET,FUSING";
-    private final String defaultPrimaryCurrencyString = "ANCIENT,ANNULMENT,DIVINE,EXALTED,HARBINGER,MASTER";
+    private final String defaultCurrencyFilterString = "fuse,regret,jew,chisel,gcp,chrom,regal,alt,scour,alch";
+    private final String defaultPrimaryCurrencyString = "exa,div";
 
     // Current Values
     private ObservableList<CurrencyID> currencyFilterList;
@@ -88,7 +88,7 @@ public class PropertyManager {
 
         // Try load from disk
         File propFile = new File(propFilename);
-        if(propFile.exists() && propFile.canRead()) {
+        if (propFile.exists() && propFile.canRead()) {
             try {
                 appProps.load(new FileInputStream(propFile));
             } catch (IOException e) {
@@ -101,7 +101,7 @@ public class PropertyManager {
         currencyFilterList = FXCollections.observableArrayList(stringToCurrencyList(appProps.getProperty(CURRENCY_LIST, defaultCurrencyFilterString)));
         primaryCurrencyList = FXCollections.observableArrayList(stringToCurrencyList(appProps.getProperty(PRIMARY_CURRENCY_LIST, defaultPrimaryCurrencyString)));
         playerList = FXCollections.observableArrayList(stringToList(appProps.getProperty(PLAYER_LIST, null)));
-        primaryCurrency = CurrencyID.valueOf(appProps.getProperty(PRIMARY_CURRENCY, defaultPrimary));
+        primaryCurrency = CurrencyID.getByTradeID(appProps.getProperty(PRIMARY_CURRENCY, defaultPrimary));
 
         filterNoApi = Boolean.parseBoolean(appProps.getProperty(FILTER_NOAPI, defaultFilterStockOffers));
         filterOutOfStock = Boolean.parseBoolean(appProps.getProperty(FILTER_OUTOFSTOCK, defaultFilterInvalidStockOffers));
@@ -118,7 +118,7 @@ public class PropertyManager {
         appProps.setProperty(CURRENCY_LIST, currencyListToString(currencyFilterList));
         appProps.setProperty(PRIMARY_CURRENCY_LIST, currencyListToString(primaryCurrencyList));
         appProps.setProperty(PLAYER_LIST, listToString(playerList));
-        appProps.setProperty(PRIMARY_CURRENCY, primaryCurrency.name());
+        appProps.setProperty(PRIMARY_CURRENCY, primaryCurrency.getTradeID());
 
         appProps.setProperty(FILTER_NOAPI, String.valueOf(filterNoApi));
         appProps.setProperty(FILTER_OUTOFSTOCK, String.valueOf(filterOutOfStock));
@@ -171,7 +171,9 @@ public class PropertyManager {
         return filterOutOfStock;
     }
 
-    public boolean getFilterExcessive() { return filterExcessive;}
+    public boolean getFilterExcessive() {
+        return filterExcessive;
+    }
 
     public void setFilterNoApi(boolean filterNoApi) {
         this.filterNoApi = filterNoApi;
@@ -186,7 +188,7 @@ public class PropertyManager {
     }
 
     public void setLeague(String league) {
-        if(league == null){
+        if (league == null) {
             LogManager.getInstance().log(getClass(), "Prevented setting null as league.");
             return;
         }
@@ -198,7 +200,7 @@ public class PropertyManager {
 
     public void setProp(String key, String value) {
         appProps.setProperty(key, value);
-        callbackUI(key,value);
+        callbackUI(key, value);
     }
 
     public String getProp(String key) {
@@ -229,12 +231,12 @@ public class PropertyManager {
     }
 
     public String currencyListToString(List<CurrencyID> list) {
-        if(list == null || list.isEmpty()){
+        if (list == null || list.isEmpty()) {
             return "";
         }
         StringBuilder sb = new StringBuilder();
         for (CurrencyID currencyID : list) {
-            sb.append(currencyID.name());
+            sb.append(currencyID.getTradeID());
             sb.append(",");
         }
         sb.deleteCharAt(sb.length() - 1);
@@ -243,14 +245,17 @@ public class PropertyManager {
 
     public List<CurrencyID> stringToCurrencyList(String s) {
         List<CurrencyID> list = new LinkedList<>();
-        if(s != null && !s.isEmpty()) {
+        if (s != null && !s.isEmpty()) {
             for (String currency : s.split(",")) {
                 try {
-                    CurrencyID id = CurrencyID.valueOf(currency.toUpperCase());
+                    CurrencyID id = CurrencyID.getByTradeID(currency.toLowerCase());
+                    if (id == null) {
+                        LogManager.getInstance().log(getClass(), "Error parsing currencyID: " + currency);
+                        continue;
+                    }
                     list.add(id);
                 } catch (IllegalArgumentException e) {
                     LogManager.getInstance().log(getClass(), "Error parsing currencyID: " + currency);
-
                 }
             }
         }
@@ -259,7 +264,7 @@ public class PropertyManager {
 
     public String getPathOfExilePath() {
         String path = getProp(POE_PATH, defaultPoePath);
-        if(path.isEmpty()){
+        if (path.isEmpty()) {
             path = defaultPoePath;
             setPathOfExilePath(path);
         }
@@ -318,7 +323,7 @@ public class PropertyManager {
 
 
     private void callbackUI(String key, String value) {
-        if(uiCallback != null){
+        if (uiCallback != null) {
             Platform.runLater(() -> uiCallback.onPropChanged(key, value));
         }
     }
@@ -327,7 +332,7 @@ public class PropertyManager {
         uiCallback = call;
     }
 
-    interface UICallback{
+    interface UICallback {
         void onPropChanged(String key, String value);
     }
 }

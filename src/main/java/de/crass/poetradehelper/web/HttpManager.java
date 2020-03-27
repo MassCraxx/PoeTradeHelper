@@ -34,7 +34,9 @@ public class HttpManager {
         if(response.code() == 404 || !response.isSuccessful()){
             return null;
         }
-        return response.body().string();
+        String result = response.body().string();
+        response.close();
+        return result;
     }
 
     public JSONObject postJSON(String url, String requestBody) throws IOException {
@@ -47,7 +49,9 @@ public class HttpManager {
                 .post(body)
                 .build();
         Response response = client.newCall(request).execute();
-        return new JSONObject(response.body().string());
+        JSONObject result = new JSONObject(response.body().string());
+        response.close();
+        return result;
     }
 
     public JSONObject getJson(String fetchURL, String params) throws IOException, JSONException {
