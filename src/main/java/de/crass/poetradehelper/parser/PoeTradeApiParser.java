@@ -10,7 +10,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class PoeTradeApiParser extends WebParser {
-    boolean cancel = false;
+    public static final String IDENTIFIER = "pathofexile.com";
+
     String poeTradeURL = "https://www.pathofexile.com/api/trade/exchange/";
     String poeFetchURL = "https://www.pathofexile.com/api/trade/fetch/";
 
@@ -41,11 +42,17 @@ public class PoeTradeApiParser extends WebParser {
             JSONObject response = HttpManager.getInstance().postJSON(poeTradeURL + PropertyManager.getInstance().getCurrentLeague(), String.valueOf(param));
 
             JSONArray offers = response.getJSONArray("result");
+            if(offers == null || offers.length() == 0){
+                LogManager.getInstance().log(getClass(), "No offers found.");
+                return;
+            }
+
             String id = response.getString("id");
 
             StringBuilder query = new StringBuilder();
             boolean first = true;
             int count = 0;
+
             for (Object offerQuery : offers) {
                 count++;
                 if (first) {

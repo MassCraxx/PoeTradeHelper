@@ -7,6 +7,7 @@ import de.crass.poetradehelper.model.CurrencyDeal;
 import de.crass.poetradehelper.model.CurrencyID;
 import de.crass.poetradehelper.model.CurrencyOffer;
 import de.crass.poetradehelper.parser.PoeNinjaParser;
+import de.crass.poetradehelper.parser.PoeTradeApiParser;
 import de.crass.poetradehelper.parser.PoeTradeWebParser;
 import de.crass.poetradehelper.parser.TradeManager;
 import de.crass.poetradehelper.tts.PoeChatTTS;
@@ -38,6 +39,7 @@ import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.math.RoundingMode;
+import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
@@ -47,7 +49,7 @@ import java.util.*;
 public class Main extends Application implements TradeManager.DealParseListener, PoeNinjaParser.PoeNinjaListener, PropertyManager.UICallback {
 
     private static final String title = "PoeTradeHelper";
-    private static final String versionText = "v0.7-SNAPSHOT";
+    private static final String versionText = "v0.7-RC1";
 
     @FXML
     private ListView<CurrencyDeal> playerDealList;
@@ -90,6 +92,9 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
     @FXML
     private ComboBox<String> voiceSpeakerCB;
+
+    @FXML
+    private ComboBox<String> webParsingCB;
 
     @FXML
     private Button addPlayerButton;
@@ -241,12 +246,13 @@ public class Main extends Application implements TradeManager.DealParseListener,
         // Setup console
         LogManager.getInstance().setConsole(console);
 
-        // Prop man
-        PropertyManager.getInstance().setUICallback(this);
-
         // Setup trade manager
         tradeManager = TradeManager.getInstance();
         tradeManager.registerListener(this, this);
+
+        // Prop man
+        PropertyManager.getInstance().setUICallback(this);
+        setWebParser(PropertyManager.getInstance().getProp("trade_data_source", PoeTradeApiParser.IDENTIFIER));
 
         // Setup TTS
         poeChatTTS = new PoeChatTTS(() -> {
@@ -586,6 +592,10 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
         leagueCB.setOnAction(event -> PropertyManager.getInstance().setLeague(leagueCB.getValue()));
 
+        webParsingCB.setItems(FXCollections.observableArrayList(PoeTradeWebParser.IDENTIFIER, PoeTradeApiParser.IDENTIFIER));
+        String defaultParser = PropertyManager.getInstance().getProp("trade_data_source", PoeTradeApiParser.IDENTIFIER);
+        webParsingCB.setValue(defaultParser);
+        webParsingCB.setOnAction(event -> setWebParser(webParsingCB.getValue()));
 
         // Setup Voice Controls
         poeChatTTS.setWordIncludeTextField(voiceShoutoutWords);
@@ -725,6 +735,25 @@ public class Main extends Application implements TradeManager.DealParseListener,
         }
     }
 
+    private void setWebParser(String newValue) {
+        if (newValue.equals(PoeTradeApiParser.IDENTIFIER)) {
+            //pathofexile.com does this by default.
+            filterInvalid.setSelected(true);
+            filterWithoutAPI.setSelected(true);
+            PropertyManager.getInstance().setFilterOutOfStock(false);
+            PropertyManager.getInstance().setFilterNoApi(false);
+            filterInvalid.setDisable(true);
+            filterWithoutAPI.setDisable(true);
+        } else {
+            filterInvalid.setSelected(false);
+            filterWithoutAPI.setSelected(false);
+            filterInvalid.setDisable(false);
+            filterWithoutAPI.setDisable(false);
+        }
+        tradeManager.setWebParser(newValue);
+        resetUiItems();
+    }
+
     private void calculateValue() {
         String inString = valueInputText.getText();
 
@@ -838,7 +867,10 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
     @Override
     public void onParsingFinished() {
-        LogManager.getInstance().log(TradeManager.class, "Parsing took " + prettyFloat((System.currentTimeMillis() - parseStartTime)) + " milliseconds");
+        float time = System.currentTimeMillis() - parseStartTime;
+        if(time > 1f) {
+            LogManager.getInstance().log(TradeManager.class, "Parsing took " + prettyFloat(time) + " milliseconds");
+        }
 
         resetUI();
     }
@@ -858,15 +890,19 @@ public class Main extends Application implements TradeManager.DealParseListener,
     public void onPropChanged(String key, String value) {
         if (PropertyManager.LEAGUE_KEY.equals(key)) {
             leagueCB.setValue(value);
-            valueTable.getItems().clear();
-            buyOfferTable.getItems().clear();
-            sellOfferTable.getItems().clear();
-            playerDealList.getItems().clear();
-            currencyList.getItems().clear();
-
-            tradeManager.reset();
+            resetUiItems();
             updateTitle();
         }
+    }
+
+    private void resetUiItems() {
+        valueTable.getItems().clear();
+        buyOfferTable.getItems().clear();
+        sellOfferTable.getItems().clear();
+        playerDealList.getItems().clear();
+        currencyList.getItems().clear();
+
+        tradeManager.reset();
     }
 
     // UTIL
@@ -887,8 +923,13 @@ public class Main extends Application implements TradeManager.DealParseListener,
     }
 
     public static void setImage(String name, ImageView view) {
+        URL url = Main.class.getResource(name);
+        if(url == null){
+            url = Main.class.getResource("0.png");
+        }
+
         try {
-            final Image image = SwingFXUtils.toFXImage(ImageIO.read(Main.class.getResource(name)), null);
+            final Image image = SwingFXUtils.toFXImage(ImageIO.read(url), null);
             Platform.runLater(() -> view.setImage(image));
         } catch (IOException e) {
             e.printStackTrace();

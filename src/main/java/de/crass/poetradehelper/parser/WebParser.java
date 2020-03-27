@@ -138,6 +138,12 @@ public abstract class WebParser {
 
     public void addOffer(CurrencyOffer offer) {
         Pair<CurrencyID, CurrencyID> key = new Pair<>(offer.getBuyID(), offer.getSellID());
+        for (String name : PropertyManager.getInstance().getPlayerList()) {
+            if (name.equalsIgnoreCase(offer.getAccountName())) {
+                offer.setPlayerOffer(true);
+                break;
+            }
+        }
 
         if (offer.isPlayerOffer()) {
             //LogManager.getInstance().log(getClass(), "Found player offer " + offer.getPlayerName());

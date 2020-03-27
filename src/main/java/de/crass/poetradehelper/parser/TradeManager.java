@@ -57,13 +57,10 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
     private TradeManager() {
         poeApiParser = new PoeApiParser();
         poeNinjaParser = new PoeNinjaParser();
-        poeNinjaParser.fetchRates(PropertyManager.getInstance().getCurrentLeague(), false);
 
-        if (Boolean.parseBoolean(PropertyManager.getInstance().getProp("use_api_parser", "false"))) {
-            webParser = new PoeTradeApiParser(this);
-        } else {
-            webParser = new PoeTradeWebParser(this);
-        }
+//        webParser = new PoeTradeApiParser(this);
+//        webParser = new PoeTradeWebParser(this);
+
         currentDeals = FXCollections.observableArrayList();
         playerDeals = FXCollections.observableArrayList();
     }
@@ -537,6 +534,18 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
     public void removeDeal(CurrencyDeal deal) {
         currentDeals.remove(deal);
         playerDeals.remove(deal);
+    }
+
+    public void setWebParser(String value) {
+        switch (value){
+            case PoeTradeWebParser.IDENTIFIER:
+                webParser = new PoeTradeWebParser(this);
+                break;
+            case PoeTradeApiParser.IDENTIFIER:
+                webParser = new PoeTradeApiParser(this);
+                break;
+        }
+        PropertyManager.getInstance().setProp("trade_data_source", value);
     }
 
     public interface DealParseListener {

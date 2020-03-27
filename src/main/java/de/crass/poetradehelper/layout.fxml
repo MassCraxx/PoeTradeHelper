@@ -6,7 +6,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
-<VBox prefHeight="650.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.crass.poetradehelper.Main">
+<VBox prefHeight="650.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.crass.poetradehelper.Main">
     <children>
         <TabPane maxHeight="1.7976931348623157E308" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
             <tabs>
@@ -109,11 +109,11 @@
                               <content>
                                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                        <children>
-                                          <AnchorPane layoutX="46.0" layoutY="41.0" prefHeight="430.0" prefWidth="270.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="5.0">
+                                          <AnchorPane layoutX="46.0" layoutY="24.6" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="5.0">
                                              <children>
                                                         <Button fx:id="addPlayerButton" mnemonicParsing="false" prefHeight="37.0" prefWidth="58.0" text="+" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
-                                                        <ListView fx:id="playerListView" layoutY="63.0" prefHeight="250.0" prefWidth="270.0" AnchorPane.topAnchor="75.0" AnchorPane.bottomAnchor="35.0" />
-                                                        <TextField fx:id="playerField" promptText="Add character name" prefHeight="37.0" prefWidth="210.0" AnchorPane.topAnchor="30.0" />
+                                                        <ListView fx:id="playerListView" layoutY="63.0" AnchorPane.bottomAnchor="35.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="75.0" />
+                                                        <TextField fx:id="playerField" prefHeight="37.0" prefWidth="210.0" promptText="Add character name" AnchorPane.topAnchor="30.0" />
                                                         <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Player Accounts" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                                         <Button fx:id="removePlayerBtn" mnemonicParsing="false" prefHeight="11.0" prefWidth="270.0" text="Remove" AnchorPane.bottomAnchor="0.0" />
                                              </children>
@@ -139,16 +139,16 @@
                               <content>
                                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                        <children>
-                                          <AnchorPane prefWidth="270.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="5.0">
+                                          <AnchorPane maxHeight="1.7976931348623157E308" prefWidth="270.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="5.0">
                                              <children>
                                                         <ComboBox fx:id="currencyFilterCB" prefHeight="31.0" prefWidth="230.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="30.0" />
-                                                        <Button fx:id="addCurrencyFilterBtn" mnemonicParsing="false" prefWidth="35.0" text="+" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
+                                                        <Button fx:id="addCurrencyFilterBtn" mnemonicParsing="false" prefHeight="30.0" prefWidth="35.0" text="+" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
                                                         <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Currency to check" AnchorPane.topAnchor="0.0" />
-                                                <VBox prefHeight="310.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="70.0">
+                                                <VBox maxHeight="1.7976931348623157E308" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="70.0">
                                                    <children>
-                                                              <ListView fx:id="currencyFilterList" prefHeight="300.0" prefWidth="200.0" />
-                                                              <Button fx:id="removeCurrencyFilterBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="25.0" text="Remove" />
-                                                              <Button fx:id="restoreCurrencyFilterBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="25.0" text="Restore Defaults" />
+                                                              <ListView fx:id="currencyFilterList" maxHeight="1.7976931348623157E308" VBox.vgrow="ALWAYS" />
+                                                              <Button fx:id="removeCurrencyFilterBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Remove" VBox.vgrow="NEVER" />
+                                                              <Button fx:id="restoreCurrencyFilterBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Restore Defaults" VBox.vgrow="NEVER" />
                                                    </children>
                                                 </VBox>
                                              </children>
@@ -159,6 +159,12 @@
                                                 <Slider fx:id="excessiveTresholdSlider" blockIncrement="25.0" layoutY="27.0" minorTickCount="25" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="75.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="30.0" />
                                                 <Label fx:id="excessiveTresholdLabel" layoutX="200.0" layoutY="29.0" text="75 %" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="28.0" />
                                                 <CheckBox fx:id="filterMultiTrade" mnemonicParsing="false" text="Filter multiple transaction deals" AnchorPane.topAnchor="90.0" />
+                                             </children>
+                                          </AnchorPane>
+                                          <AnchorPane layoutX="353.6" layoutY="189.6" prefHeight="60.0" prefWidth="270.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="180.0">
+                                             <children>
+                                                <Text id="text-id" fill="#d8d8d8" layoutX="42.0" layoutY="11.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Web Parsing" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                <ComboBox fx:id="webParsingCB" layoutY="31.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
                                              </children>
                                           </AnchorPane>
                                        </children>
@@ -214,12 +220,12 @@
                     </HBox.margin>
                 </Label>
                 <ComboBox fx:id="primaryComboBox" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" BorderPane.alignment="CENTER" HBox.hgrow="ALWAYS" />
-                <CheckBox fx:id="filterWithoutAPI" maxHeight="1.7976931348623157E308" mnemonicParsing="false" text="Filter No API">
+                <CheckBox fx:id="filterWithoutAPI" disable="true" maxHeight="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Filter No API">
                     <HBox.margin>
                         <Insets left="5.0" right="5.0" />
                     </HBox.margin>
                 </CheckBox>
-                <CheckBox fx:id="filterInvalid" maxHeight="1.7976931348623157E308" mnemonicParsing="false" text="Filter Out Of Stock">
+                <CheckBox fx:id="filterInvalid" disable="true" maxHeight="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Filter Out Of Stock">
                     <HBox.margin>
                         <Insets left="5.0" right="5.0" />
                     </HBox.margin>
@@ -232,16 +238,16 @@
         </HBox>
         <HBox prefHeight="40.0" prefWidth="640.0" VBox.vgrow="NEVER">
             <children>
-                <VBox maxWidth="100.0" minWidth="100.0" prefWidth="100.0">
+                <VBox maxWidth="1.7976931348623157E308">
                     <children>
-                        <Button id="updateButton" fx:id="updateButton" defaultButton="true" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="73.0" text="Update All" />
+                        <Button id="updateButton" fx:id="updateButton" defaultButton="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="100.0" mnemonicParsing="false" text="Update All" VBox.vgrow="ALWAYS" />
                     </children>
                     <HBox.margin>
                         <Insets left="5.0" right="5.0" />
                     </HBox.margin>
                 </VBox>
-                <TextArea fx:id="console" editable="false" maxWidth="1.7976931348623157E308" nodeOrientation="LEFT_TO_RIGHT" prefHeight="0.0" promptText="Status console" wrapText="true" HBox.hgrow="ALWAYS" />
-                <Label fx:id="version" alignment="CENTER" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" minWidth="50.0" text="Version" textAlignment="CENTER" textOverrun="CLIP">
+                <TextArea fx:id="console" editable="false" nodeOrientation="LEFT_TO_RIGHT" prefHeight="0.0" promptText="Status console" wrapText="true" />
+                <Label fx:id="version" alignment="CENTER" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" minWidth="60.0" text="Version" textAlignment="CENTER" textOverrun="CLIP" HBox.hgrow="ALWAYS">
                     <HBox.margin>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                     </HBox.margin>

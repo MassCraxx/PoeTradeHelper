@@ -50,12 +50,12 @@ public class PropertyManager {
     public static final String FILTER_MULTIPLE_TRANSACTIONS = "filter_multiple_transactions";
 
     // DEFAULTS
-    private final String defaultLeague = "Standard";
+    public static final String defaultLeague = "Standard";
     private final String defaultPrimary = "exa";
     private final String defaultPoePath = "C:\\Program Files (x86)\\Grinding Gear Games\\Path of Exile\\";
 
     private final String defaultFilterStockOffers = "false";
-    private final String defaultFilterInvalidStockOffers = "true";
+    private final String defaultFilterInvalidStockOffers = "false";
     private final String defaultFilterExcessive = "true";
     private final String defaultExcessiveTreshold = "75";
 

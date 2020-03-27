@@ -2,7 +2,6 @@ package de.crass.poetradehelper.parser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.crass.poetradehelper.LogManager;
-import de.crass.poetradehelper.PropertyManager;
 import de.crass.poetradehelper.model.CurrencyID;
 import de.crass.poetradehelper.model.CurrencyOffer;
 import de.crass.poetradehelper.web.HttpManager;
@@ -20,6 +19,8 @@ import java.util.regex.Pattern;
 import static de.crass.poetradehelper.PropertyManager.offlineMode;
 
 public class PoeTradeWebParser extends WebParser{
+    public static final String IDENTIFIER = "poe.trade";
+
     //TODO: Switch to (observable) sets
     //TODO: https://stackoverflow.com/questions/1732348/regex-match-open-tags-except-xhtml-self-contained-tags
 
@@ -122,13 +123,6 @@ public class PoeTradeWebParser extends WebParser{
                             CurrencyID.get(Integer.parseInt(offerMatcher.group(4))),
                             buy,
                             stock);
-
-                    for (String name : PropertyManager.getInstance().getPlayerList()) {
-                        if (name.equalsIgnoreCase(accountName)) {
-                            offer.setPlayerOffer(true);
-                            break;
-                        }
-                    }
 
                     addOffer(offer);
                 } else {
