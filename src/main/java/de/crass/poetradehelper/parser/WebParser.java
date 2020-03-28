@@ -178,6 +178,7 @@ public abstract class WebParser {
     }
 
     public void reset() {
+        // The individual offer tables may be bound to the offer list views
         for (List<CurrencyOffer> list : currentOffers.values()) {
             list.clear();
         }

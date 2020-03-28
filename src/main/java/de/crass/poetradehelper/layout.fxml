@@ -231,9 +231,9 @@
         </TabPane>
         <HBox VBox.vgrow="NEVER">
             <children>
-                <Label maxHeight="1.7976931348623157E308" text="Flip currency" textAlignment="CENTER">
+                <Label alignment="CENTER" maxHeight="1.7976931348623157E308" minWidth="100.0" prefWidth="100.0" text="Flip currency" textAlignment="CENTER">
                     <HBox.margin>
-                        <Insets left="5.0" right="10.0" />
+                        <Insets right="5.0" />
                     </HBox.margin>
                 </Label>
                 <ComboBox fx:id="primaryComboBox" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" BorderPane.alignment="CENTER" HBox.hgrow="ALWAYS" />

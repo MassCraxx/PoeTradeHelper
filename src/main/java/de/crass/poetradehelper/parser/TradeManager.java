@@ -183,6 +183,14 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
 
                     processedKeys.add(key);
 
+                    int totalOffers = (marketOffers.get(key) == null ? 0 : marketOffers.get(key).size())
+                            + (marketOffers.get(invertedKey) == null ? 0 : marketOffers.get(invertedKey).size());
+
+                    if (totalOffers == 0) {
+                        LogManager.getInstance().log(getClass(), "Found empty deal.");
+                        continue;
+                    }
+
                     CurrencyOffer bestMarketSellOffer;
                     CurrencyOffer bestMarketBuyOffer;
 
@@ -203,9 +211,6 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
                     bestMarketSellOffer = getBestOffer(marketOffers.get(key));
 
                     bestMarketBuyOffer = getBestOffer(marketOffers.get(invertedKey));
-
-                    int totalOffers = (marketOffers.get(key) == null ? 0 : marketOffers.get(key).size())
-                            + (marketOffers.get(invertedKey) == null ? 0 : marketOffers.get(invertedKey).size());
 
                     float marketSellPrice = 0;
                     if (bestMarketSellOffer != null) {
@@ -565,10 +570,10 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
     }
 
     public void reset() {
+        poeNinjaParser.reset();
         webParser.reset();
         playerDeals.clear();
         currentDeals.clear();
-        poeNinjaParser.reset();
     }
 
     public void removeDeal(CurrencyDeal deal) {
