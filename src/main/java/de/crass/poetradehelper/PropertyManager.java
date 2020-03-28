@@ -57,7 +57,7 @@ public class PropertyManager {
     private final String defaultFilterStockOffers = "false";
     private final String defaultFilterInvalidStockOffers = "false";
     private final String defaultFilterExcessive = "true";
-    private final String defaultExcessiveTreshold = "75";
+    private final String defaultExcessiveTreshold = "60";
 
     private final String defaultCurrencyFilterString = "fuse,regret,jew,chisel,gcp,chrom,regal,alt,scour,alch";
     private final String defaultPrimaryCurrencyString = "exa,divine,mir,mirror-shard";

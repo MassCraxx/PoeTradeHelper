@@ -36,7 +36,7 @@
                     <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                             <children>
-                                <ComboBox fx:id="offerSecondary" layoutX="292.0" layoutY="11.0" prefHeight="31.0" prefWidth="138.0" AnchorPane.leftAnchor="190.0" AnchorPane.rightAnchor="270.0" AnchorPane.topAnchor="10.0" />
+                                <ComboBox fx:id="offerSecondary" layoutX="150.0" layoutY="11.0" prefHeight="30.0" prefWidth="300.0" AnchorPane.leftAnchor="120.0" AnchorPane.rightAnchor="200.0" AnchorPane.topAnchor="10.0" />
                                 <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Buy Offers" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="15.0" />
                                 <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Sell Offers" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="15.0" />
                                 <HBox layoutY="50.0" maxWidth="1.7976931348623157E308" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="50.0">
@@ -61,7 +61,7 @@
                                         </TableView>
                                     </children>
                                 </HBox>
-                        <Button fx:id="refreshBtn" layoutX="134.0" layoutY="10.0" mnemonicParsing="false" text="Refresh" AnchorPane.rightAnchor="190.0" />
+                        <Button fx:id="refreshBtn" layoutX="134.0" layoutY="10.0" mnemonicParsing="false" text="Refresh" AnchorPane.rightAnchor="120.0" />
                             </children>
                             <padding>
                                 <Insets left="10.0" right="10.0" />
@@ -73,21 +73,21 @@
                     <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                             <children>
-                        <AnchorPane layoutX="230.0" layoutY="15.0" prefHeight="180.0" prefWidth="270.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="10.0">
+                        <AnchorPane layoutX="230.0" layoutY="15.0" prefWidth="270.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="10.0">
                            <children>
                                       <ComboBox fx:id="valueInputCB" layoutX="229.60000610351562" layoutY="49.0" prefHeight="31.0" prefWidth="190.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
                                       <ComboBox fx:id="valueOutputCB" layoutX="229.60000610351562" layoutY="102.0" prefHeight="31.0" prefWidth="190.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="80.0" />
                                       <TextField fx:id="valueInputText" layoutY="49.0" prefHeight="31.0" prefWidth="65.0" AnchorPane.topAnchor="30.0" />
                                       <TextField fx:id="valueOutputText" layoutY="102.0" prefHeight="31.0" prefWidth="65.0" AnchorPane.topAnchor="80.0" />
                                       <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Currency Conversion Calculator" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                              <VBox layoutY="147.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                              <VBox layoutY="147.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="130.0">
                                  <children>
                                             <Button fx:id="convertButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Convert" />
                                     <Button fx:id="openConversionInBrowser" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Open In Browser" />
                                  </children>
                               </VBox>
-                                      <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="x" AnchorPane.leftAnchor="68.0" AnchorPane.topAnchor="35.0" />
-                                      <Text fill="#d8d8d8" layoutX="68.0" strokeType="OUTSIDE" strokeWidth="0.0" text="x" AnchorPane.leftAnchor="68.0" AnchorPane.topAnchor="85.0" />
+                                      <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="x" AnchorPane.leftAnchor="70.0" AnchorPane.topAnchor="35.0" />
+                                      <Text fill="#d8d8d8" layoutX="68.0" strokeType="OUTSIDE" strokeWidth="0.0" text="x" AnchorPane.leftAnchor="70.0" AnchorPane.topAnchor="85.0" />
                            </children>
                         </AnchorPane>
                         <AnchorPane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="300.0" AnchorPane.topAnchor="10.0">
@@ -168,15 +168,17 @@
                                                 </VBox>
                                              </children>
                                           </AnchorPane>
-                                          <AnchorPane layoutX="438.0" layoutY="29.0" prefWidth="270.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="5.0">
+                                          <AnchorPane layoutX="438.0" layoutY="24.6" prefHeight="163.0" prefWidth="270.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="15.0">
                                              <children>
                                                 <Text id="text-id" fill="#d8d8d8" layoutX="14.0" layoutY="30.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Excessive Filter Threshold" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                                <Slider fx:id="excessiveTresholdSlider" blockIncrement="25.0" layoutY="27.0" minorTickCount="25" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="75.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="30.0" />
-                                                <Label fx:id="excessiveTresholdLabel" layoutX="200.0" layoutY="29.0" text="75 %" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="28.0" />
-                                                <CheckBox fx:id="filterMultiTrade" mnemonicParsing="false" text="Filter multiple transaction deals" AnchorPane.topAnchor="90.0" />
+                                                <Slider fx:id="excessiveTresholdSlider" blockIncrement="25.0" layoutY="27.0" minorTickCount="25" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="60.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="30.0" />
+                                                <Label fx:id="excessiveTresholdLabel" layoutX="200.0" layoutY="29.0" text="60 %" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="28.0" />
+                                                <CheckBox fx:id="filterMultiTrade" mnemonicParsing="false" text="Filter multiple transaction deals" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="80.0" />
+                                                    <CheckBox fx:id="filterWithoutAPI" disable="true" layoutY="141.0" maxHeight="1.7976931348623157E308" mnemonicParsing="false" text="Filter No API" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="130.0" />
+                                                    <CheckBox fx:id="filterInvalid" disable="true" layoutX="6.0" layoutY="114.0" maxHeight="1.7976931348623157E308" mnemonicParsing="false" text="Filter Out Of Stock" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="105.0" />
                                              </children>
                                           </AnchorPane>
-                                          <AnchorPane layoutX="353.6" layoutY="189.6" prefHeight="60.0" prefWidth="270.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="180.0">
+                                          <AnchorPane layoutX="353.6" layoutY="189.6" prefHeight="50.0" prefWidth="270.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="200.0">
                                              <children>
                                                 <Text id="text-id" fill="#d8d8d8" layoutX="42.0" layoutY="11.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Web Parsing" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                                 <ComboBox fx:id="webParsingCB" layoutY="31.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
@@ -235,17 +237,10 @@
                     </HBox.margin>
                 </Label>
                 <ComboBox fx:id="primaryComboBox" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" BorderPane.alignment="CENTER" HBox.hgrow="ALWAYS" />
-                <CheckBox fx:id="filterWithoutAPI" disable="true" maxHeight="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Filter No API">
-                    <HBox.margin>
-                        <Insets left="5.0" right="5.0" />
-                    </HBox.margin>
-                </CheckBox>
-                <CheckBox fx:id="filterInvalid" disable="true" maxHeight="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Filter Out Of Stock">
-                    <HBox.margin>
-                        <Insets left="5.0" right="5.0" />
-                    </HBox.margin>
-                </CheckBox>
-            <CheckBox fx:id="filterExcessive" layoutX="362.0" layoutY="10.0" maxHeight="1.7976931348623157E308" mnemonicParsing="false" text="Filter Excessive" />
+            <CheckBox fx:id="filterExcessive" maxHeight="1.7976931348623157E308" mnemonicParsing="false" text="Filter Excessive">
+               <HBox.margin>
+                  <Insets left="10.0" right="5.0" />
+               </HBox.margin></CheckBox>
             </children>
             <VBox.margin>
                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />

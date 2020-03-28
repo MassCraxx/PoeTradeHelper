@@ -2,6 +2,7 @@ package de.crass.poetradehelper.parser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.crass.poetradehelper.LogManager;
+import de.crass.poetradehelper.Main;
 import de.crass.poetradehelper.PropertyManager;
 import de.crass.poetradehelper.model.CurrencyID;
 import de.crass.poetradehelper.web.HttpManager;
@@ -9,9 +10,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.HashMap;
 
 public class PoeNinjaParser {
@@ -29,12 +30,7 @@ public class PoeNinjaParser {
 
     PoeNinjaParser() {
         objectMapper = new ObjectMapper();
-        if (!fetchRates(PropertyManager.defaultLeague, false)) {
-            JOptionPane.showMessageDialog(null, "Loading poe.ninja currency data failed. This app will not work properly without it.");
-        }
-
-        // rates are now standard and not in sync with what will be loaded as selected leauge, so clear here
-        reset();
+        loadDefaultFile();
     }
 
     boolean fetchRates(String league, boolean forceUpdate) {
@@ -53,7 +49,7 @@ public class PoeNinjaParser {
 
                 writeToCache(league, json.toString());
 
-                parseJson(json);
+                parseJson(json, false);
                 LogManager.getInstance().log(getClass(), "Fetching currency values finished.");
             } catch (IOException e) {
                 LogManager.getInstance().log(getClass(), "Fetching rates from PoeNinja failed. No internet connection?");
@@ -77,6 +73,15 @@ public class PoeNinjaParser {
         }
     }
 
+    public void loadDefaultFile(){
+        URL url = Main.class.getResource("default_data.dat");
+        try {
+            parseJson(objectMapper.readValue(url, JSONObject.class), true);
+        } catch (Exception e) {
+            LogManager.getInstance().log(getClass(), "Error loading default values!");
+        }
+    }
+
     private boolean loadFromCache(String league) {
         File cacheFile = new File(league + cacheFileName);
         // If there is a file  and it is recent
@@ -87,7 +92,7 @@ public class PoeNinjaParser {
                 //TypeReference<HashMap<CurrencyID, Float>> typeRef = new TypeReference<HashMap<CurrencyID, Float>>() {};
                 try {
                     //LogManager.getInstance().log(getClass(), "Loading poe.ninja values for league " + league + " from cache.");
-                    parseJson(objectMapper.readValue(cacheFile, JSONObject.class));
+                    parseJson(objectMapper.readValue(cacheFile, JSONObject.class), false);
                 } catch (Exception e) {
                     LogManager.getInstance().log(getClass(), "Error loading poe.ninja values from cache.");
                     return false;
@@ -98,7 +103,7 @@ public class PoeNinjaParser {
         return false;
     }
 
-    private void parseJson(JSONObject json) {
+    private void parseJson(JSONObject json, boolean onlyCurrencyDetails) {
         JSONArray idArray = json.getJSONArray("currencyDetails");
         for (Object currencyDetailsObject : idArray) {
             if (currencyDetailsObject instanceof JSONObject) {
@@ -107,6 +112,10 @@ public class PoeNinjaParser {
                     new CurrencyID(currencyDetails).store();
                 }
             }
+        }
+
+        if(onlyCurrencyDetails){
+            return;
         }
 
         JSONArray array = json.getJSONArray("lines");

@@ -77,22 +77,27 @@ public class PoeTradeApiParser extends WebParser {
             JSONArray result = data.getJSONArray("result");
 
             for (Object object : result) {
-                JSONObject json = (JSONObject) object;
-                JSONObject listing = json.getJSONObject("listing");
-                String charName = listing.getJSONObject("account").getString("lastCharacterName");
-                String account = listing.getJSONObject("account").getString("name");
+                if(object != JSONObject.NULL) {
+                    JSONObject json = (JSONObject) object;
+                    JSONObject listing = json.getJSONObject("listing");
+                    String charName = listing.getJSONObject("account").getString("lastCharacterName");
+                    String account = listing.getJSONObject("account").getString("name");
 
-                JSONObject price = listing.getJSONObject("price");
-                CurrencyID buyID = CurrencyID.getByTradeID(price.getJSONObject("exchange").getString("currency"));
-                int buyValue = price.getJSONObject("exchange").getInt("amount");
-                CurrencyID sellID = CurrencyID.getByTradeID(price.getJSONObject("item").getString("currency"));
-                int sellValue = price.getJSONObject("item").getInt("amount");
-                int stock = price.getJSONObject("item").getInt("stock");
+                    JSONObject price = listing.getJSONObject("price");
+                    CurrencyID buyID = CurrencyID.getByTradeID(price.getJSONObject("exchange").getString("currency"));
+                    CurrencyID sellID = CurrencyID.getByTradeID(price.getJSONObject("item").getString("currency"));
+                    float buyValue = price.getJSONObject("exchange").getFloat("amount");
+                    float sellValue = price.getJSONObject("item").getFloat("amount");
+                    int stock = price.getJSONObject("item").getInt("stock");
 
-                CurrencyOffer offer = new CurrencyOffer(charName, account, sellID, sellValue, buyID, buyValue, stock);
-                offer.setQueryId(id);
+                    CurrencyOffer offer = new CurrencyOffer(charName, account, sellID, sellValue, buyID, buyValue, stock);
+                    offer.setQueryId(id);
 
-                addOffer(offer);
+                    addOffer(offer);
+                } else {
+                    LogManager.getInstance().log(getClass(), "JSON result was null.");
+                    System.out.println(result);
+                }
             }
         } catch (Exception e) {
             Platform.runLater(() -> parseListener.onUpdateError());

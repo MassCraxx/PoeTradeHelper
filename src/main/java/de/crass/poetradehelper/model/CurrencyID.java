@@ -2,15 +2,16 @@ package de.crass.poetradehelper.model;
 
 import org.json.JSONObject;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Random;
+import java.util.Set;
 
 public class CurrencyID {
     private int id;
     private String tradeID;
     private String displayName;
 
-    static List<CurrencyID> values = new LinkedList<>();
+    static Set<CurrencyID> values = new HashSet<>();
 
     public CurrencyID(JSONObject object){
         id = object.getInt("poeTradeId");
@@ -63,10 +64,7 @@ public class CurrencyID {
         return null;
     }
 
-    public static List<CurrencyID> getValues() {
-//        if (values == null || values.isEmpty()){
-//            TradeManager.getInstance().updateCurrencyValues();
-//        }
+    public static Set<CurrencyID> getValues() {
         return values;
     }
 
@@ -76,7 +74,16 @@ public class CurrencyID {
     }
 
     public static CurrencyID getRandom(){
-        return values.get((int) Math.floor(Math.random() * values.size()));
+        int size = values.size();
+        int item = new Random().nextInt(size); // In real life, the Random object should be rather more shared than this
+        int i = 0;
+        for(CurrencyID obj : values)
+        {
+            if (i == item)
+                return obj;
+            i++;
+        }
+        return null;
     }
 
     public String getTradeID() {

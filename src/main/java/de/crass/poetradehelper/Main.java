@@ -18,6 +18,7 @@ import de.crass.poetradehelper.ui.PlayerTradeCell;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleFloatProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -365,6 +366,8 @@ public class Main extends Application implements TradeManager.DealParseListener,
         offerSecondary.setOnAction(event -> new Thread(() -> {
             CurrencyID newValue = offerSecondary.getValue();
             if (newValue != null) {
+                buyOfferTable.setItems(null);
+                sellOfferTable.setItems(null);
                 buyOfferTable.setItems(tradeManager.getBuyOffers(newValue));
                 sellOfferTable.setItems(tradeManager.getSellOffers(newValue));
             }
@@ -377,24 +380,26 @@ public class Main extends Application implements TradeManager.DealParseListener,
                     if (stock < 0) {
                         return null;
                     }
-                    return new SimpleFloatProperty(stock);
+                    return new SimpleIntegerProperty(stock);
                 };
 
         Callback<TableColumn.CellDataFeatures<CurrencyOffer, String>, ObservableValue<String>> playerCellFactory =
                 param -> new SimpleStringProperty(param.getValue().getPlayerName());
 
-        TableColumn<CurrencyOffer, Number> valueColumn = new TableColumn<>();
-        valueColumn.setText("Amount");
-        valueColumn.setCellValueFactory(param -> new SimpleFloatProperty(param.getValue().getBuyAmount() / param.getValue().getSellAmount()));
+        TableColumn<CurrencyOffer, String> valueColumn = new TableColumn<>();
+        valueColumn.setText("Price");
+        valueColumn.setCellValueFactory(param -> new SimpleStringProperty(prettyFloat(param.getValue().getBuyAmount() / param.getValue().getSellAmount())));
+        valueColumn.setPrefWidth(50);
 
         TableColumn<CurrencyOffer, Number> stockColumn = new TableColumn<>();
         stockColumn.setText("Stock");
         stockColumn.setCellValueFactory(stockCellFactory);
+        stockColumn.setPrefWidth(50);
 
         TableColumn<CurrencyOffer, String> playerColumn = new TableColumn<>();
         playerColumn.setText("Character");
         playerColumn.setCellValueFactory(playerCellFactory);
-        playerColumn.setPrefWidth(150);
+        playerColumn.setPrefWidth(200);
 
 
 //        TableColumn<CurrencyOffer, String> apiColumn = new TableColumn<>();
@@ -407,18 +412,20 @@ public class Main extends Application implements TradeManager.DealParseListener,
         buyOfferTable.setContextMenu(new OfferContextMenu(buyOfferTable, offerSecondary));
 
         // Sell table
-        TableColumn<CurrencyOffer, Number> sellValueColumn = new TableColumn<>();
-        sellValueColumn.setText("Amount");
-        sellValueColumn.setCellValueFactory(param -> new SimpleFloatProperty(param.getValue().getSellAmount() / param.getValue().getBuyAmount()));
+        TableColumn<CurrencyOffer, String> sellValueColumn = new TableColumn<>();
+        sellValueColumn.setText("Price");
+        sellValueColumn.setCellValueFactory(param -> new SimpleStringProperty(prettyFloat(param.getValue().getSellAmount() / param.getValue().getBuyAmount())));
+        sellValueColumn.setPrefWidth(50);
 
         TableColumn<CurrencyOffer, Number> sellStockColumn = new TableColumn<>();
         sellStockColumn.setText("Stock");
         sellStockColumn.setCellValueFactory(stockCellFactory);
+        sellStockColumn.setPrefWidth(50);
 
         TableColumn<CurrencyOffer, String> sellPlayerColumn = new TableColumn<>();
         sellPlayerColumn.setText("Character");
         sellPlayerColumn.setCellValueFactory(playerCellFactory);
-        sellPlayerColumn.setPrefWidth(150);
+        sellPlayerColumn.setPrefWidth(200);
 
 //        TableColumn<CurrencyOffer, String> sellApiColumn = new TableColumn<>();
 //        sellApiColumn.setText("API");
