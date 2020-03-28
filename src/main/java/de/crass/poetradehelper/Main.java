@@ -392,7 +392,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
         stockColumn.setCellValueFactory(stockCellFactory);
 
         TableColumn<CurrencyOffer, String> playerColumn = new TableColumn<>();
-        playerColumn.setText("Character name");
+        playerColumn.setText("Character");
         playerColumn.setCellValueFactory(playerCellFactory);
         playerColumn.setPrefWidth(150);
 
@@ -463,16 +463,14 @@ public class Main extends Application implements TradeManager.DealParseListener,
                 if (empty) {
                     setText(null);
                 } else {
-                    setText(prettyFloat(number.floatValue(), valueFormat));
+                    setText(prettyFloat(number.floatValue(), valueFormat) + "c");
                 }
             }
         });
 
         column.setText("Currency");
-        column.setPrefWidth(100);
-        column.setMaxWidth(100);
-        column2.setText("Value in C");
-        column2.setPrefWidth(100);
+        column2.setText("Value");
+        column2.setMinWidth(80);
         column2.setMaxWidth(100);
         column2.setStyle("-fx-alignment: CENTER-RIGHT;");
 
@@ -861,9 +859,9 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
     private void resetUI() {
         currencyList.setPlaceholder(new Label("No deals to show."));
-        Label label = new Label("No deals to show. Is your currently selling player set in settings? Otherwise your offers may not be online yet.");
+        Label label = new Label("No player offers found.");
         if (PropertyManager.getInstance().getPlayerList().isEmpty()) {
-            label = new Label("Add your selling character's name to the list in Settings -> General to evaluate your current offers.");
+            label = new Label("Add your poe in-game account name to the list in Settings -> General to evaluate your current offers.");
         }
         playerDealList.setPlaceholder(label);
 
@@ -990,4 +988,13 @@ public class Main extends Application implements TradeManager.DealParseListener,
             LogManager.getInstance().log(PoeTradeWebParser.class, "Error opening browser. " + e);
         }
     }
+
+    public static void openInBrowser(CurrencyID primary, CurrencyID secondary) {
+        try {
+            Desktop.getDesktop().browse(URI.create(PoeTradeWebParser.getSearchURL(primary, secondary)));
+        } catch (Exception e) {
+            LogManager.getInstance().log(PoeTradeWebParser.class, "Error opening browser. " + e);
+        }
+    }
+
 }

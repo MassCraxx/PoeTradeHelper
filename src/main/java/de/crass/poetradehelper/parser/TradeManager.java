@@ -339,10 +339,19 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
 
                     float cValue = poeNinjaParser.getCurrentCValueFor(secondaryCurrency);
                     int totalOffers = -1;
+                    CurrencyDeal deal = new CurrencyDeal(primaryCurrency, secondaryCurrency, cValue, totalOffers, marketBuyPrice,
+                            marketSellPrice, playerBuyPrice, playerSellPrice, playerBuyStock, playerSellStock);
+
+                    if(playerBuyOffer != null && playerBuyOffer.getQueryID() != null && !playerBuyOffer.getQueryID().isEmpty()){
+                        deal.setBuyQueryID(playerBuyOffer.getQueryID());
+                    }
+
+                    if(playerSellOffer != null && playerSellOffer.getQueryID() != null && !playerSellOffer.getQueryID().isEmpty()){
+                        deal.setSellQueryID(playerSellOffer.getQueryID());
+                    }
 
                     if (playerBuyPrice > 0 || playerSellPrice > 0) {
-                        playerDeals.add(new CurrencyDeal(primaryCurrency, secondaryCurrency, cValue, totalOffers, marketBuyPrice,
-                                marketSellPrice, playerBuyPrice, playerSellPrice, playerBuyStock, playerSellStock));
+                        playerDeals.add(deal);
                     }
 //                    else {
 //                        // Is logged before now. Needs further investigation...

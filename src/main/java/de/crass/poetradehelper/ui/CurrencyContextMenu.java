@@ -1,7 +1,9 @@
 package de.crass.poetradehelper.ui;
 
 import de.crass.poetradehelper.model.CurrencyID;
+import de.crass.poetradehelper.parser.TradeManager;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableView;
 
 import java.util.Map;
@@ -29,7 +31,10 @@ public class CurrencyContextMenu extends ContextMenu {
 //                Main.openInBrowser(PropertyManager.getInstance().getCurrentLeague(), getSelected(), PropertyManager.getInstance().getPrimaryCurrency());
 //            }
 //        });
+        MenuItem fetchItem = new MenuItem("Fetch Offers");
+        fetchItem.setOnAction(event -> TradeManager.getInstance().updateOffersForCurrency(getSelected(), true));
 
+        getItems().add(fetchItem);
 //        getItems().addAll(buyItem, sellItem);
     }
 

@@ -15,14 +15,19 @@ class DealContextMenu extends ContextMenu {
     DealContextMenu(CurrencyDeal deal) {
         MenuItem nameItem = new MenuItem(deal.getSecondaryCurrencyID().getDisplayName());
 
-        String league = deal.getLeague();
-        MenuItem buyItem = new MenuItem("Open Buy Offers");
-//        buyItem.setOnAction(event -> Main.openInBrowser(league, deal.getPrimaryCurrencyID(), deal.getSecondaryCurrencyID()));
-        buyItem.setOnAction(event -> Main.openInBrowser(deal.getBuyQueryID()));
+        MenuItem buyItem = new MenuItem("Open Buy in Browser");
+        if (deal.getBuyQueryID() == null) {
+            buyItem.setOnAction(event -> Main.openInBrowser(deal.getPrimaryCurrencyID(), deal.getSecondaryCurrencyID()));
+        } else {
+            buyItem.setOnAction(event -> Main.openInBrowser(deal.getBuyQueryID()));
+        }
 
-        MenuItem sellItem = new MenuItem("Open Sell Offers");
-//        sellItem.setOnAction(event -> Main.openInBrowser(league, deal.getSecondaryCurrencyID(), deal.getPrimaryCurrencyID()));
-        sellItem.setOnAction(event -> Main.openInBrowser(deal.getSellQueryID()));
+        MenuItem sellItem = new MenuItem("Open Sell in Browser");
+        if (deal.getSellQueryID() == null) {
+            buyItem.setOnAction(event -> Main.openInBrowser(deal.getSecondaryCurrencyID(), deal.getPrimaryCurrencyID()));
+        } else {
+            buyItem.setOnAction(event -> Main.openInBrowser(deal.getSellQueryID()));
+        }
 
         MenuItem buyValueItem = new MenuItem("Market Buy Value: " + Main.prettyFloat(deal.getcValue() * deal.getBuyAmount()) + "c");
         MenuItem sellValueItem = new MenuItem("Market Sell Value: " + Main.prettyFloat(deal.getcValue() * deal.getSellAmount()) + "c");

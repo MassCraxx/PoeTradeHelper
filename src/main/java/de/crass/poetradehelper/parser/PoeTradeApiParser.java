@@ -44,7 +44,7 @@ public class PoeTradeApiParser extends WebParser {
 
             JSONArray offers = response.getJSONArray("result");
             if(offers == null || offers.length() == 0){
-                LogManager.getInstance().log(getClass(), "No offers found.");
+                LogManager.getInstance().log(getClass(), "No offers found for ");
                 return;
             }
 

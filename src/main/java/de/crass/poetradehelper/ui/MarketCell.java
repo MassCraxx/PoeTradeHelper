@@ -80,8 +80,12 @@ public class MarketCell<T> extends javafx.scene.control.ListCell<CurrencyDeal> {
 
             float buy = deal.getBuyAmount();
             float sell = deal.getSellAmount();
+            float value = deal.getcValue();
+            if (value > 10000) {
+                value = Math.round(value);
+            }
 
-            chaosValue.setText(prettyFloat(deal.getcValue()) + "c");
+            chaosValue.setText(prettyFloat(value) + "c");
             offersText.setText(prettyFloat(deal.getOffers()));
             buyOffer.setText(prettyFloat(buy));
             sellOffer.setText(prettyFloat(sell));
