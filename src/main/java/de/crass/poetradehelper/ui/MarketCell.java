@@ -74,9 +74,6 @@ public class MarketCell<T> extends javafx.scene.control.ListCell<CurrencyDeal> {
 
             }
 
-//            root.setBorder(new Border(new BorderStroke(Color.BLACK,
-//                    BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(2))));
-
             String url = deal.getSecondaryCurrencyID().getID() + ".png";
             setImage(url,currencyIcon);
             currencyIcon.setCache(true);
@@ -84,26 +81,17 @@ public class MarketCell<T> extends javafx.scene.control.ListCell<CurrencyDeal> {
 
             float buy = deal.getBuyAmount();
             float sell = deal.getSellAmount();
-//            float value = deal.getcValue();
-//            if (value > 10000) {
-//                value = Math.round(value);
-//            }
 
             timestamp.setText(timeFormat.format(new Date(deal.getTimestamp())));
             offersText.setText(prettyFloat(deal.getOffers()));
             buyOffer.setText(prettyFloat(buy));
             sellOffer.setText(prettyFloat(sell));
-            diff.setText(prettyFloat((deal.getDiff())));
+            diff.setText(prettyFloat((deal.getDiff()), true, true));
             diffValue.setText(prettyFloat((deal.getDiffValue())) + "c");
 
             setGraphic(root);
 
             setContextMenu(new DealContextMenu(deal));
         }
-    }
-
-    @Override
-    public void updateSelected(boolean selected) {
-//        super.updateSelected(selected);
     }
 }
