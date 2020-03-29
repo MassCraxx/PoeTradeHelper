@@ -332,6 +332,10 @@ public class PropertyManager {
         uiCallback = call;
     }
 
+    public boolean getBooleanProp(String key, boolean def) {
+        return Boolean.parseBoolean(getProp(key, String.valueOf(def)));
+    }
+
     interface UICallback {
         void onPropChanged(String key, String value);
     }

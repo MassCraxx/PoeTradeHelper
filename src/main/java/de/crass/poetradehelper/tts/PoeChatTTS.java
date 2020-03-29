@@ -600,7 +600,11 @@ public class PoeChatTTS {
         CurrencyID sell = CurrencyID.getRandom();
         boolean known = Math.random() > 0.8;
         try {
-            textToSpeech(getTradeMessage(buy.toString(), sell.toString(), known), true);
+            if (buy != null && sell != null) {
+                textToSpeech(getTradeMessage(buy.toString(), sell.toString(), known), true);
+            } else {
+                textToSpeech(getTradeMessage("Bananas", "Apples", known), true);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

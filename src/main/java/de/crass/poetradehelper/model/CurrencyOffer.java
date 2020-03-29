@@ -11,7 +11,9 @@ public class CurrencyOffer {
     private boolean isPlayerOffer = false;
     private String queryID;
 
-    public CurrencyOffer(String username, String accountName, CurrencyID sellID, float sellValue, CurrencyID buyID, float buyValue, int stock) {
+    private long timestamp;
+
+    public CurrencyOffer(String username, String accountName, CurrencyID sellID, float sellValue, CurrencyID buyID, float buyValue, int stock, long timestamp) {
         this.playerName = username;
         this.accountName = accountName;
         this.sellID = sellID;
@@ -19,6 +21,7 @@ public class CurrencyOffer {
         this.buyID = buyID;
         this.buyAmount = buyValue;
         this.stock = stock;
+        this.timestamp = timestamp;
     }
 
     public String getPlayerName() {
@@ -68,5 +71,9 @@ public class CurrencyOffer {
 
     public String getQueryID() {
         return queryID;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
     }
 }

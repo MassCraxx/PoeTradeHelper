@@ -10,6 +10,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import static de.crass.poetradehelper.Main.prettyFloat;
 import static de.crass.poetradehelper.Main.setImage;
@@ -25,7 +27,7 @@ public class MarketCell<T> extends javafx.scene.control.ListCell<CurrencyDeal> {
     private Text sellOffer;
 
     @FXML
-    private Text chaosValue;
+    private Text timestamp;
 
     @FXML
     private AnchorPane root;
@@ -47,6 +49,8 @@ public class MarketCell<T> extends javafx.scene.control.ListCell<CurrencyDeal> {
 
     @FXML
     private ImageView currencyIcon;
+
+    private static final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
 
     @Override
     protected void updateItem(CurrencyDeal deal, boolean empty) {
@@ -80,12 +84,12 @@ public class MarketCell<T> extends javafx.scene.control.ListCell<CurrencyDeal> {
 
             float buy = deal.getBuyAmount();
             float sell = deal.getSellAmount();
-            float value = deal.getcValue();
-            if (value > 10000) {
-                value = Math.round(value);
-            }
+//            float value = deal.getcValue();
+//            if (value > 10000) {
+//                value = Math.round(value);
+//            }
 
-            chaosValue.setText(prettyFloat(value) + "c");
+            timestamp.setText(timeFormat.format(new Date(deal.getTimestamp())));
             offersText.setText(prettyFloat(deal.getOffers()));
             buyOffer.setText(prettyFloat(buy));
             sellOffer.setText(prettyFloat(sell));

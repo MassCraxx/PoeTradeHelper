@@ -58,7 +58,7 @@ import java.util.*;
 public class Main extends Application implements TradeManager.DealParseListener, PoeNinjaParser.PoeNinjaListener, PropertyManager.UICallback {
 
     private static final String title = "PoeTradeHelper";
-    private static final String versionText = "v0.7-RC2";
+    private static final String versionText = "v0.7-RC3-SNAPSHOT";
 
     @FXML
     private ListView<CurrencyDeal> playerDealList;
@@ -250,7 +250,6 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
     @FXML
     void initialize() {
-        //TODO: Somehow fetch available items before prop man starts up
 
         // Setup console
         LogManager.getInstance().setConsole(console);
@@ -308,12 +307,14 @@ public class Main extends Application implements TradeManager.DealParseListener,
         version.setOnMouseClicked(event -> {
             versionClicked++;
             if (versionClicked % 10 == 0) {
+                PropertyManager.getInstance().setProp("auto_update_enabled", "true");
                 JOptionPane.showMessageDialog(null, "Automatic Update setting enabled! Please don't abuse this.");
                 autoUpdate.setVisible(true);
                 updateTime.setVisible(true);
                 updateSlider.setVisible(true);
             }
         });
+
         ContextMenu vContext = new ContextMenu();
         vContext.getItems().add(new MenuItem("by MassCraxx"));
         version.setContextMenu(vContext);
@@ -336,28 +337,10 @@ public class Main extends Application implements TradeManager.DealParseListener,
                 updateButton.setDisable(true);
 //                    updatePlayerButton.setDisable(true);
             } else {
-                tradeManager.updateOffers(currencyFilterChanged);
+                tradeManager.updateOffers(false);
 //                    updatePlayerButton.setDisable(true);
             }
         });
-
-//        updatePlayerButton.setOnAction(new EventHandler<ActionEvent>() {
-//            @Override
-//            public void handle(ActionEvent event) {
-//                if(updateTimer != null){
-//                    stopUpdateTask();
-//                    startUpdateTask();
-//                }
-//                if (tradeManager.isUpdating()) {
-//                    tradeManager.cancelUpdate();
-//                    updateButton.setDisable(true);
-//                    updatePlayerButton.setDisable(true);
-//                } else {
-//                    tradeManager.updatePlayerOffers();
-//                    updateButton.setDisable(true);
-//                }
-//            }
-//        });
 
         // Offer tab
         ObservableList<CurrencyID> currencies = FXCollections.observableArrayList(CurrencyID.getValues());
@@ -470,7 +453,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
                 if (empty) {
                     setText(null);
                 } else {
-                    setText(prettyFloat(number.floatValue(), valueFormat) + "c");
+                    setText(prettyFloat(number.floatValue(), false) + "c");
                 }
             }
         });
@@ -743,7 +726,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
         updateTime.setTooltip(new Tooltip("Set volume of the voice speaker"));
         updateTime.setText(updateDelay + " min");
 
-        if (PropertyManager.getInstance().getProp("DEBUG", null) == null) {
+        if (!PropertyManager.getInstance().getBooleanProp("auto_update_enabled", false)) {
             autoUpdate.setVisible(false);
             updateTime.setVisible(false);
             updateSlider.setVisible(false);
@@ -778,30 +761,31 @@ public class Main extends Application implements TradeManager.DealParseListener,
             outputReversed = true;
         }
 
-        String result = "";
         if (inString != null && !inString.isEmpty()) {
             try {
                 float inAmount = dFormat.parse(inString).floatValue();
+                String result;
                 if (outputReversed) {
-                    result = prettyFloat(inAmount * tradeManager.getCurrencyValue(valueOutputCB.getValue(), valueInputCB.getValue()), valueFormat);
+                    result = prettyFloat(inAmount * tradeManager.getCurrencyValue(valueOutputCB.getValue(), valueInputCB.getValue()), false, false);
                 } else {
-                    result = prettyFloat(inAmount * tradeManager.getCurrencyValue(valueInputCB.getValue(), valueOutputCB.getValue()), valueFormat);
+                    result = prettyFloat(inAmount * tradeManager.getCurrencyValue(valueInputCB.getValue(), valueOutputCB.getValue()), false, false);
                 }
-            } catch (ParseException ignored) {
 
+                if (outputReversed) {
+                    valueInputText.setText(result);
+                    valueOutputText.setText(prettyFloat(inAmount, false, false));
+                } else {
+                    valueOutputText.setText(result);
+                    valueInputText.setText(prettyFloat(inAmount, false, false));
+                }
+            } catch (ParseException pex) {
+                LogManager.getInstance().log(getClass(), "Conversion failed! " + pex.getMessage());
             }
-        }
-
-        if (outputReversed) {
-            valueInputText.setText(result);
-        } else {
-            valueOutputText.setText(result);
         }
     }
 
     private void setDisableVoiceControls() {
         String balconMissingText = "Place balcon.exe next to the app to enable this feature.";
-//        voiceActive.setDisable(true);
         voiceActive.setTooltip(new Tooltip(balconMissingText));
         voiceReadTradeOffers.setDisable(true);
         voiceReadTradeOffers.setTooltip(new Tooltip(balconMissingText));
@@ -844,7 +828,6 @@ public class Main extends Application implements TradeManager.DealParseListener,
         playerDealList.setPlaceholder(new Label("Updating..."));
 
         updateButton.setText("Cancel");
-//        updatePlayerButton.setText("Cancel");
     }
 
     @Override
@@ -874,8 +857,6 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
         updateButton.setText("Update All");
         updateButton.setDisable(false);
-//        updatePlayerButton.setText("Update Player");
-//        updatePlayerButton.setDisable(false);
 
         currencyFilterChanged = false;
     }
@@ -883,9 +864,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
     @Override
     public void onParsingFinished() {
         float time = System.currentTimeMillis() - parseStartTime;
-        if (time > 1f) {
-            LogManager.getInstance().log(TradeManager.class, "Parsing took " + prettyFloat(time) + " milliseconds");
-        }
+        LogManager.getInstance().log(TradeManager.class, "Parsing took " + prettyFloat(time, true, false) + " milliseconds");
 
         resetUI();
     }
@@ -926,15 +905,23 @@ public class Main extends Application implements TradeManager.DealParseListener,
     // UTIL
 
     public static String prettyFloat(float in) {
-        return prettyFloat(in, null);
+        return prettyFloat(in, true, false);
     }
 
-    public static String prettyFloat(float in, DecimalFormat format) {
-        if (in == 0) {
+    public static String prettyFloat(float in, boolean hideEmptyDecimal){
+        return prettyFloat(in, hideEmptyDecimal, false);
+    }
+
+    public static String prettyFloat(float in, boolean hideEmptyDecimal, boolean hideZero) {
+        if (hideZero && in == 0) {
             return "---";
         }
-        if (format == null) {
+
+        DecimalFormat format;
+        if (hideEmptyDecimal) {
             format = dFormat;
+        } else {
+            format = valueFormat;
         }
 
         return format.format(in);

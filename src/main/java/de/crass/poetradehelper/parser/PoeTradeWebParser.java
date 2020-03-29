@@ -121,7 +121,8 @@ public class PoeTradeWebParser extends WebParser{
                             sell,
                             CurrencyID.get(Integer.parseInt(offerMatcher.group(4))),
                             buy,
-                            stock);
+                            stock,
+                            System.currentTimeMillis());
 
                     addOffer(offer);
                 } else {

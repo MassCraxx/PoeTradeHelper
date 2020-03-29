@@ -24,13 +24,15 @@ public class CurrencyDeal {
     private String buyQueryID;
     private String sellQueryID;
 
+    private long timestamp;
+
     public CurrencyDeal(CurrencyID primaryCurrencyID,
                         CurrencyID secondaryCurrencyID,
                         float cValue,
                         int offers,
                         float buyAmount,
-                        float sellAmount) {
-        this(primaryCurrencyID, secondaryCurrencyID, cValue, offers, buyAmount, sellAmount, 0, 0, 0, 0);
+                        float sellAmount, long timestamp) {
+        this(primaryCurrencyID, secondaryCurrencyID, cValue, offers, buyAmount, sellAmount, 0, 0, 0, 0, timestamp);
     }
 
     public CurrencyDeal(CurrencyID primaryCurrencyID,
@@ -42,7 +44,7 @@ public class CurrencyDeal {
                         float playerBuyAmount,
                         float playerSellAmount,
                         int playerBuyStock,
-                        int playerSellStock) {
+                        int playerSellStock, long timestamp) {
 
         this.primaryCurrencyID = primaryCurrencyID;
         this.secondaryCurrencyID = secondaryCurrencyID;
@@ -54,6 +56,7 @@ public class CurrencyDeal {
         this.playerSellAmount = playerSellAmount;
         this.playerBuyStock = playerBuyStock;
         this.playerSellStock = playerSellStock;
+        this.timestamp = timestamp;
 
         this.league = PropertyManager.getInstance().getCurrentLeague();
     }
@@ -143,5 +146,9 @@ public class CurrencyDeal {
 
     public void setSellQueryID(String sellQueryID) {
         this.sellQueryID = sellQueryID;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
     }
 }

@@ -90,7 +90,15 @@ public class PoeTradeApiParser extends WebParser {
                     float sellValue = price.getJSONObject("item").getFloat("amount");
                     int stock = price.getJSONObject("item").getInt("stock");
 
-                    CurrencyOffer offer = new CurrencyOffer(charName, account, sellID, sellValue, buyID, buyValue, stock);
+                    CurrencyOffer offer = new CurrencyOffer(
+                            charName,
+                            account,
+                            sellID,
+                            sellValue,
+                            buyID,
+                            buyValue,
+                            stock,
+                            System.currentTimeMillis());
                     offer.setQueryId(id);
 
                     addOffer(offer);
