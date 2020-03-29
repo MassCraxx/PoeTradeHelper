@@ -64,12 +64,12 @@
                <Font size="18.0" />
             </font>
          </Text>
-         <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Buy" wrappingWidth="55.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="7.0">
+         <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Buying" wrappingWidth="60.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="7.0">
             <font>
                <Font name="System Bold" size="18.0" />
             </font>
          </Text>
-         <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Sell" wrappingWidth="55.0" AnchorPane.bottomAnchor="7.0" AnchorPane.leftAnchor="0.0">
+         <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Selling" wrappingWidth="60.0" AnchorPane.bottomAnchor="7.0" AnchorPane.leftAnchor="0.0">
             <font>
                <Font name="System Bold" size="18.0" />
             </font>
@@ -94,12 +94,12 @@
                <Font name="System Bold" size="18.0" />
             </font>
          </Text>
-         <Text fx:id="diff" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="14" textAlignment="RIGHT" wrappingWidth="55.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="7.0">
+         <Text fx:id="diff" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="14" textAlignment="RIGHT" wrappingWidth="60.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="7.0">
             <font>
                <Font size="18.0" />
             </font>
          </Text>
-         <Text fx:id="diffValue" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="-12,5" textAlignment="RIGHT" wrappingWidth="55.0" AnchorPane.bottomAnchor="7.0" AnchorPane.rightAnchor="0.0">
+         <Text fx:id="diffValue" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="-12,55c" textAlignment="RIGHT" wrappingWidth="60.0" AnchorPane.bottomAnchor="7.0" AnchorPane.rightAnchor="0.0">
             <font>
                <Font size="18.0" />
             </font>

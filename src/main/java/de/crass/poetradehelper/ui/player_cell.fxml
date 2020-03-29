@@ -5,141 +5,114 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.*?>
-<AnchorPane fx:id="root" minWidth="600.0" xmlns="http://javafx.com/javafx/10.0.2-internal"
-            xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane fx:id="root" minWidth="600.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1">
    <padding>
-      <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+      <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
    </padding>
-   <HBox scaleShape="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-         AnchorPane.topAnchor="0.0">
-      <ImageView fx:id="currencyIcon" fitHeight="70.0" fitWidth="70.0" pickOnBounds="true" preserveRatio="true"
-                 HBox.hgrow="NEVER">
+   <HBox scaleShape="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <ImageView fx:id="currencyIcon" fitHeight="70.0" fitWidth="70.0" pickOnBounds="true" preserveRatio="true" HBox.hgrow="NEVER">
          <HBox.margin>
-            <Insets left="-5.0" right="5.0"/>
+            <Insets left="-5.0" right="5.0" />
          </HBox.margin>
       </ImageView>
-      <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#d8d8d8" height="70.0" stroke="BLACK" strokeType="INSIDE"
-                 strokeWidth="0.0" width="2.0">
+      <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#d8d8d8" height="70.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="2.0">
          <HBox.margin>
-            <Insets left="5.0"/>
+            <Insets left="5.0" />
          </HBox.margin>
       </Rectangle>
       <AnchorPane maxHeight="1.7976931348623157E308" HBox.hgrow="ALWAYS">
-         <Text fill="#d8d8d8" layoutX="3.0" layoutY="40.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Buy"
-               textAlignment="CENTER" wrappingWidth="25.0" AnchorPane.leftAnchor="10.0"
-               AnchorPane.rightAnchor="10.0">
+         <Text fill="#d8d8d8" layoutX="3.0" layoutY="40.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Buy" textAlignment="CENTER" wrappingWidth="25.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="10.0">
             <font>
-               <Font size="13.0"/>
+               <Font size="13.0" />
             </font>
          </Text>
       </AnchorPane>
-      <AnchorPane maxHeight="1.7976931348623157E308" minWidth="120.0" HBox.hgrow="ALWAYS">
-         <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Player" wrappingWidth="70.0"
-               AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="7.0">
+      <AnchorPane maxHeight="1.7976931348623157E308" minWidth="115.0" HBox.hgrow="ALWAYS">
+         <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Player" wrappingWidth="70.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="7.0">
             <font>
-               <Font name="System Bold" size="18.0"/>
+               <Font name="System Bold" size="18.0" />
             </font>
          </Text>
-         <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Market" wrappingWidth="70.0"
-               AnchorPane.bottomAnchor="7.0">
+         <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Market" wrappingWidth="70.0" AnchorPane.bottomAnchor="7.0">
             <font>
-               <Font name="System Bold" size="18.0"/>
+               <Font name="System Bold" size="18.0" />
             </font>
          </Text>
-         <Text fx:id="playerBuy" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="1095"
-               textAlignment="RIGHT" wrappingWidth="50.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="7.0">
+         <Text fx:id="playerBuy" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="1095" textAlignment="RIGHT" wrappingWidth="50.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="7.0">
             <font>
-               <Font size="18.0"/>
+               <Font size="18.0" />
             </font>
          </Text>
-         <Text fx:id="marketBuy" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="1100"
-               textAlignment="RIGHT" wrappingWidth="50.0" AnchorPane.bottomAnchor="7.0"
-               AnchorPane.rightAnchor="0.0">
+         <Text fx:id="marketBuy" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="1100" textAlignment="RIGHT" wrappingWidth="50.0" AnchorPane.bottomAnchor="7.0" AnchorPane.rightAnchor="0.0">
             <font>
-               <Font size="18.0"/>
+               <Font size="18.0" />
             </font>
          </Text>
       </AnchorPane>
-      <AnchorPane maxHeight="1.7976931348623157E308" HBox.hgrow="ALWAYS"/>
-      <ImageView fx:id="buyTendency" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true"
-                 translateY="10.0">
+      <AnchorPane maxHeight="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
+      <ImageView fx:id="buyTendency" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true" translateY="10.0">
          <HBox.margin>
-            <Insets bottom="15.0" right="10.0" top="10.0"/>
+            <Insets bottom="15.0" left="5.0" right="5.0" top="10.0" />
          </HBox.margin>
       </ImageView>
-      <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#d8d8d8" height="70.0" stroke="BLACK" strokeType="INSIDE"
-                 strokeWidth="0.0" width="2.0"/>
+      <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#d8d8d8" height="70.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="2.0" />
       <AnchorPane maxHeight="1.7976931348623157E308" HBox.hgrow="ALWAYS">
-         <Text fill="#d8d8d8" layoutX="3.0" layoutY="40.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Sell"
-               textAlignment="CENTER" wrappingWidth="25.0" AnchorPane.leftAnchor="10.0"
-               AnchorPane.rightAnchor="10.0">
+         <Text fill="#d8d8d8" layoutX="3.0" layoutY="40.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Sell" textAlignment="CENTER" wrappingWidth="25.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="10.0">
             <font>
-               <Font size="13.0"/>
+               <Font size="13.0" />
             </font>
          </Text>
       </AnchorPane>
-      <AnchorPane maxHeight="1.7976931348623157E308" minWidth="120.0" HBox.hgrow="ALWAYS">
-         <Text fx:id="playerSell" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="181"
-               textAlignment="RIGHT" wrappingWidth="50.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="7.0">
+      <AnchorPane maxHeight="1.7976931348623157E308" minWidth="115.0" HBox.hgrow="ALWAYS">
+         <Text fx:id="playerSell" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="181" textAlignment="RIGHT" wrappingWidth="50.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="7.0">
             <font>
-               <Font size="18.0"/>
+               <Font size="18.0" />
             </font>
          </Text>
-         <Text fx:id="marketSell" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="180"
-               textAlignment="RIGHT" wrappingWidth="50.0" AnchorPane.bottomAnchor="7.0"
-               AnchorPane.rightAnchor="0.0">
+         <Text fx:id="marketSell" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="180" textAlignment="RIGHT" wrappingWidth="50.0" AnchorPane.bottomAnchor="7.0" AnchorPane.rightAnchor="0.0">
             <font>
-               <Font size="18.0"/>
+               <Font size="18.0" />
             </font>
          </Text>
-         <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Player" wrappingWidth="55.0"
-               AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="7.0">
+         <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Player" wrappingWidth="55.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="7.0">
             <font>
-               <Font name="System Bold" size="18.0"/>
+               <Font name="System Bold" size="18.0" />
             </font>
          </Text>
-         <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Market" wrappingWidth="70.0"
-               AnchorPane.bottomAnchor="7.0" AnchorPane.leftAnchor="0.0">
+         <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Market" wrappingWidth="70.0" AnchorPane.bottomAnchor="7.0" AnchorPane.leftAnchor="0.0">
             <font>
-               <Font name="System Bold" size="18.0"/>
+               <Font name="System Bold" size="18.0" />
             </font>
          </Text>
       </AnchorPane>
-      <ImageView fx:id="sellTendency" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true"
-                 translateY="10.0">
+      <ImageView fx:id="sellTendency" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true" translateY="10.0">
          <HBox.margin>
-            <Insets bottom="15.0" right="10.0" top="10.0"/>
+            <Insets bottom="15.0" left="5.0" right="5.0" top="10.0" />
          </HBox.margin>
       </ImageView>
-      <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#d8d8d8" height="70.0" stroke="BLACK" strokeType="INSIDE"
-                 strokeWidth="0.0" width="2.0"/>
-      <AnchorPane maxHeight="1.7976931348623157E308" minWidth="100.0" HBox.hgrow="ALWAYS">
+      <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#d8d8d8" height="70.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="2.0" />
+      <AnchorPane maxHeight="1.7976931348623157E308" minWidth="115.0" HBox.hgrow="ALWAYS">
          <HBox.margin>
-            <Insets left="10.0" right="10.0"/>
+            <Insets left="5.0" right="10.0" />
          </HBox.margin>
-         <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Diff" wrappingWidth="55.0"
-               AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="7.0">
+         <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Diff" wrappingWidth="55.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="7.0">
             <font>
-               <Font name="System Bold" size="18.0"/>
+               <Font name="System Bold" size="18.0" />
             </font>
          </Text>
-         <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Profit" wrappingWidth="55.0"
-               AnchorPane.bottomAnchor="7.0" AnchorPane.leftAnchor="0.0">
+         <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Profit" wrappingWidth="55.0" AnchorPane.bottomAnchor="7.0" AnchorPane.leftAnchor="0.0">
             <font>
-               <Font name="System Bold" size="18.0"/>
+               <Font name="System Bold" size="18.0" />
             </font>
          </Text>
-         <Text fx:id="diff" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="180" textAlignment="RIGHT"
-               wrappingWidth="50.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="7.0">
+         <Text fx:id="diff" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="180" textAlignment="RIGHT" wrappingWidth="50.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="7.0">
             <font>
-               <Font size="18.0"/>
+               <Font size="18.0" />
             </font>
          </Text>
-         <Text fx:id="diffValue" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="181"
-               textAlignment="RIGHT" wrappingWidth="50.0" AnchorPane.bottomAnchor="7.0"
-               AnchorPane.rightAnchor="0.0">
+         <Text fx:id="diffValue" fill="#d8d8d8" layoutX="60.0" layoutY="36.0" strokeType="OUTSIDE" strokeWidth="0.0" text="-12.58c" textAlignment="RIGHT" wrappingWidth="60.0" AnchorPane.bottomAnchor="7.0" AnchorPane.rightAnchor="0.0">
             <font>
-               <Font size="18.0"/>
+               <Font size="18.0" />
             </font>
          </Text>
       </AnchorPane>

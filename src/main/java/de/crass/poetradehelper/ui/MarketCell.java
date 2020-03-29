@@ -84,10 +84,10 @@ public class MarketCell<T> extends javafx.scene.control.ListCell<CurrencyDeal> {
 
             timestamp.setText(timeFormat.format(new Date(deal.getTimestamp())));
             offersText.setText(prettyFloat(deal.getOffers()));
-            buyOffer.setText(prettyFloat(buy));
-            sellOffer.setText(prettyFloat(sell));
-            diff.setText(prettyFloat((deal.getDiff()), true, true));
-            diffValue.setText(prettyFloat((deal.getDiffValue())) + "c");
+            buyOffer.setText(prettyFloat(buy, true, true));
+            sellOffer.setText(prettyFloat(sell, true, true));
+            diff.setText(prettyFloat((deal.getDiff()), true, false));
+            diffValue.setText(prettyFloat((deal.getDiffValue()), false, false) + "c");
 
             setGraphic(root);
 

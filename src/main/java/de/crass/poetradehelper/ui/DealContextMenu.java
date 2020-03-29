@@ -15,6 +15,9 @@ class DealContextMenu extends ContextMenu {
     DealContextMenu(CurrencyDeal deal) {
         MenuItem nameItem = new MenuItem(deal.getSecondaryCurrencyID().getDisplayName());
 
+        //TODO
+        MenuItem offersItem = new MenuItem("Open in Offers Tab");
+
         MenuItem buyItem = new MenuItem("Open Buy in Browser");
         if (deal.getBuyQueryID() == null) {
             buyItem.setOnAction(event -> Main.openInBrowser(deal.getPrimaryCurrencyID(), deal.getSecondaryCurrencyID()));
