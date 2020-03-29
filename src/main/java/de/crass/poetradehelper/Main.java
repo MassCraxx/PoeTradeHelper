@@ -238,8 +238,8 @@ public class Main extends Application implements TradeManager.DealParseListener,
         Parent root = FXMLLoader.load(getClass().getResource("layout.fxml"));
         Scene scene = new Scene(root, 650, 650);
         scene.getStylesheets().add(getClass().getResource("stylesheet.css").toExternalForm());
-        primaryStage.setMinWidth(640);
-        primaryStage.setMinHeight(225);
+        primaryStage.setMinWidth(650);
+        primaryStage.setMinHeight(300);
         primaryStage.setScene(scene);
         primaryStage.getIcons().add(new Image(Main.class.getResourceAsStream("icon.png")));
         primaryStage.show();
@@ -335,6 +335,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
             if (tradeManager.isUpdating()) {
                 tradeManager.cancelUpdate();
                 updateButton.setDisable(true);
+                updateButton.setText("Cancel...");
 //                    updatePlayerButton.setDisable(true);
             } else {
                 tradeManager.updateOffers(false);
@@ -855,7 +856,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
         }
         playerDealList.setPlaceholder(label);
 
-        updateButton.setText("Update All");
+        updateButton.setText("Update");
         updateButton.setDisable(false);
 
         currencyFilterChanged = false;

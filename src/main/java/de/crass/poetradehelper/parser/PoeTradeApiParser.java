@@ -9,6 +9,8 @@ import javafx.application.Platform;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.net.SocketTimeoutException;
+
 public class PoeTradeApiParser extends WebParser {
     public static final String IDENTIFIER = "pathofexile.com";
 
@@ -20,7 +22,11 @@ public class PoeTradeApiParser extends WebParser {
         super(listener);
     }
 
-    public void fetchOffers(CurrencyID primaryCurrency, CurrencyID secondaryCurrency, String currentLeague) {
+    public void fetchOffers(CurrencyID primaryCurrency, CurrencyID secondaryCurrency, String currentLeague){
+        fetchOffers(primaryCurrency, secondaryCurrency, currentLeague, 0);
+    }
+
+    public void fetchOffers(CurrencyID primaryCurrency, CurrencyID secondaryCurrency, String currentLeague, int retries) {
         LogManager.getInstance().log(getClass(), "Fetching " + secondaryCurrency + " offers for " + primaryCurrency);
 
         JSONObject status = new JSONObject();
@@ -40,7 +46,7 @@ public class PoeTradeApiParser extends WebParser {
         param.put("exchange", exchange);
 
         try {
-            JSONObject response = HttpManager.getInstance().postJSON(poeTradeURL + PropertyManager.getInstance().getCurrentLeague(), String.valueOf(param));
+            JSONObject response = HttpManager.getInstance().postJSON(poeTradeURL + currentLeague, String.valueOf(param));
 
             JSONArray offers = response.getJSONArray("result");
             if(offers == null || offers.length() == 0){
@@ -107,10 +113,17 @@ public class PoeTradeApiParser extends WebParser {
                     System.out.println(result);
                 }
             }
-        } catch (Exception e) {
+        } catch (SocketTimeoutException e) {
+            if (retries < Integer.parseInt(PropertyManager.getInstance().getProp("trade_data_retries", "0"))) {
+                LogManager.getInstance().log(getClass(), IDENTIFIER + " took too long to respond. Retrying retrying " + retries + " more time(s)");
+                fetchOffers(primaryCurrency, secondaryCurrency, currentLeague, retries + 1);
+            } else {
+                LogManager.getInstance().log(getClass(), IDENTIFIER + " took too long to respond. It may be overloaded.");
+            }
+        } catch (Exception ex) {
             Platform.runLater(() -> parseListener.onUpdateError());
-            LogManager.getInstance().log(getClass(), e.getMessage());
-            e.printStackTrace();
+            LogManager.getInstance().log(getClass(), ex.getMessage());
+            ex.printStackTrace();
         }
     }
 

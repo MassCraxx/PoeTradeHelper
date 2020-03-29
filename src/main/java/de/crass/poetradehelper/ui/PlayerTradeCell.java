@@ -163,12 +163,12 @@ public class PlayerTradeCell extends javafx.scene.control.ListCell<CurrencyDeal>
                 sellTendency.setEffect(null);
             }
 
-            marketBuy.setText(prettyFloat(buy));
-            marketSell.setText(prettyFloat(sell));
+            marketBuy.setText(prettyFloat(buy, true, false));
+            marketSell.setText(prettyFloat(sell, true, false));
             diff.setText(prettyFloat((diffF)));
 
-            playerBuy.setText(prettyFloat(pBuy));
-            playerSell.setText(prettyFloat(pSell));
+            playerBuy.setText(prettyFloat(pBuy, true, false));
+            playerSell.setText(prettyFloat(pSell, true, false));
 
             diffValue.setText(prettyFloat((diffV)) + "c");
 

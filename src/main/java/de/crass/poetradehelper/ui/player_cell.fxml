@@ -20,20 +20,13 @@
             <Insets left="5.0" />
          </HBox.margin>
       </Rectangle>
-      <AnchorPane maxHeight="1.7976931348623157E308" HBox.hgrow="ALWAYS">
-         <Text fill="#d8d8d8" layoutX="3.0" layoutY="40.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Buy" textAlignment="CENTER" wrappingWidth="25.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0">
-            <font>
-               <Font size="13.0" />
-            </font>
-         </Text>
-      </AnchorPane>
-      <AnchorPane maxHeight="1.7976931348623157E308" minWidth="115.0" HBox.hgrow="ALWAYS">
-         <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Player" wrappingWidth="70.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="7.0">
+      <AnchorPane maxHeight="1.7976931348623157E308" minWidth="140.0" HBox.hgrow="ALWAYS">
+         <Text fill="#d8d8d8" layoutX="30.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Player" wrappingWidth="70.0" AnchorPane.topAnchor="7.0">
             <font>
                <Font name="System Bold" size="18.0" />
             </font>
          </Text>
-         <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Market" wrappingWidth="70.0" AnchorPane.bottomAnchor="7.0">
+         <Text fill="#d8d8d8" layoutX="30.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Market" wrappingWidth="70.0" AnchorPane.bottomAnchor="7.0">
             <font>
                <Font name="System Bold" size="18.0" />
             </font>
@@ -48,52 +41,66 @@
                <Font size="18.0" />
             </font>
          </Text>
-      </AnchorPane>
-      <AnchorPane maxHeight="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
-      <ImageView fx:id="buyTendency" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true" translateY="10.0">
-         <HBox.margin>
-            <Insets bottom="15.0" left="10.0" right="5.0" top="10.0" />
-         </HBox.margin>
-      </ImageView>
-      <Rectangle fill="#d8d8d8" height="70.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="2.0" />
-      <AnchorPane maxHeight="1.7976931348623157E308" HBox.hgrow="ALWAYS">
-         <Text fill="#d8d8d8" layoutX="3.0" layoutY="40.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Sell" textAlignment="CENTER" wrappingWidth="25.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0">
+         <Text fill="#d8d8d8" layoutY="40.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Buy" textAlignment="CENTER" wrappingWidth="25.0" AnchorPane.leftAnchor="0.0">
             <font>
                <Font size="13.0" />
             </font>
          </Text>
-      </AnchorPane>
-      <AnchorPane maxHeight="1.7976931348623157E308" minWidth="115.0" HBox.hgrow="ALWAYS">
-         <Text fx:id="playerSell" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="181" textAlignment="RIGHT" wrappingWidth="50.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="7.0">
-            <font>
-               <Font size="18.0" />
-            </font>
-         </Text>
-         <Text fx:id="marketSell" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="180" textAlignment="RIGHT" wrappingWidth="50.0" AnchorPane.bottomAnchor="7.0" AnchorPane.rightAnchor="0.0">
-            <font>
-               <Font size="18.0" />
-            </font>
-         </Text>
-         <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Player" wrappingWidth="55.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="7.0">
-            <font>
-               <Font name="System Bold" size="18.0" />
-            </font>
-         </Text>
-         <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Market" wrappingWidth="70.0" AnchorPane.bottomAnchor="7.0" AnchorPane.leftAnchor="0.0">
-            <font>
-               <Font name="System Bold" size="18.0" />
-            </font>
-         </Text>
-      </AnchorPane>
-      <ImageView fx:id="sellTendency" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true" translateY="10.0">
          <HBox.margin>
-            <Insets bottom="15.0" left="10.0" right="5.0" top="10.0" />
+            <Insets left="5.0" />
          </HBox.margin>
-      </ImageView>
-      <Rectangle fill="#d8d8d8" height="70.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="2.0" />
-      <AnchorPane maxHeight="1.7976931348623157E308" minWidth="115.0" HBox.hgrow="ALWAYS">
+      </AnchorPane>
+      <AnchorPane prefWidth="0.0" HBox.hgrow="ALWAYS" />
+      <AnchorPane>
          <HBox.margin>
-            <Insets left="10.0" right="10.0" />
+            <Insets left="10.0" right="10.0"/>
+         </HBox.margin>
+         <ImageView fx:id="buyTendency" fitHeight="30.0" fitWidth="30.0" layoutY="20.0" pickOnBounds="true"
+                    preserveRatio="true"/>
+      </AnchorPane>
+      <Rectangle fill="#d8d8d8" height="70.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="2.0" />
+      <AnchorPane maxHeight="1.7976931348623157E308" minWidth="140.0" HBox.hgrow="ALWAYS">
+         <Text fx:id="playerSell" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="1337" textAlignment="RIGHT" wrappingWidth="50.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="7.0">
+            <font>
+               <Font size="18.0" />
+            </font>
+         </Text>
+         <Text fx:id="marketSell" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="1337" textAlignment="RIGHT" wrappingWidth="50.0" AnchorPane.bottomAnchor="7.0" AnchorPane.rightAnchor="0.0">
+            <font>
+               <Font size="18.0" />
+            </font>
+         </Text>
+         <Text fill="#d8d8d8" layoutX="30.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Player" wrappingWidth="55.0" AnchorPane.topAnchor="7.0">
+            <font>
+               <Font name="System Bold" size="18.0" />
+            </font>
+         </Text>
+         <Text fill="#d8d8d8" layoutX="30.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Market" wrappingWidth="70.0" AnchorPane.bottomAnchor="7.0">
+            <font>
+               <Font name="System Bold" size="18.0" />
+            </font>
+         </Text>
+         <Text fill="#d8d8d8" layoutX="3.0" layoutY="40.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Sell" textAlignment="CENTER" wrappingWidth="25.0" AnchorPane.leftAnchor="0.0">
+            <font>
+               <Font size="13.0" />
+            </font>
+         </Text>
+         <HBox.margin>
+            <Insets left="5.0" />
+         </HBox.margin>
+      </AnchorPane>
+      <AnchorPane prefWidth="0.0" HBox.hgrow="ALWAYS" />
+      <AnchorPane>
+         <HBox.margin>
+            <Insets left="10.0" right="10.0"/>
+         </HBox.margin>
+         <ImageView fx:id="sellTendency" fitHeight="30.0" fitWidth="30.0" layoutY="20.0" pickOnBounds="true"
+                    preserveRatio="true" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"/>
+      </AnchorPane>
+      <Rectangle fill="#d8d8d8" height="70.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="2.0" />
+      <AnchorPane maxHeight="1.7976931348623157E308" minWidth="110.0" HBox.hgrow="ALWAYS">
+         <HBox.margin>
+            <Insets left="10.0" right="5.0" />
          </HBox.margin>
          <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Diff" wrappingWidth="55.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="7.0">
             <font>

@@ -6,7 +6,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
-<SplitPane dividerPositions="0.8527" orientation="VERTICAL" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.crass.poetradehelper.Main">
+<SplitPane dividerPositions="0.845" orientation="VERTICAL" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.crass.poetradehelper.Main">
    <items>
         <TabPane maxHeight="1.7976931348623157E308" tabClosingPolicy="UNAVAILABLE">
             <tabs>
@@ -14,11 +14,7 @@
                     <content>
                         <AnchorPane>
                             <children>
-                                <ListView fx:id="currencyList" styleClass="deal-list" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                           <padding>
-                              <Insets bottom="5.0" />
-                           </padding>
-                        </ListView>
+                                <ListView fx:id="currencyList" styleClass="deal-list" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                             </children>
                         </AnchorPane>
                     </content>
@@ -27,15 +23,7 @@
                     <content>
                         <AnchorPane>
                             <children>
-                                <VBox maxHeight="1.7976931348623157E308" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                    <children>
-                                        <ListView fx:id="playerDealList" maxHeight="1.7976931348623157E308" styleClass="deal-list" VBox.vgrow="ALWAYS">
-                                 <VBox.margin>
-                                    <Insets bottom="5.0" />
-                                 </VBox.margin>
-                              </ListView>
-                                    </children>
-                                </VBox>
+                                  <ListView fx:id="playerDealList" maxHeight="1.7976931348623157E308" styleClass="deal-list" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                             </children>
                         </AnchorPane>
                     </content>
@@ -259,7 +247,7 @@
                   </CheckBox>
                   </children>
                <VBox.margin>
-                  <Insets top="5.0" />
+                  <Insets />
                </VBox.margin>
               </HBox>
               <HBox VBox.vgrow="ALWAYS">
@@ -279,8 +267,14 @@
                           </HBox.margin>
                       </Label>
                   </children>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
               </HBox>
          </children>
+         <padding>
+            <Insets bottom="5.0" top="5.0" />
+         </padding>
       </VBox>
    </items>
 </SplitPane>
