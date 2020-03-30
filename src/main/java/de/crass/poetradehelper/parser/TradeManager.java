@@ -600,6 +600,13 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
         PropertyManager.getInstance().setProp("trade_data_source", value);
     }
 
+    public String getCurrencyValuePercentage(float amount, CurrencyID primary, CurrencyID secondary) {
+        float primaryValue = TradeManager.getInstance().getCurrencyValue(primary, CurrencyID.CHAOS);
+        float secondaryValue = TradeManager.getInstance().getCurrencyValue(secondary, CurrencyID.CHAOS);
+        int percentage = Math.round(amount * secondaryValue * 100 / primaryValue) - 100;
+        return (percentage >= 0 ? "+" : "") + percentage + "%";
+    }
+
     public interface DealParseListener {
         void onUpdateStarted();
 

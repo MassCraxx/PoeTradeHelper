@@ -60,7 +60,7 @@ public class PropertyManager {
     private final String defaultExcessiveTreshold = "60";
 
     private final String defaultCurrencyFilterString = "fuse,regret,jew,chisel,gcp,chrom,regal,alt,scour,alch";
-    private final String defaultPrimaryCurrencyString = "exa,divine,mir,mirror-shard";
+    private final String defaultPrimaryCurrencyString = "mir,mirror-shard,exa,blessing-chayula,divine,exalted-shard";
 
     // Current Values
     private ObservableList<CurrencyID> currencyFilterList;

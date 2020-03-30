@@ -34,12 +34,12 @@
                <Font name="System Bold" size="18.0" />
             </font>
          </Text>
-         <Text fx:id="offersText" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="40" textAlignment="RIGHT" wrappingWidth="60.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="7.0">
+         <Text fx:id="offersText" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="40" textAlignment="RIGHT" wrappingWidth="70.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="7.0">
             <font>
                <Font size="18.0" />
             </font>
          </Text>
-         <Text fx:id="timestamp" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="13:37" textAlignment="RIGHT" wrappingWidth="60.0" AnchorPane.bottomAnchor="7.0" AnchorPane.rightAnchor="0.0">
+         <Text fx:id="timestamp" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="13:37" textAlignment="RIGHT" wrappingWidth="70.0" AnchorPane.bottomAnchor="7.0" AnchorPane.rightAnchor="0.0">
             <font>
                <Font size="18.0" />
             </font>
@@ -54,12 +54,12 @@
          <HBox.margin>
             <Insets />
          </HBox.margin>
-         <Text fx:id="buyOffer" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="200" textAlignment="RIGHT" wrappingWidth="60.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="7.0">
+         <Text fx:id="buyOffer" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="200" textAlignment="RIGHT" wrappingWidth="70.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="7.0">
             <font>
                <Font size="18.0" />
             </font>
          </Text>
-         <Text fx:id="sellOffer" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="195" textAlignment="RIGHT" wrappingWidth="60.0" AnchorPane.bottomAnchor="7.0" AnchorPane.rightAnchor="0.0">
+         <Text fx:id="sellOffer" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="195" textAlignment="RIGHT" wrappingWidth="70.0" AnchorPane.bottomAnchor="7.0" AnchorPane.rightAnchor="0.0">
             <font>
                <Font size="18.0" />
             </font>
@@ -94,12 +94,12 @@
                <Font name="System Bold" size="18.0" />
             </font>
          </Text>
-         <Text fx:id="diff" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="14" textAlignment="RIGHT" wrappingWidth="60.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="7.0">
+         <Text fx:id="diff" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="14" textAlignment="RIGHT" wrappingWidth="70.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="7.0">
             <font>
                <Font size="18.0" />
             </font>
          </Text>
-         <Text fx:id="diffValue" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="-12,55c" textAlignment="RIGHT" wrappingWidth="60.0" AnchorPane.bottomAnchor="7.0" AnchorPane.rightAnchor="0.0">
+         <Text fx:id="diffValue" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="-12,55c" textAlignment="RIGHT" wrappingWidth="70.0" AnchorPane.bottomAnchor="7.0" AnchorPane.rightAnchor="0.0">
             <font>
                <Font size="18.0" />
             </font>

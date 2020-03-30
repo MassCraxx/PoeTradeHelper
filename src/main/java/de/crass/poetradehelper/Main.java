@@ -374,24 +374,31 @@ public class Main extends Application implements TradeManager.DealParseListener,
         valueColumn.setText("Price");
         valueColumn.setCellValueFactory(param -> new SimpleStringProperty(prettyFloat(param.getValue().getBuyAmount() / param.getValue().getSellAmount())));
         valueColumn.setPrefWidth(50);
+        valueColumn.setStyle("-fx-alignment: CENTER-RIGHT;");
+
+        TableColumn<CurrencyOffer, String> buyPercentageColumn = new TableColumn<>();
+        buyPercentageColumn.setText("%");
+        buyPercentageColumn.setCellValueFactory(param -> {
+            float amount = param.getValue().getBuyAmount() / param.getValue().getSellAmount();
+            String percentage = tradeManager.getCurrencyValuePercentage(amount, PropertyManager.getInstance().getPrimaryCurrency(), param.getValue().getBuyID());
+            return new SimpleStringProperty(percentage);
+        });
+        buyPercentageColumn.setPrefWidth(50);
+        buyPercentageColumn.setStyle("-fx-alignment: CENTER-RIGHT;");
 
         TableColumn<CurrencyOffer, Number> stockColumn = new TableColumn<>();
         stockColumn.setText("Stock");
         stockColumn.setCellValueFactory(stockCellFactory);
         stockColumn.setPrefWidth(50);
+        stockColumn.setStyle("-fx-alignment: CENTER-RIGHT;");
 
         TableColumn<CurrencyOffer, String> playerColumn = new TableColumn<>();
         playerColumn.setText("Character");
         playerColumn.setCellValueFactory(playerCellFactory);
-        playerColumn.setPrefWidth(200);
-
-
-//        TableColumn<CurrencyOffer, String> apiColumn = new TableColumn<>();
-//        apiColumn.setText("API");
-//        apiColumn.setCellValueFactory(param -> new SimpleStringProperty((param.getValue().getStock() < 0) ? "" : "X"));
+        playerColumn.setPrefWidth(155);
 
         buyOfferTable.getColumns().clear();
-        buyOfferTable.getColumns().addAll(valueColumn, stockColumn, playerColumn);
+        buyOfferTable.getColumns().addAll(valueColumn,buyPercentageColumn, stockColumn, playerColumn);
 
         buyOfferTable.setContextMenu(new OfferContextMenu(buyOfferTable, offerSecondary));
 
@@ -400,23 +407,31 @@ public class Main extends Application implements TradeManager.DealParseListener,
         sellValueColumn.setText("Price");
         sellValueColumn.setCellValueFactory(param -> new SimpleStringProperty(prettyFloat(param.getValue().getSellAmount() / param.getValue().getBuyAmount())));
         sellValueColumn.setPrefWidth(50);
+        sellValueColumn.setStyle("-fx-alignment: CENTER-RIGHT;");
+
+        TableColumn<CurrencyOffer, String> sellPercentageColumn = new TableColumn<>();
+        sellPercentageColumn.setText("%");
+        sellPercentageColumn.setCellValueFactory(param -> {
+            float amount = param.getValue().getSellAmount() / param.getValue().getBuyAmount();
+            String percentage = tradeManager.getCurrencyValuePercentage(amount, PropertyManager.getInstance().getPrimaryCurrency(), param.getValue().getSellID());
+            return new SimpleStringProperty(percentage);
+        });
+        sellPercentageColumn.setPrefWidth(50);
+        sellPercentageColumn.setStyle("-fx-alignment: CENTER-RIGHT;");
 
         TableColumn<CurrencyOffer, Number> sellStockColumn = new TableColumn<>();
         sellStockColumn.setText("Stock");
         sellStockColumn.setCellValueFactory(stockCellFactory);
         sellStockColumn.setPrefWidth(50);
+        sellStockColumn.setStyle("-fx-alignment: CENTER-RIGHT;");
 
         TableColumn<CurrencyOffer, String> sellPlayerColumn = new TableColumn<>();
         sellPlayerColumn.setText("Character");
         sellPlayerColumn.setCellValueFactory(playerCellFactory);
-        sellPlayerColumn.setPrefWidth(200);
-
-//        TableColumn<CurrencyOffer, String> sellApiColumn = new TableColumn<>();
-//        sellApiColumn.setText("API");
-//        sellApiColumn.setCellValueFactory(param -> new SimpleStringProperty((param.getValue().getStock() < 0) ? "" : "X"));
+        sellPlayerColumn.setPrefWidth(155);
 
         sellOfferTable.getColumns().clear();
-        sellOfferTable.getColumns().addAll(sellValueColumn, sellStockColumn, sellPlayerColumn);
+        sellOfferTable.getColumns().addAll(sellValueColumn, sellPercentageColumn, sellStockColumn, sellPlayerColumn);
         sellOfferTable.setContextMenu(new OfferContextMenu(sellOfferTable, offerSecondary));
 
 
@@ -471,9 +486,9 @@ public class Main extends Application implements TradeManager.DealParseListener,
         updateValuesButton.setOnAction(event -> tradeManager.updateCurrencyValues());
 
         valueInputCB.setItems(currencies);
-        valueInputCB.setValue(CurrencyID.getByTradeID("exa"));
+        valueInputCB.setValue(CurrencyID.EXALTED);
         valueOutputCB.setItems(currencies);
-        valueOutputCB.setValue(CurrencyID.getByTradeID("chaos"));
+        valueOutputCB.setValue(CurrencyID.CHAOS);
         valueOutputCB.setOnAction(event -> calculateValue());
         valueInputCB.setOnAction(event -> calculateValue());
 

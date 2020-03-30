@@ -7,6 +7,9 @@ import java.util.Random;
 import java.util.Set;
 
 public class CurrencyID {
+    public static CurrencyID CHAOS = new CurrencyID(4, "chaos", "Chaos Orb");
+    public static CurrencyID EXALTED = new CurrencyID(6, "exa", "Exalted Orb");
+
     private int id;
     private String tradeID;
     private String displayName;
@@ -19,7 +22,7 @@ public class CurrencyID {
         tradeID = object.getString("tradeId");
     }
 
-    public CurrencyID(int ID, String tradeID, String displayName) {
+    private CurrencyID(int ID, String tradeID, String displayName) {
         id = ID;
         this.tradeID = tradeID;
         this.displayName = displayName;
@@ -43,15 +46,18 @@ public class CurrencyID {
     }
 
     public static CurrencyID getByTradeID(String ID) {
+        if (ID.equals("exa")) {
+            return EXALTED;
+        } else if(ID.equals("chaos")){
+            return CHAOS;
+        }
+
         for (CurrencyID id : getValues()) {
             if (id.getTradeID().equals(ID)) {
                 return id;
             }
         }
 
-        if (ID.equals("exa")) {
-            return new CurrencyID(6, "exa", "Exalted Orb");
-        }
         return null;
     }
 

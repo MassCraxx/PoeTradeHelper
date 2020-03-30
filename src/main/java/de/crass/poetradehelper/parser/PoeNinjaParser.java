@@ -130,6 +130,7 @@ public class PoeNinjaParser {
                 }
             }
         }
+        currentRates.put(CurrencyID.CHAOS, 1f);
 
         if(listener != null){
             listener.onRatesFetched();
