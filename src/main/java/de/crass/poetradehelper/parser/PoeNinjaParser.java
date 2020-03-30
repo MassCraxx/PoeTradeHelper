@@ -145,7 +145,7 @@ public class PoeNinjaParser {
     }
 
     Float getCurrentCValueFor(CurrencyID id) {
-        if (id.getTradeID().equals("chaos")) {
+        if (id.equals(CurrencyID.CHAOS)) {
             return 1f;
         }
         Float value = getCurrentRates().get(id);

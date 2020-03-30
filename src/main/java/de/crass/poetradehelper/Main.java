@@ -434,10 +434,10 @@ public class Main extends Application implements TradeManager.DealParseListener,
         sellOfferTable.getColumns().addAll(sellValueColumn, sellPercentageColumn, sellStockColumn, sellPlayerColumn);
         sellOfferTable.setContextMenu(new OfferContextMenu(sellOfferTable, offerSecondary));
 
-
         refreshBtn.setOnAction(event -> {
-            if (offerSecondary.getValue() != null) {
-                tradeManager.updateOffersForCurrency(offerSecondary.getValue(), true);
+            CurrencyID newValue = offerSecondary.getValue();
+            if (newValue != null) {
+                tradeManager.updateOffersForCurrency(newValue, true);
             }
         });
 
@@ -849,6 +849,11 @@ public class Main extends Application implements TradeManager.DealParseListener,
     @Override
     public void onUpdateFinished() {
         LogManager.getInstance().log(TradeManager.class, "Update took " + prettyFloat((System.currentTimeMillis() - updateStart) / 1000f) + " seconds");
+        CurrencyID newValue = offerSecondary.getValue();
+        if (newValue != null) {
+            buyOfferTable.setItems(tradeManager.getBuyOffers(newValue));
+            sellOfferTable.setItems(tradeManager.getSellOffers(newValue));
+        }
     }
 
     private long parseStartTime;

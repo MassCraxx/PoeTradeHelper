@@ -46,9 +46,9 @@ public class CurrencyID {
     }
 
     public static CurrencyID getByTradeID(String ID) {
-        if (ID.equals("exa")) {
+        if (ID.equals(EXALTED.tradeID)) {
             return EXALTED;
-        } else if(ID.equals("chaos")){
+        } else if(ID.equals(CHAOS.tradeID)){
             return CHAOS;
         }
 
