@@ -378,7 +378,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
         TableColumn<CurrencyOffer, String> playerColumn = new TableColumn<>();
         playerColumn.setText("Character");
         playerColumn.setCellValueFactory(playerCellFactory);
-        playerColumn.setPrefWidth(155);
+        playerColumn.setPrefWidth(140);
 
         buyOfferTable.getColumns().clear();
         buyOfferTable.getColumns().addAll(valueColumn, buyPercentageColumn, stockColumn, playerColumn);
@@ -411,7 +411,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
         TableColumn<CurrencyOffer, String> sellPlayerColumn = new TableColumn<>();
         sellPlayerColumn.setText("Character");
         sellPlayerColumn.setCellValueFactory(playerCellFactory);
-        sellPlayerColumn.setPrefWidth(155);
+        sellPlayerColumn.setPrefWidth(140);
 
         sellOfferTable.getColumns().clear();
         sellOfferTable.getColumns().addAll(sellValueColumn, sellPercentageColumn, sellStockColumn, sellPlayerColumn);
