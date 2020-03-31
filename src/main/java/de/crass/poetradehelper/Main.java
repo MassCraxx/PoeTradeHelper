@@ -64,13 +64,6 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
     @FXML
     private ListView<CurrencyDeal> playerDealList;
-
-    @FXML
-    private CheckBox voiceReadCurOffers;
-
-    @FXML
-    private CheckBox voiceReadTradeOffers;
-
     @FXML
     private TextArea console;
 
@@ -132,9 +125,6 @@ public class Main extends Application implements TradeManager.DealParseListener,
     private Button updateButton;
 
     @FXML
-    private CheckBox voiceReadChat;
-
-    @FXML
     private CheckBox filterInvalid;
 
     @FXML
@@ -142,12 +132,6 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
     @FXML
     private Button addCurrencyFilterBtn;
-
-    @FXML
-    private CheckBox voiceReadAFK;
-
-    @FXML
-    private CheckBox voiceRandom;
 
     @FXML
     private Button restoreCurrencyFilterBtn;
@@ -160,9 +144,6 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
     @FXML
     private Button updateValuesButton;
-
-//    @FXML
-//    private Button updatePlayerButton;
 
     @FXML
     private TextField valueInputText;
@@ -255,7 +236,6 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
     @FXML
     void initialize() {
-
         // Setup console
         LogManager.getInstance().setConsole(console);
 
@@ -341,10 +321,8 @@ public class Main extends Application implements TradeManager.DealParseListener,
                 tradeManager.cancelUpdate();
                 updateButton.setDisable(true);
                 updateButton.setText("Cancel...");
-//                    updatePlayerButton.setDisable(true);
             } else {
                 tradeManager.updateOffers(false);
-//                    updatePlayerButton.setDisable(true);
             }
         });
 
@@ -403,7 +381,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
         playerColumn.setPrefWidth(155);
 
         buyOfferTable.getColumns().clear();
-        buyOfferTable.getColumns().addAll(valueColumn,buyPercentageColumn, stockColumn, playerColumn);
+        buyOfferTable.getColumns().addAll(valueColumn, buyPercentageColumn, stockColumn, playerColumn);
 
         buyOfferTable.setContextMenu(new OfferContextMenu(buyOfferTable, offerSecondary));
 
@@ -653,40 +631,6 @@ public class Main extends Application implements TradeManager.DealParseListener,
                 }
             });
 
-//            voiceReadAFK.setSelected(poeChatTTS.isReadAFK());
-//            voiceReadAFK.setOnAction(event -> {
-//                poeChatTTS.setReadAFK(voiceReadAFK.isSelected());
-//                PropertyManager.getInstance().setProp(PropertyManager.VOICE_AFK, String.valueOf(voiceReadAFK
-//                        .isSelected()));
-//            });
-//
-//            voiceReadChat.setSelected(poeChatTTS.isReadChatMessages());
-//            voiceReadChat.setOnAction(event -> {
-//                poeChatTTS.setReadChatMessages(voiceReadChat.isSelected());
-//                PropertyManager.getInstance().setProp(PropertyManager.VOICE_CHAT, String.valueOf(voiceReadChat
-//                        .isSelected()));
-//            });
-//
-//            voiceReadCurOffers.setSelected(poeChatTTS.isReadCurrencyRequests());
-//            voiceReadCurOffers.setOnAction(event -> {
-//                poeChatTTS.setReadCurrencyRequests(voiceReadCurOffers.isSelected());
-//                PropertyManager.getInstance().setProp(PropertyManager.VOICE_CURRENCY, String.valueOf(voiceReadCurOffers
-//                        .isSelected()));
-//            });
-//
-//            voiceReadTradeOffers.setSelected(poeChatTTS.isReadTradeRequests());
-//            voiceReadTradeOffers.setOnAction(event -> {
-//                poeChatTTS.setReadTradeRequests(voiceReadTradeOffers.isSelected());
-//                PropertyManager.getInstance().setProp(PropertyManager.VOICE_TRADE, String.valueOf(voiceReadTradeOffers.isSelected()));
-//            });
-//
-//            voiceRandom.setSelected(poeChatTTS.isRandomizeMessages());
-//            voiceRandom.setOnAction(event -> {
-//                poeChatTTS.setRandomizeMessages(voiceRandom.isSelected());
-//                PropertyManager.getInstance().setProp(PropertyManager.VOICE_RANDOMIZE, String.valueOf
-//                        (voiceRandom.isSelected()));
-//            });
-
             volumeLabel.setTooltip(new Tooltip("Set volume of the voice speaker"));
 
             int volume = PropertyManager.getInstance().getVoiceVolume();
@@ -816,20 +760,10 @@ public class Main extends Application implements TradeManager.DealParseListener,
     private void setDisableVoiceControls() {
         String balconMissingText = "Place balcon.exe next to the app to enable this feature.";
         voiceActive.setTooltip(new Tooltip(balconMissingText));
-        voiceReadTradeOffers.setDisable(true);
-        voiceReadTradeOffers.setTooltip(new Tooltip(balconMissingText));
-        voiceReadChat.setDisable(true);
-        voiceReadChat.setTooltip(new Tooltip(balconMissingText));
-        voiceReadCurOffers.setDisable(true);
-        voiceReadCurOffers.setTooltip(new Tooltip(balconMissingText));
         volumeLabel.setDisable(true);
         volumeLabel.setTooltip(new Tooltip(balconMissingText));
         volumeSlider.setDisable(true);
         volumeSlider.setTooltip(new Tooltip(balconMissingText));
-        voiceReadAFK.setDisable(true);
-        voiceReadAFK.setTooltip(new Tooltip(balconMissingText));
-        voiceRandom.setDisable(true);
-        voiceRandom.setTooltip(new Tooltip(balconMissingText));
         voiceTestButton.setDisable(true);
         voiceTestButton.setTooltip(new Tooltip(balconMissingText));
         voiceShoutoutWords.setDisable(true);
@@ -944,7 +878,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
         return prettyFloat(in, true, false);
     }
 
-    public static String prettyFloat(float in, boolean hideEmptyDecimal){
+    public static String prettyFloat(float in, boolean hideEmptyDecimal) {
         return prettyFloat(in, hideEmptyDecimal, false);
     }
 
@@ -990,7 +924,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
     }
 
     public static void openInBrowser(String query) {
-        if(query == null || query.isEmpty() || query.equals("null")){
+        if (query == null || query.isEmpty() || query.equals("null")) {
             LogManager.getInstance().log(Main.class, "Could not open browser. Query was null!");
             return;
         }
@@ -1026,5 +960,4 @@ public class Main extends Application implements TradeManager.DealParseListener,
             LogManager.getInstance().log(PoeTradeWebParser.class, "Error opening browser. " + e);
         }
     }
-
 }

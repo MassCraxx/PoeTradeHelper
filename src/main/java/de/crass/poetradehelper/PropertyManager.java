@@ -40,12 +40,7 @@ public class PropertyManager {
     public static final String PLAYER_LIST = "player_list";
     public static final String POE_PATH = "poe_path";
     public static final String VOICE_VOLUME = "voice_volume";
-    public static final String VOICE_CHAT = "voice_read_chat";
-    public static final String VOICE_TRADE = "voice_read_trade_offers";
-    public static final String VOICE_CURRENCY = "voice_read_currency_offers";
     public static final String VOICE_SPEAKER = "voice_speaker";
-    public static final String VOICE_AFK = "voice_read_afk";
-    public static final String VOICE_RANDOMIZE = "voice_randomize_messages";
     public static final String UPDATE_DELAY_MINUTES = "auto_update_delay_minutes";
     public static final String FILTER_MULTIPLE_TRANSACTIONS = "filter_multiple_transactions";
 
