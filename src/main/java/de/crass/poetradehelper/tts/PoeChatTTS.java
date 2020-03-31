@@ -79,17 +79,17 @@ public class PoeChatTTS implements FileListener{
             return;
         }
 
-        boolean wasRunning = false;
-        if(isRunning){
-            wasRunning = true;
-            stopTTS();
-        }
+//        boolean wasRunning = false;
+//        if(isRunning){
+//            wasRunning = true;
+//            stopTTS();
+//        }
 
         this.parseConfig = parseConfig;
 
-        if(wasRunning) {
-            startTTS();
-        }
+//        if(wasRunning) {
+//            startTTS();
+//        }
     }
 
     private void processNewLine(String newLine) {
