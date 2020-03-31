@@ -23,7 +23,7 @@ public class PoeTradeApiParser extends WebParser {
     }
 
     public void fetchOffers(CurrencyID primaryCurrency, CurrencyID secondaryCurrency, String currentLeague){
-        fetchOffers(primaryCurrency, secondaryCurrency, currentLeague, 0);
+        fetchOffers(primaryCurrency, secondaryCurrency, currentLeague, Integer.parseInt(PropertyManager.getInstance().getProp("trade_data_retries", "0")));
     }
 
     public void fetchOffers(CurrencyID primaryCurrency, CurrencyID secondaryCurrency, String currentLeague, int retries) {
@@ -114,9 +114,9 @@ public class PoeTradeApiParser extends WebParser {
                 }
             }
         } catch (SocketTimeoutException e) {
-            if (retries < Integer.parseInt(PropertyManager.getInstance().getProp("trade_data_retries", "0"))) {
+            if (!cancel && retries > 0) {
                 LogManager.getInstance().log(getClass(), IDENTIFIER + " took too long to respond. Retrying retrying " + retries + " more time(s)");
-                fetchOffers(primaryCurrency, secondaryCurrency, currentLeague, retries + 1);
+                fetchOffers(primaryCurrency, secondaryCurrency, currentLeague, retries - 1);
             } else {
                 LogManager.getInstance().log(getClass(), IDENTIFIER + " took too long to respond. It may be overloaded.");
             }

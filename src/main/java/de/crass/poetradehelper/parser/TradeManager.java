@@ -78,7 +78,8 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
             pauseUpdateTask();
             updateOffers(clear, true, PropertyManager.getInstance().getFilterList());
         } else {
-            LogManager.getInstance().log(getClass(), "Prevented update attempt while updating!");
+//            LogManager.getInstance().log(getClass(), "Prevented update attempt while updating!");
+            System.out.println("Prevented update attempt while updating!");
         }
     }
 
@@ -113,7 +114,8 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
 
             webParser.updateCurrencies(currencyIDList, clear, async);
         } else {
-            LogManager.getInstance().log(getClass(), "Prevented update attempt while updating!");
+//            LogManager.getInstance().log(getClass(), "Prevented update attempt while updating!");
+            System.out.println("Prevented update attempt while updating!");
         }
     }
 
@@ -140,7 +142,8 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
 
             webParser.updateCurrency(secondaryCurrencyID, async);
         } else {
-            LogManager.getInstance().log(getClass(), "Prevented update attempt while updating!");
+//            LogManager.getInstance().log(getClass(), "Prevented update attempt while updating!");
+            System.out.println("Prevented update attempt while updating!");
         }
     }
 

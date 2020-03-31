@@ -53,7 +53,7 @@ public class PoeChatTTS implements FileListener{
     private boolean useIncludeExclude = false;
 
     // Threads and Processes
-    private Process speechProcess;
+    private List<Process> speechProcesses = new LinkedList<>();
     private LogTailer logTailer;
 
     private ExecutorService executorService;
@@ -93,7 +93,7 @@ public class PoeChatTTS implements FileListener{
     }
 
     private void processNewLine(String newLine) {
-        LogManager.getInstance().log(getClass(), "Processing: " + newLine);
+//        LogManager.getInstance().log(getClass(), "Processing: " + newLine);
 
         if (parseConfig == null) {
             return;
@@ -133,7 +133,13 @@ public class PoeChatTTS implements FileListener{
 
                 StringBuilder log = new StringBuilder();
                 for (int g = 0; g <= m.groupCount(); g++) {
-                    voiceOutput = voiceOutput.replace("(" + g + ")", m.group(g));
+                    String groupInput = m.group(g);
+                    groupInput = groupInput.replace("_", " ");
+                    // Check if readable
+                    if (!Pattern.matches("[A-Za-z0-9 ]+", groupInput)) {
+                        groupInput = "something i can not pronounce";
+                    }
+                    voiceOutput = voiceOutput.replace("(" + g + ")", groupInput);
 
                     log.append(g)
                             .append(":(")
@@ -331,11 +337,6 @@ public class PoeChatTTS implements FileListener{
     }
 
     public void stopTTS() {
-        if (speechProcess != null) {
-            speechProcess.destroy();
-            speechProcess = null;
-        }
-
         if (logTailer != null) {
             logTailer.stopRunning();
             logTailer = null;
@@ -398,15 +399,20 @@ public class PoeChatTTS implements FileListener{
     public void textToSpeech(String text, boolean interrupt) throws IOException {
         LogManager.getInstance().log(getClass(), "Voice: \"" + text + '\"');
 
-        if (interrupt && speechProcess != null && speechProcess.isAlive()) {
-            speechProcess.destroy();
+        if (interrupt && !speechProcesses.isEmpty()) {
+            for (Process speechProcess : speechProcesses) {
+                if (speechProcess.isAlive()) {
+                    speechProcess.destroy();
+                }
+            }
+            speechProcesses.clear();
         }
 
         String voiceParam = "";
         if (voice != null) {
             voiceParam = " -n " + voice;
         }
-        speechProcess = Runtime.getRuntime().exec("balcon -t \"" + text + "\"" + voiceParam + " -v " + volume + " -s " + speed);
+        speechProcesses.add(Runtime.getRuntime().exec("balcon -t \"" + text + "\"" + voiceParam + " -v " + volume + " -s " + speed));
 
         // If not waiting here the order gets messed up
         if (!interrupt) {
@@ -597,6 +603,13 @@ public class PoeChatTTS implements FileListener{
         isRunning = false;
         if (listener != null) {
             listener.onShutDown();
+        }
+
+        if (speechProcesses != null && !speechProcesses.isEmpty()) {
+            for (Process speechProcess : speechProcesses) {
+                speechProcess.destroy();
+            }
+            speechProcesses.clear();
         }
     }
 

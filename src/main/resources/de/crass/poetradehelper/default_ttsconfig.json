@@ -1,6 +1,6 @@
 {
   "placeholders": {
-    "test": "%20%attention , %name %10%attribute %buy Exalted Orb for his Chaos Orb, %20%end",
+    "test": "This is a test",
     "buy": "wants to buy your;wants your;wants to trade your",
     "name": "an exile;someone;some guy;a player;some dude;this cheeky scrub lord;that newbie",
     "attention": "guess what;check that out;wait a second;hold on!;what the fuck;what the actual fuck!;did you see;listen;DUDE;nice;hello there;hey there;holy cow!;Holy Fuck!;wonderful;watch out",
@@ -26,14 +26,14 @@
     },
     {
       "active": true,
-      "pattern": "] @From (.+?): .+your \\\\d+ (.+) for my \\\\d+ (.+) i",
-      "output": "%20%attention %name %10%attribute %buy (2) for his (3) %10%end",
-      "probability": 50
+      "pattern": "] @Fro.+\\s(.+):.+your \\d+ (.+) for my \\d+ (.+) in",
+      "output": "%20%attention , %name %10%attribute %buy (2) for his (3), %10%end",
+      "probability": 100
     },
     {
       "active": true,
-      "pattern": "] @From (.+?):.+ buy your (.+) listed for \\\\d+ (.+) in",
-      "output": "%20%attention (1) %10%attribute %buy (2) for his (3) %10%end",
+      "pattern": "] @Fro.+\\s(.+):.+ buy your (.+) listed for \\d+ (.+) in",
+      "output": "%20%attention , %name %10%attribute %buy (2) for his (3), %10%end",
       "probability": 100
     }
   ]

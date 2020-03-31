@@ -27,6 +27,7 @@ public class LogTailer implements Runnable {
         }
     }
 
+    int skipped = 0;
     @Override
     public void run() {
         if(logFile == null || !logFile.exists()){
@@ -39,18 +40,22 @@ public class LogTailer implements Runnable {
         if (onlyLogNewLines) {
             lastKnownPosition = logFile.length();
         }
-        try {
+        try (RandomAccessFile readWriteFileAccess = new RandomAccessFile(logFile, "r")) {
+            readWriteFileAccess.seek(lastKnownPosition);
+            // Reading and writing file
             while (running) {
                 Thread.sleep(delay);
-                long fileLength = logFile.length();
-                if (fileLength < lastKnownPosition) {
+                long fileLength = readWriteFileAccess.length();
+                if (skipped >= 5) {
+                    LogManager.getInstance().log(getClass(), "LogFile is definitely smaller, resetting to last line.");
                     lastKnownPosition = fileLength;
-                } else if (fileLength > lastKnownPosition) {
-
-                    // Reading and writing file
-                    RandomAccessFile readWriteFileAccess = new RandomAccessFile(logFile, "rw");
-//                    RandomAccessFile readWriteFileAccess = new RandomAccessFile(logFile, "r");
                     readWriteFileAccess.seek(lastKnownPosition);
+                } else if (fileLength < lastKnownPosition) {
+                    // Fix for programs rewriting whole file...
+                    LogManager.getInstance().log(getClass(), "LogFile got smaller, skipping read. (" + fileLength + " < " + lastKnownPosition+")");
+                    skipped++;
+                } else if (fileLength > lastKnownPosition) {
+                    skipped = 0;
                     String currentLine;
                     while ((currentLine = readWriteFileAccess.readLine()) != null) {
                         currentLine = new String(currentLine.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
@@ -59,7 +64,6 @@ public class LogTailer implements Runnable {
                         }
                     }
                     lastKnownPosition = readWriteFileAccess.getFilePointer();
-                    readWriteFileAccess.close();
                 }
             }
         } catch (Exception e) {
