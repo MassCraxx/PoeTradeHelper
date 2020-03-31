@@ -246,7 +246,7 @@
                   <Insets />
                </VBox.margin>
               </HBox>
-              <HBox VBox.vgrow="ALWAYS">
+              <HBox maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS">
                   <children>
                       <VBox maxWidth="1.7976931348623157E308">
                           <children>
@@ -256,8 +256,8 @@
                               <Insets left="5.0" right="5.0" />
                           </HBox.margin>
                       </VBox>
-                      <TextArea fx:id="console" editable="false" minHeight="0.0" nodeOrientation="LEFT_TO_RIGHT" promptText="Status console" wrapText="true" />
-                      <Label fx:id="version" alignment="CENTER" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" minWidth="30.0" text="Version" textAlignment="CENTER" textOverrun="CLIP" HBox.hgrow="ALWAYS">
+                      <TextArea fx:id="console" editable="false" maxWidth="1.7976931348623157E308" minHeight="0.0" nodeOrientation="LEFT_TO_RIGHT" promptText="Status console" wrapText="true" HBox.hgrow="ALWAYS" />
+                      <Label fx:id="version" alignment="CENTER" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" maxWidth="-Infinity" minWidth="-Infinity" text="Version" textAlignment="CENTER" textOverrun="CLIP" HBox.hgrow="ALWAYS">
                           <HBox.margin>
                               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                           </HBox.margin>

@@ -758,14 +758,16 @@ public class Main extends Application implements TradeManager.DealParseListener,
     }
 
     private void setDisableVoiceControls() {
-        String balconMissingText = "Place balcon.exe next to the app to enable this feature.";
-        voiceActive.setTooltip(new Tooltip(balconMissingText));
+        Tooltip tooltip = new Tooltip("Place balcon.exe next to the app and restart to enable this feature.");
+        voiceActive.setTooltip(tooltip);
         volumeLabel.setDisable(true);
-        volumeLabel.setTooltip(new Tooltip(balconMissingText));
+        volumeLabel.setTooltip(tooltip);
         volumeSlider.setDisable(true);
-        volumeSlider.setTooltip(new Tooltip(balconMissingText));
+        volumeSlider.setTooltip(tooltip);
+        reloadConfigBtn.setDisable(true);
+        reloadConfigBtn.setTooltip(tooltip);
         voiceTestButton.setDisable(true);
-        voiceTestButton.setTooltip(new Tooltip(balconMissingText));
+        voiceTestButton.setTooltip(tooltip);
         voiceShoutoutWords.setDisable(true);
         voiceExcludeWords.setDisable(true);
         voiceSpeakerCB.setDisable(true);

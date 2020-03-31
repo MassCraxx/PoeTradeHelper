@@ -288,7 +288,8 @@ public class PoeChatTTS implements FileListener{
                 result.add(voices[i].trim());
             }
         } catch (InterruptedException | IOException e) {
-            LogManager.getInstance().log(getClass(), "Exception during checking voice support. " + e);
+            // Normal if balcon not found
+//            LogManager.getInstance().log(getClass(), "Exception during checking voice support. " + e);
             return null;
         }
 
