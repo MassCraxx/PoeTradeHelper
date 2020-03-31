@@ -24,6 +24,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -58,7 +60,7 @@ import java.util.*;
 public class Main extends Application implements TradeManager.DealParseListener, PoeNinjaParser.PoeNinjaListener, PropertyManager.UICallback {
 
     private static final String title = "PoeTradeHelper";
-    private static final String versionText = "v0.7";
+    private static final String versionText = "v0.8-SNAPSHOT";
 
     @FXML
     private ListView<CurrencyDeal> playerDealList;
@@ -74,6 +76,9 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
     @FXML
     private Button removeCurrencyFilterBtn;
+
+    @FXML
+    private Button reloadConfigBtn;
 
     @FXML
     private ListView<CurrencyDeal> currencyList;
@@ -280,7 +285,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
         PropertyManager.getInstance().storeProperties();
 
         if (poeChatTTS != null && poeChatTTS.isActive()) {
-            poeChatTTS.stopTTS();
+            poeChatTTS.shutdown();
             poeChatTTS = null;
         }
 
@@ -629,11 +634,10 @@ public class Main extends Application implements TradeManager.DealParseListener,
         } else {
             voiceActive.setOnAction(event -> {
                 if (voiceActive.isSelected()) {
-                    poeChatTTS.startTTS();
                     poePath.setDisable(true);
                     String newPath = poePath.getText();
-                    poeChatTTS.setPath(newPath);
                     PropertyManager.getInstance().setPathOfExilePath(newPath);
+                    poeChatTTS.startTTS();
                 } else {
                     poeChatTTS.stopTTS();
                     poePath.setDisable(false);
@@ -649,39 +653,39 @@ public class Main extends Application implements TradeManager.DealParseListener,
                 }
             });
 
-            voiceReadAFK.setSelected(poeChatTTS.isReadAFK());
-            voiceReadAFK.setOnAction(event -> {
-                poeChatTTS.setReadAFK(voiceReadAFK.isSelected());
-                PropertyManager.getInstance().setProp(PropertyManager.VOICE_AFK, String.valueOf(voiceReadAFK
-                        .isSelected()));
-            });
-
-            voiceReadChat.setSelected(poeChatTTS.isReadChatMessages());
-            voiceReadChat.setOnAction(event -> {
-                poeChatTTS.setReadChatMessages(voiceReadChat.isSelected());
-                PropertyManager.getInstance().setProp(PropertyManager.VOICE_CHAT, String.valueOf(voiceReadChat
-                        .isSelected()));
-            });
-
-            voiceReadCurOffers.setSelected(poeChatTTS.isReadCurrencyRequests());
-            voiceReadCurOffers.setOnAction(event -> {
-                poeChatTTS.setReadCurrencyRequests(voiceReadCurOffers.isSelected());
-                PropertyManager.getInstance().setProp(PropertyManager.VOICE_CURRENCY, String.valueOf(voiceReadCurOffers
-                        .isSelected()));
-            });
-
-            voiceReadTradeOffers.setSelected(poeChatTTS.isReadTradeRequests());
-            voiceReadTradeOffers.setOnAction(event -> {
-                poeChatTTS.setReadTradeRequests(voiceReadTradeOffers.isSelected());
-                PropertyManager.getInstance().setProp(PropertyManager.VOICE_TRADE, String.valueOf(voiceReadTradeOffers.isSelected()));
-            });
-
-            voiceRandom.setSelected(poeChatTTS.isRandomizeMessages());
-            voiceRandom.setOnAction(event -> {
-                poeChatTTS.setRandomizeMessages(voiceRandom.isSelected());
-                PropertyManager.getInstance().setProp(PropertyManager.VOICE_RANDOMIZE, String.valueOf
-                        (voiceRandom.isSelected()));
-            });
+//            voiceReadAFK.setSelected(poeChatTTS.isReadAFK());
+//            voiceReadAFK.setOnAction(event -> {
+//                poeChatTTS.setReadAFK(voiceReadAFK.isSelected());
+//                PropertyManager.getInstance().setProp(PropertyManager.VOICE_AFK, String.valueOf(voiceReadAFK
+//                        .isSelected()));
+//            });
+//
+//            voiceReadChat.setSelected(poeChatTTS.isReadChatMessages());
+//            voiceReadChat.setOnAction(event -> {
+//                poeChatTTS.setReadChatMessages(voiceReadChat.isSelected());
+//                PropertyManager.getInstance().setProp(PropertyManager.VOICE_CHAT, String.valueOf(voiceReadChat
+//                        .isSelected()));
+//            });
+//
+//            voiceReadCurOffers.setSelected(poeChatTTS.isReadCurrencyRequests());
+//            voiceReadCurOffers.setOnAction(event -> {
+//                poeChatTTS.setReadCurrencyRequests(voiceReadCurOffers.isSelected());
+//                PropertyManager.getInstance().setProp(PropertyManager.VOICE_CURRENCY, String.valueOf(voiceReadCurOffers
+//                        .isSelected()));
+//            });
+//
+//            voiceReadTradeOffers.setSelected(poeChatTTS.isReadTradeRequests());
+//            voiceReadTradeOffers.setOnAction(event -> {
+//                poeChatTTS.setReadTradeRequests(voiceReadTradeOffers.isSelected());
+//                PropertyManager.getInstance().setProp(PropertyManager.VOICE_TRADE, String.valueOf(voiceReadTradeOffers.isSelected()));
+//            });
+//
+//            voiceRandom.setSelected(poeChatTTS.isRandomizeMessages());
+//            voiceRandom.setOnAction(event -> {
+//                poeChatTTS.setRandomizeMessages(voiceRandom.isSelected());
+//                PropertyManager.getInstance().setProp(PropertyManager.VOICE_RANDOMIZE, String.valueOf
+//                        (voiceRandom.isSelected()));
+//            });
 
             volumeLabel.setTooltip(new Tooltip("Set volume of the voice speaker"));
 
@@ -716,9 +720,18 @@ public class Main extends Application implements TradeManager.DealParseListener,
                 }
             });
 
-            voiceTestButton.setOnAction(event -> poeChatTTS.randomTradeMessage());
+            voiceTestButton.setOnAction(event -> poeChatTTS.testSpeech());
 
             poePath.setText(PropertyManager.getInstance().getPathOfExilePath());
+
+            reloadConfigBtn.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    if (!poeChatTTS.loadConfig()) {
+                        LogManager.getInstance().log(getClass(), "Reload config failed.");
+                    }
+                }
+            });
         }
 
         // Auto Update checkbox
@@ -906,6 +919,8 @@ public class Main extends Application implements TradeManager.DealParseListener,
         if (PropertyManager.LEAGUE_KEY.equals(key)) {
             leagueCB.setValue(value);
             resetUiItems();
+        } else if (PropertyManager.POE_PATH.equals(key)) {
+            poePath.setText(value);
         }
     }
 

@@ -1,0 +1,40 @@
+{
+  "placeholders": {
+    "test": "%20%attention , %name %10%attribute %buy Exalted Orb for his Chaos Orb, %20%end",
+    "buy": "wants to buy your;wants your;wants to trade your",
+    "name": "an exile;someone;some guy;a player;some dude;this cheeky scrub lord;that newbie",
+    "attention": "guess what;check that out;wait a second;hold on!;what the fuck;what the actual fuck!;did you see;listen;DUDE;nice;hello there;hey there;holy cow!;Holy Fuck!;wonderful;watch out",
+    "end": "congratulations;good for you;what a noob;how fortunate;sweet;savage;radical;groovay;awesome;what you gonna do?;you are welcome",
+    "attributes": "with too much cash;here;over there;being generous",
+    "potential": "do it like this;go afk;but seriously;now go out there",
+    "nice": "thats some good shit right there;congratulations;how fortunate;sweet;savage;radical;groovay;awesome;crunchy",
+    "insult": "what a noob;that cheeky scrub lord",
+    "chat": "mentioned something of interest in the chat;says something interesting in the chat"
+  },
+  "patternToOutput": [
+    {
+      "active": true,
+      "pattern": "AFK mode is now ON.",
+      "output": "You just went AFK!",
+      "probability": 100
+    },
+    {
+      "active": false,
+      "pattern": "].+? (.+?): (.+)",
+      "output": "(1) says (2)",
+      "probability": 100
+    },
+    {
+      "active": true,
+      "pattern": "] @From (.+?): .+your \\\\d+ (.+) for my \\\\d+ (.+) i",
+      "output": "%20%attention %name %10%attribute %buy (2) for his (3) %10%end",
+      "probability": 50
+    },
+    {
+      "active": true,
+      "pattern": "] @From (.+?):.+ buy your (.+) listed for \\\\d+ (.+) in",
+      "output": "%20%attention (1) %10%attribute %buy (2) for his (3) %10%end",
+      "probability": 100
+    }
+  ]
+}
