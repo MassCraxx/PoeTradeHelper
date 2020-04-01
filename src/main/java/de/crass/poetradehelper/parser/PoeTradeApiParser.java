@@ -5,10 +5,10 @@ import de.crass.poetradehelper.PropertyManager;
 import de.crass.poetradehelper.model.CurrencyID;
 import de.crass.poetradehelper.model.CurrencyOffer;
 import de.crass.poetradehelper.web.HttpManager;
-import javafx.application.Platform;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.net.SocketTimeoutException;
 
 public class PoeTradeApiParser extends WebParser {
@@ -22,11 +22,11 @@ public class PoeTradeApiParser extends WebParser {
         super(listener);
     }
 
-    public void fetchOffers(CurrencyID primaryCurrency, CurrencyID secondaryCurrency, String currentLeague){
+    public void fetchOffers(CurrencyID primaryCurrency, CurrencyID secondaryCurrency, String currentLeague) throws IOException {
         fetchOffers(primaryCurrency, secondaryCurrency, currentLeague, Integer.parseInt(PropertyManager.getInstance().getProp("trade_data_retries", "0")));
     }
 
-    public void fetchOffers(CurrencyID primaryCurrency, CurrencyID secondaryCurrency, String currentLeague, int retries) {
+    public void fetchOffers(CurrencyID primaryCurrency, CurrencyID secondaryCurrency, String currentLeague, int retries) throws IOException {
         LogManager.getInstance().log(getClass(), "Fetching " + secondaryCurrency + " offers for " + primaryCurrency);
 
         JSONObject status = new JSONObject();
@@ -49,7 +49,7 @@ public class PoeTradeApiParser extends WebParser {
             JSONObject response = HttpManager.getInstance().postJSON(poeTradeURL + currentLeague, String.valueOf(param));
 
             JSONArray offers = response.getJSONArray("result");
-            if(offers == null || offers.length() == 0){
+            if (offers == null || offers.length() == 0) {
                 LogManager.getInstance().log(getClass(), "No offers found for ");
                 return;
             }
@@ -80,10 +80,13 @@ public class PoeTradeApiParser extends WebParser {
             }
 
             JSONObject data = HttpManager.getInstance().getJson(poeFetchURL + query.toString(), "?query=" + id + "&exchange");
-            JSONArray result = data.getJSONArray("result");
+            if (data == null) {
+                return;
+            }
 
+            JSONArray result = data.getJSONArray("result");
             for (Object object : result) {
-                if(object != JSONObject.NULL) {
+                if (object != JSONObject.NULL) {
                     JSONObject json = (JSONObject) object;
                     JSONObject listing = json.getJSONObject("listing");
                     String charName = listing.getJSONObject("account").getString("lastCharacterName");
@@ -120,10 +123,6 @@ public class PoeTradeApiParser extends WebParser {
             } else {
                 LogManager.getInstance().log(getClass(), IDENTIFIER + " took too long to respond. It may be overloaded.");
             }
-        } catch (Exception ex) {
-            Platform.runLater(() -> parseListener.onUpdateError());
-            LogManager.getInstance().log(getClass(), ex.getMessage());
-            ex.printStackTrace();
         }
     }
 

@@ -74,8 +74,8 @@ public class PoeTradeSearcher {
             }
             try {
                 JSONObject response = HttpManager.getInstance().getJson(fetchURL, offerID + "?query=" + searchID);
-                if (!response.has("result")) {
-                    LogManager.getInstance().log(getClass(), "Fetching ItemOffer failed! " + response.toString());
+                if (response == null || !response.has("result")) {
+                    LogManager.getInstance().log(getClass(), "Fetching ItemOffer failed! " + response);
                     return result;
                 }
                 result.add(response.toString());

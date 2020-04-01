@@ -43,7 +43,6 @@ public class PoeNinjaParser {
                 json = HttpManager.getInstance().getJson(currencyURL, "&league=" + league);
 
                 if (json == null || json.length() == 0) {
-                    LogManager.getInstance().log(getClass(), "Invalid response from PoeNinja! API has been changed.");
                     return false;
                 }
 
@@ -56,7 +55,7 @@ public class PoeNinjaParser {
                 e.printStackTrace();
                 return false;
             } catch (JSONException j){
-                LogManager.getInstance().log(getClass(), currencyURL + "&league=" + league + " returned no valid JSON!\n");
+                LogManager.getInstance().log(getClass(), currencyURL + "&league=" + league + " returned no valid JSON! API may have changed.");
                 j.printStackTrace();
                 return false;
             }
