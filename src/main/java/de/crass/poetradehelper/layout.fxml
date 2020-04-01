@@ -69,7 +69,7 @@
                     <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                             <children>
-                        <AnchorPane layoutX="230.0" layoutY="15.0" prefWidth="290.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="10.0">
+                        <AnchorPane layoutX="230.0" layoutY="15.0" prefWidth="300.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="10.0">
                            <children>
                                       <ComboBox fx:id="valueInputCB" layoutX="229.60000610351562" layoutY="49.0" prefHeight="31.0" prefWidth="190.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
                                       <ComboBox fx:id="valueOutputCB" layoutX="229.60000610351562" layoutY="102.0" prefHeight="31.0" prefWidth="190.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="80.0" />
@@ -86,7 +86,7 @@
                                       <Text fill="#d8d8d8" layoutX="68.0" strokeType="OUTSIDE" strokeWidth="0.0" text="x" AnchorPane.leftAnchor="89.0" AnchorPane.topAnchor="85.0" />
                            </children>
                         </AnchorPane>
-                        <AnchorPane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="300.0" AnchorPane.topAnchor="10.0">
+                        <AnchorPane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="320.0" AnchorPane.topAnchor="10.0">
                            <children>
                               <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                  <children>
