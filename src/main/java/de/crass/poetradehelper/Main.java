@@ -63,7 +63,12 @@ public class Main extends Application implements TradeManager.DealParseListener,
     private static final String versionText = "v0.8-SNAPSHOT";
 
     @FXML
+    private TabPane tabPane;
+    public static TabPane tabPaneStatic;
+
+    @FXML
     private ListView<CurrencyDeal> playerDealList;
+
     @FXML
     private TextArea console;
 
@@ -174,6 +179,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
     @FXML
     private ComboBox<CurrencyID> offerSecondary;
+    public static ComboBox<CurrencyID> offerSecondaryStatic;
 
     @FXML
     private Button refreshBtn;
@@ -280,6 +286,8 @@ public class Main extends Application implements TradeManager.DealParseListener,
     private int volumeClicked = 0;
 
     private void setupUI() {
+        tabPaneStatic = tabPane;
+
         DecimalFormatSymbols symbols = new DecimalFormatSymbols();
         symbols.setDecimalSeparator('.');
         dFormat.setDecimalFormatSymbols(symbols);
@@ -329,6 +337,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
         // Offer tab
         ObservableList<CurrencyID> currencies = FXCollections.observableArrayList(CurrencyID.getValues());
         currencies.sort(Comparator.comparing(Object::toString));
+        offerSecondaryStatic = offerSecondary;
         offerSecondary.setItems(currencies);
         offerSecondary.setOnAction(event -> new Thread(() -> {
             CurrencyID newValue = offerSecondary.getValue();

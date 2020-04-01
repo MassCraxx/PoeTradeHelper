@@ -8,7 +8,7 @@
 <?import javafx.scene.text.*?>
 <SplitPane dividerPositions="0.845" orientation="VERTICAL" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.crass.poetradehelper.Main">
    <items>
-        <TabPane maxHeight="1.7976931348623157E308" tabClosingPolicy="UNAVAILABLE">
+        <TabPane fx:id="tabPane" maxHeight="1.7976931348623157E308" tabClosingPolicy="UNAVAILABLE">
             <tabs>
                 <Tab text="Market Overview">
                     <content>
