@@ -30,9 +30,9 @@ class DealContextMenu extends ContextMenu {
 
         MenuItem sellItem = new MenuItem("Open Sell in Browser");
         if (deal.getSellQueryID() == null) {
-            buyItem.setOnAction(event -> Main.openInBrowser(deal.getSecondaryCurrencyID(), deal.getPrimaryCurrencyID()));
+            sellItem.setOnAction(event -> Main.openInBrowser(deal.getSecondaryCurrencyID(), deal.getPrimaryCurrencyID()));
         } else {
-            buyItem.setOnAction(event -> Main.openInBrowser(deal.getSellQueryID()));
+            sellItem.setOnAction(event -> Main.openInBrowser(deal.getSellQueryID()));
         }
 
         String buyPercentage = String.valueOf(TradeManager.getInstance().getCurrencyValuePercentage(deal.getBuyAmount(), deal.getPrimaryCurrencyID(), deal.getSecondaryCurrencyID()));
