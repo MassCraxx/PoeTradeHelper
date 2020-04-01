@@ -1,6 +1,7 @@
 package de.crass.poetradehelper;
 
 import de.crass.poetradehelper.model.CurrencyID;
+import de.crass.poetradehelper.ui.OfferContextMenu;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableStringValue;
 import javafx.collections.FXCollections;
@@ -61,6 +62,7 @@ public class PropertyManager {
     private ObservableList<CurrencyID> currencyFilterList;
     private ObservableList<CurrencyID> primaryCurrencyList;
     private ObservableList<String> playerList;
+    private ObservableList<String> ignoredPlayers;
 
     private CurrencyID primaryCurrency;
     private boolean filterNoApi;
@@ -329,6 +331,28 @@ public class PropertyManager {
 
     public boolean getBooleanProp(String key, boolean def) {
         return Boolean.parseBoolean(getProp(key, String.valueOf(def)));
+    }
+
+    public ObservableList<String> getIgnoredPlayers() {
+        if (ignoredPlayers == null) {
+            ignoredPlayers = FXCollections.observableArrayList(stringToList(PropertyManager.getInstance().getProp("ignored_players", null)));
+        }
+        return ignoredPlayers;
+    }
+
+    public void addIgnoredPlayer(String player){
+        LogManager.getInstance().log(OfferContextMenu.class, "Adding player to ignore list");
+        List<String> newList = getIgnoredPlayers();
+        newList.add(player);
+        setProp("ignored_players", listToString(newList));
+    }
+
+    public void removeIgnoredPlayer(String player){
+        LogManager.getInstance().log(getClass(), "Removing player from ignore list");
+        ObservableList<String> newList = getIgnoredPlayers();
+        newList.remove(player);
+        ignoredPlayers = newList;
+        setProp("ignored_players", listToString(newList));
     }
 
     interface UICallback {

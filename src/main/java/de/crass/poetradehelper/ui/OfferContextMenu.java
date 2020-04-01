@@ -4,10 +4,9 @@ import de.crass.poetradehelper.Main;
 import de.crass.poetradehelper.PropertyManager;
 import de.crass.poetradehelper.model.CurrencyID;
 import de.crass.poetradehelper.model.CurrencyOffer;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.ContextMenu;
+import de.crass.poetradehelper.parser.TradeManager;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
@@ -49,8 +48,20 @@ public class OfferContextMenu extends ContextMenu {
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             clipboard.setContents(stringSelection, null);
         });
+        MenuItem ignoreItem;
 
-        getItems().addAll(browserItem, copyItem);
+        ignoreItem = new MenuItem("Toggle ignore player");
+        ignoreItem.setOnAction(event -> {
+            if (getSelected().isIgnored()) {
+                PropertyManager.getInstance().removeIgnoredPlayer(getSelected().getAccountName());
+            } else {
+                PropertyManager.getInstance().addIgnoredPlayer(getSelected().getAccountName());
+            }
+            TradeManager.getInstance().parseDeals();
+            tableView.refresh();
+        });
+
+        getItems().addAll(copyItem, browserItem, new SeparatorMenuItem(), ignoreItem);
     }
 
     private CurrencyOffer getSelected() {

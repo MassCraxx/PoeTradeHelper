@@ -404,6 +404,11 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
                 continue;
             }
 
+            // player is on ignorelist
+            if (offer.isIgnored()) {
+                continue;
+            }
+
             // Return most top offer that meets filter requirements
 
             if (filterStockOffers && offer.getStock() < 0) {

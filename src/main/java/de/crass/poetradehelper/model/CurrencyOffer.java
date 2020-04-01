@@ -1,5 +1,7 @@
 package de.crass.poetradehelper.model;
 
+import de.crass.poetradehelper.PropertyManager;
+
 public class CurrencyOffer {
     private String playerName;
     private String accountName;
@@ -75,5 +77,9 @@ public class CurrencyOffer {
 
     public long getTimestamp() {
         return timestamp;
+    }
+
+    public boolean isIgnored() {
+        return PropertyManager.getInstance().getIgnoredPlayers().contains(accountName);
     }
 }

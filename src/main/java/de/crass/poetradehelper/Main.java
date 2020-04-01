@@ -419,6 +419,17 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
         buyOfferTable.setContextMenu(new OfferContextMenu(buyOfferTable, offerSecondary));
 
+        buyOfferTable.setRowFactory(row -> new TableRow<CurrencyOffer>() {
+            @Override
+            public void updateItem(CurrencyOffer item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if (item != null && item.isIgnored()) {
+                    setStyle("-fx-background-color: gray");
+                }
+            }
+        });
+
         // Sell table
         TableColumn<CurrencyOffer, String> sellValueColumn = new TableColumn<>();
         sellValueColumn.setText("Price");
@@ -450,6 +461,17 @@ public class Main extends Application implements TradeManager.DealParseListener,
         sellOfferTable.getColumns().clear();
         sellOfferTable.getColumns().addAll(sellValueColumn, sellPercentageColumn, sellStockColumn, sellPlayerColumn);
         sellOfferTable.setContextMenu(new OfferContextMenu(sellOfferTable, offerSecondary));
+
+        sellOfferTable.setRowFactory(param -> new TableRow<CurrencyOffer>() {
+            @Override
+            public void updateItem(CurrencyOffer item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if (item != null && item.isIgnored()) {
+                    setStyle("-fx-background-color: gray");
+                }
+            }
+        });
 
         refreshBtn.setOnAction(event -> {
             CurrencyID newValue = offerSecondary.getValue();
