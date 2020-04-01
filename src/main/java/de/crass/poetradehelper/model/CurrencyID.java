@@ -7,12 +7,15 @@ import java.util.Random;
 import java.util.Set;
 
 public class CurrencyID {
+    public static CurrencyID ALCHEMY = new CurrencyID(3, "alch", "Orb of Alchemy");
     public static CurrencyID CHAOS = new CurrencyID(4, "chaos", "Chaos Orb");
     public static CurrencyID EXALTED = new CurrencyID(6, "exa", "Exalted Orb");
+    public static CurrencyID REGAL = new CurrencyID(14, "regal", "Regal Orb");
 
     private int id;
     private String tradeID;
     private String displayName;
+    private int stackSize = 0;
 
     static Set<CurrencyID> values = new HashSet<>();
 
@@ -112,5 +115,16 @@ public class CurrencyID {
     @Override
     public int hashCode() {
         return id;
+    }
+
+    public int getStackSize() {
+        // FIXME only works for 20stack items and predefined
+        if (CurrencyID.CHAOS.equals(this) || CurrencyID.EXALTED.equals(this) || CurrencyID.ALCHEMY.equals(this) || CurrencyID.REGAL.equals(this)) {
+            stackSize = 10;
+        } else if (stackSize == 0) {
+            stackSize = 20;
+        }
+
+        return stackSize;
     }
 }

@@ -172,6 +172,16 @@ public class PoeNinjaParser {
         currentRates.clear();
     }
 
+    public boolean requiresMultipleTransactions(CurrencyID secondaryCurrency) {
+        if (PropertyManager.getInstance().getFilterMultipleTransactionDeals()) {
+            float tradeAmount = getCurrentValue(PropertyManager.getInstance().getPrimaryCurrency(), secondaryCurrency);
+            int threshold = secondaryCurrency.getStackSize() * 5 * 12;
+
+            return tradeAmount > threshold;
+        }
+        return false;
+    }
+
     public interface PoeNinjaListener{
         void onRatesFetched();
     }

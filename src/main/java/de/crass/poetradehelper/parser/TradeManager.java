@@ -101,11 +101,10 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
                 currencyIDList = new LinkedList<>();
                 for (CurrencyID currencyID : currencyIDs) {
                     //only works for 20stack items
-                    float tradeAmount = poeNinjaParser.getCurrentValue(PropertyManager.getInstance().getPrimaryCurrency(), currencyID);
-                    if (tradeAmount <= 1200) {
+                    if (!poeNinjaParser.requiresMultipleTransactions(currencyID)) {
                         currencyIDList.add(currencyID);
                     } else {
-                        LogManager.getInstance().log(getClass(), "Skipping " + currencyID + " since it would require multiple trade transactions.");
+                        LogManager.getInstance().log(getClass(), "Skipping update of" + currencyID + " since it would require multiple trade transactions.");
                     }
                 }
             } else {
@@ -201,6 +200,12 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
 
                     CurrencyID secondaryCurrency = key.getValue();
                     float cValue = poeNinjaParser.getCurrentCValueFor(secondaryCurrency);
+
+                    if(poeNinjaParser.requiresMultipleTransactions(secondaryCurrency)){
+                        LogManager.getInstance().log(getClass(), "Skip parse " + secondaryCurrency + " since it would require multiple trade transactions.");
+                        continue;
+                    }
+
                     long timestamp = -1;
 
                     bestMarketSellOffer = getBestOffer(marketOffers.get(key));
