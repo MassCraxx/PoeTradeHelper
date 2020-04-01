@@ -161,7 +161,7 @@ public abstract class WebParser {
         currentOffers.put(key, offers);
     }
 
-    private void removeOffers(CurrencyID primary, CurrencyID secondary) {
+    public void removeOffers(CurrencyID primary, CurrencyID secondary) {
         Pair<CurrencyID, CurrencyID> key = new Pair<>(primary, secondary);
         clearListIfPossible(currentOffers.get(key));
         clearListIfPossible(playerOffers.get(key));

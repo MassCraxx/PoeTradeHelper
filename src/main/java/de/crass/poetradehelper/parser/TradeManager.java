@@ -615,6 +615,10 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
         return (percentage >= 0 ? "+" : "") + percentage + "%";
     }
 
+    public void removeOffers(CurrencyDeal deal) {
+        webParser.removeOffers(PropertyManager.getInstance().getPrimaryCurrency(), deal.getSecondaryCurrencyID());
+    }
+
     public interface DealParseListener {
         void onUpdateStarted();
 

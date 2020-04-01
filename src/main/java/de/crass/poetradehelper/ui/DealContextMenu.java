@@ -49,7 +49,10 @@ class DealContextMenu extends ContextMenu {
         updatePlayerItem.setOnAction(event -> TradeManager.getInstance().updatePlayerOffers());
 
         MenuItem removeItem = new MenuItem("Remove from Overview");
-        removeItem.setOnAction(event -> TradeManager.getInstance().removeDeal(deal));
+        removeItem.setOnAction(event -> {
+            TradeManager.getInstance().removeOffers(deal);
+            TradeManager.getInstance().parseDeals();
+        });
 
         getItems().addAll(
                 nameItem,
