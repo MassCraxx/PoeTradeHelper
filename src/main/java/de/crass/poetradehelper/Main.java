@@ -38,6 +38,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Callback;
@@ -230,6 +231,18 @@ public class Main extends Application implements TradeManager.DealParseListener,
         Parent root = FXMLLoader.load(getClass().getResource("layout.fxml"));
         Scene scene = new Scene(root, 650, 650);
         scene.getStylesheets().add(getClass().getResource("stylesheet.css").toExternalForm());
+        boolean activateKeys = PropertyManager.getInstance().getBooleanProp("tab_switch_key", false);
+        if (activateKeys) {
+            scene.setOnKeyPressed(event -> {
+                if (tabPane != null && tabPane.getSelectionModel() != null) {
+                    if (event.getCode().equals(KeyCode.LEFT)) {
+                        tabPane.getSelectionModel().selectPrevious();
+                    } else if (event.getCode().equals(KeyCode.RIGHT)) {
+                        tabPane.getSelectionModel().selectNext();
+                    }
+                }
+            });
+        }
         primaryStage.setMinWidth(650);
         primaryStage.setMinHeight(300);
         primaryStage.setScene(scene);
@@ -287,6 +300,18 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
     private void setupUI() {
         tabPaneStatic = tabPane;
+        tabPane.setOnScroll(event -> {
+            if (event.isShiftDown() || event.isControlDown()) {
+                if (tabPane != null && tabPane.getSelectionModel() != null) {
+                    double deltaY = event.getDeltaY();
+                    if (deltaY > 0) {
+                        tabPane.getSelectionModel().selectNext();
+                    } else {
+                        tabPane.getSelectionModel().selectPrevious();
+                    }
+                }
+            }
+        });
 
         DecimalFormatSymbols symbols = new DecimalFormatSymbols();
         symbols.setDecimalSeparator('.');
@@ -971,4 +996,5 @@ public class Main extends Application implements TradeManager.DealParseListener,
             LogManager.getInstance().log(PoeTradeWebParser.class, "Error opening browser. " + e);
         }
     }
+
 }

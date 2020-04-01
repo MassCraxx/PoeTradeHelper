@@ -14,6 +14,7 @@ class DealContextMenu extends ContextMenu {
 
     DealContextMenu(CurrencyDeal deal) {
         MenuItem nameItem = new MenuItem(deal.getSecondaryCurrencyID().getDisplayName());
+        nameItem.setStyle("-fx-font-weight: bold;");
 
         MenuItem offersItem = new MenuItem("Open in Offers Tab");
         offersItem.setOnAction(event -> {

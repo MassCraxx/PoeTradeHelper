@@ -1,10 +1,12 @@
 package de.crass.poetradehelper.ui;
 
+import de.crass.poetradehelper.Main;
 import de.crass.poetradehelper.model.CurrencyDeal;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.CacheHint;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
@@ -92,6 +94,15 @@ public class MarketCell<T> extends javafx.scene.control.ListCell<CurrencyDeal> {
             setGraphic(root);
 
             setContextMenu(new DealContextMenu(deal));
+
+            setOnMouseClicked(mouseEvent -> {
+                if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+                    if (mouseEvent.getClickCount() == 2) {
+                        Main.offerSecondaryStatic.setValue(deal.getSecondaryCurrencyID());
+                        Main.tabPaneStatic.getSelectionModel().select(2);
+                    }
+                }
+            });
         }
     }
 }
