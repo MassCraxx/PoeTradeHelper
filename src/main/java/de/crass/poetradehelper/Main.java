@@ -61,7 +61,7 @@ import java.util.*;
 public class Main extends Application implements TradeManager.DealParseListener, PoeNinjaParser.PoeNinjaListener, PropertyManager.UICallback {
 
     private static final String title = "PoeTradeHelper";
-    private static final String versionText = "v0.8.1-SNAPSHOT";
+    private static final String versionText = "v0.8.1";
 
     @FXML
     private TabPane tabPane;
@@ -426,6 +426,8 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
                 if (item != null && item.isIgnored()) {
                     setStyle("-fx-background-color: gray");
+                } else {
+                    setStyle(null);
                 }
             }
         });
@@ -469,6 +471,8 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
                 if (item != null && item.isIgnored()) {
                     setStyle("-fx-background-color: gray");
+                } else {
+                    setStyle(null);
                 }
             }
         });

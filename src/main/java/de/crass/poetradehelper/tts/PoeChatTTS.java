@@ -136,7 +136,7 @@ public class PoeChatTTS implements FileListener{
                     String groupInput = m.group(g);
                     groupInput = groupInput.replace("_", " ");
                     // Check if readable
-                    if (!Pattern.matches("[A-Za-z0-9 ]+", groupInput)) {
+                    if (!Pattern.matches("[A-Za-z0-9%'.,!? ]+", groupInput)) {
                         groupInput = "something i can not pronounce";
                     }
                     voiceOutput = voiceOutput.replace("(" + g + ")", groupInput);
