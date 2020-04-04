@@ -84,6 +84,16 @@ public class PoeTradeApiParser extends WebParser {
                 return;
             }
 
+            if (!data.isNull("error")) {
+                String msg = ((JSONObject) data.get("error")).getString("message");
+                LogManager.getInstance().log(getClass(), "Fetching failed! " + msg);
+                cancel();
+                if (TradeManager.getInstance().isAutoUpdating()) {
+                    TradeManager.getInstance().setAutoUpdate(false);
+                }
+                return;
+            }
+
             JSONArray result = data.getJSONArray("result");
             for (Object object : result) {
                 if (object != JSONObject.NULL) {

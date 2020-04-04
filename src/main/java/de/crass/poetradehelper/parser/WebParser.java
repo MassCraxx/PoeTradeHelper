@@ -71,6 +71,10 @@ public abstract class WebParser {
                 // BUY
                 fetchOffers(primaryCurrency, secondaryCurrency, PropertyManager.getInstance().getCurrentLeague());
 
+                if (cancel) {
+                    break;
+                }
+
                 // SELL
                 fetchOffers(secondaryCurrency, primaryCurrency, PropertyManager.getInstance().getCurrentLeague());
             }

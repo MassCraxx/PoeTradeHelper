@@ -104,7 +104,7 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
                     if (!poeNinjaParser.requiresMultipleTransactions(currencyID)) {
                         currencyIDList.add(currencyID);
                     } else {
-                        LogManager.getInstance().log(getClass(), "Skipping update of" + currencyID + " since it would require multiple trade transactions.");
+                        LogManager.getInstance().log(getClass(), "Skipping update of " + currencyID + " since it would require multiple trade transactions.");
                     }
                 }
             } else {
@@ -569,7 +569,10 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
     }
 
     public void setAutoUpdate(boolean enabled) {
-        if(isUpdating()){
+        if (autoUpdate == enabled) {
+            return;
+        } else if (isUpdating()) {
+            autoUpdate = enabled;
             return;
         }
         LogManager.getInstance().log(getClass(), "Automatic Updates " + (enabled ? "en" : "dis") + "abled.");

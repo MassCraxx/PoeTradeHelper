@@ -31,9 +31,7 @@ public class HttpManager {
                 .get()
                 .build();
         Response response = client.newCall(request).execute();
-        if(response.code() == 404 || !response.isSuccessful()){
-            return null;
-        }
+
         String result = response.body().string();
         response.close();
         return result;

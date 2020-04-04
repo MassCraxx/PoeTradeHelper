@@ -61,7 +61,7 @@ import java.util.*;
 public class Main extends Application implements TradeManager.DealParseListener, PoeNinjaParser.PoeNinjaListener, PropertyManager.UICallback {
 
     private static final String title = "PoeTradeHelper";
-    private static final String versionText = "v0.8.1";
+    private static final String versionText = "v0.8.2";
 
     @FXML
     private TabPane tabPane;
@@ -555,6 +555,8 @@ public class Main extends Application implements TradeManager.DealParseListener,
             PropertyManager.getInstance().setPrimaryCurrency(newValue);
             tradeManager.parseDeals();
             valueTable.refresh();
+            buyOfferTable.setItems(null);
+            sellOfferTable.setItems(null);
         });
 
         filterInvalid.setSelected(PropertyManager.getInstance().getFilterOutOfStock());
