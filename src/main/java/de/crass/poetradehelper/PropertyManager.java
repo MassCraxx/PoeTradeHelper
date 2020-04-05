@@ -44,6 +44,8 @@ public class PropertyManager {
     public static final String VOICE_SPEAKER = "voice_speaker";
     public static final String UPDATE_DELAY_MINUTES = "auto_update_delay_minutes";
     public static final String FILTER_MULTIPLE_TRANSACTIONS = "filter_multiple_transactions";
+    private static final String WINDOW_WIDTH = "window_width";
+    private static final String WINDOW_HEIGHT = "window_height";
 
     // DEFAULTS
     public static final String defaultLeague = "Standard";
@@ -75,6 +77,9 @@ public class PropertyManager {
     private boolean filterMultipleTransactionDeals;
 
     private UICallback uiCallback;
+
+    private double windowWidth;
+    private double windowHeight;
 
     private PropertyManager() {
         loadProperties();
@@ -108,6 +113,9 @@ public class PropertyManager {
         filterMultipleTransactionDeals = Boolean.parseBoolean(appProps.getProperty(FILTER_MULTIPLE_TRANSACTIONS, "false"));
 
         updateDelay = Integer.parseInt(appProps.getProperty(UPDATE_DELAY_MINUTES, "5"));
+
+        windowWidth = Double.parseDouble(appProps.getProperty(WINDOW_WIDTH, "650"));
+        windowHeight = Double.parseDouble(appProps.getProperty(WINDOW_HEIGHT, "650"));
     }
 
     void storeProperties() {
@@ -125,6 +133,9 @@ public class PropertyManager {
         appProps.setProperty(UPDATE_DELAY_MINUTES, String.valueOf(updateDelay));
 
         appProps.setProperty(FILTER_MULTIPLE_TRANSACTIONS, String.valueOf(filterMultipleTransactionDeals));
+
+        appProps.setProperty(WINDOW_WIDTH, String.valueOf(windowWidth));
+        appProps.setProperty(WINDOW_HEIGHT, String.valueOf(windowHeight));
 
         try {
             appProps.store(new FileWriter(propFilename), "PoeTradeHelper Properties");
@@ -353,6 +364,19 @@ public class PropertyManager {
         newList.remove(player);
         ignoredPlayers = newList;
         setProp("ignored_players", listToString(newList));
+    }
+
+    public void setWindowSize(double newWindowWidth, double windowHeight) {
+        this.windowWidth = newWindowWidth;
+        this.windowHeight = windowHeight;
+    }
+
+    public double getWindowWidth() {
+        return windowWidth;
+    }
+
+    public double getWindowHeight() {
+        return windowHeight;
     }
 
     interface UICallback {

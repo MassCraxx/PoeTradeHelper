@@ -20,6 +20,7 @@ import javafx.application.Platform;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -61,7 +62,7 @@ import java.util.*;
 public class Main extends Application implements TradeManager.DealParseListener, PoeNinjaParser.PoeNinjaListener, PropertyManager.UICallback {
 
     private static final String title = "PoeTradeHelper";
-    private static final String versionText = "v0.8.2";
+    private static final String versionText = "v0.8.3-SNAPSHOT";
 
     @FXML
     private TabPane tabPane;
@@ -231,10 +232,13 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        PropertyManager propManager = PropertyManager.getInstance();
+
         Parent root = FXMLLoader.load(getClass().getResource("layout.fxml"));
-        Scene scene = new Scene(root, 650, 650);
+        Scene scene = new Scene(root, propManager.getWindowWidth(), propManager.getWindowHeight());
         scene.getStylesheets().add(getClass().getResource("stylesheet.css").toExternalForm());
-        boolean activateKeys = PropertyManager.getInstance().getBooleanProp("tab_switch_key", false);
+
+        boolean activateKeys = propManager.getBooleanProp("tab_switch_key", false);
         if (activateKeys) {
             scene.setOnKeyPressed(event -> {
                 if (tabPane != null && tabPane.getSelectionModel() != null) {
@@ -246,6 +250,13 @@ public class Main extends Application implements TradeManager.DealParseListener,
                 }
             });
         }
+
+        ChangeListener<Number> stageSizeListener = (observable, oldValue, newValue) ->
+                PropertyManager.getInstance().setWindowSize(primaryStage.getWidth(), primaryStage.getHeight());
+
+        primaryStage.widthProperty().addListener(stageSizeListener);
+        primaryStage.heightProperty().addListener(stageSizeListener);
+
         primaryStage.setMinWidth(650);
         primaryStage.setMinHeight(300);
         primaryStage.setScene(scene);
@@ -253,6 +264,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
         primaryStage.show();
 
         currentStage = primaryStage;
+
         updateTitle();
     }
 
