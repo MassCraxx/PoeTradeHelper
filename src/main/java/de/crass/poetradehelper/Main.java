@@ -173,6 +173,9 @@ public class Main extends Application implements TradeManager.DealParseListener,
     private CheckBox autoUpdate;
 
     @FXML
+    private CheckBox autoUpdatePlayerOffers;
+
+    @FXML
     private TableView<CurrencyOffer> buyOfferTable;
 
     @FXML
@@ -328,6 +331,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
                 PropertyManager.getInstance().setProp("auto_update_enabled", "true");
                 JOptionPane.showMessageDialog(null, "Automatic Update setting enabled! Please don't abuse this.");
                 autoUpdate.setVisible(true);
+                autoUpdatePlayerOffers.setVisible(true);
                 updateTime.setVisible(true);
                 updateSlider.setVisible(true);
             }
@@ -745,6 +749,12 @@ public class Main extends Application implements TradeManager.DealParseListener,
             tradeManager.setAutoUpdate(autoUpdate.isSelected());
             autoUpdate.setSelected(tradeManager.isAutoUpdating());
         });
+        autoUpdatePlayerOffers.setSelected(PropertyManager.getInstance().getBooleanProp("auto_update_player_offers", false));
+        autoUpdatePlayerOffers.setOnAction(event -> {
+            boolean enable = !PropertyManager.getInstance().getBooleanProp("auto_update_player_offers", false);
+            PropertyManager.getInstance().setProp("auto_update_player_offers", String.valueOf(enable));
+            autoUpdatePlayerOffers.setSelected(PropertyManager.getInstance().getBooleanProp("auto_update_player_offers", false));
+        });
 
         autoUpdate.setTooltip(new Tooltip("Automatically fetches all offers after the given time interval."));
 
@@ -763,6 +773,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
         if (!PropertyManager.getInstance().getBooleanProp("auto_update_enabled", false)) {
             autoUpdate.setVisible(false);
+            autoUpdatePlayerOffers.setVisible(false);
             updateTime.setVisible(false);
             updateSlider.setVisible(false);
         }

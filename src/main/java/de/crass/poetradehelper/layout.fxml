@@ -139,8 +139,9 @@
                                           <AnchorPane layoutX="416.0" layoutY="22.0" prefWidth="270.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="115.0">
                                              <children>
                                                         <CheckBox fx:id="autoUpdate" mnemonicParsing="false" text="Auto Update" AnchorPane.leftAnchor="0.0" />
-                                                <Slider fx:id="updateSlider" blockIncrement="5.0" majorTickUnit="15.0" max="65.0" min="5.0" minorTickCount="1" value="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="40.0" />
-                                                <Label fx:id="updateTime" text="5 min" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="38.0" />
+                                                <Slider fx:id="updateSlider" blockIncrement="5.0" majorTickUnit="15.0" max="65.0" min="5.0" minorTickCount="1" value="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="60.0" />
+                                                <Label fx:id="updateTime" text="5 min" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="56.0" />
+                                                <CheckBox fx:id="autoUpdatePlayerOffers" layoutY="19.0" mnemonicParsing="false" text="Always include player offers" AnchorPane.topAnchor="25.0" />
                                              </children>
                                           </AnchorPane>
                                        </children>

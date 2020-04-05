@@ -61,6 +61,7 @@ public class PoeChatTTS implements FileListener{
     private boolean isRunning = false;
     private File configFile = new File("./ttsconfig.json");
     private Listener listener;
+    private Pattern allowedChars = Pattern.compile(PropertyManager.getInstance().getProp("voice_allowed_chars", "[A-Za-z0-9%'.,!?()+-/&=$ ]+"));
 
     public PoeChatTTS(Listener listener) {
         this.listener = listener;
@@ -136,7 +137,7 @@ public class PoeChatTTS implements FileListener{
                     String groupInput = m.group(g);
                     groupInput = groupInput.replace("_", " ");
                     // Check if readable
-                    if (!Pattern.matches("[A-Za-z0-9%'.,!? ]+", groupInput)) {
+                    if (!allowedChars.matcher(groupInput).matches()) {
                         groupInput = "something i can not pronounce";
                     }
                     voiceOutput = voiceOutput.replace("(" + g + ")", groupInput);
