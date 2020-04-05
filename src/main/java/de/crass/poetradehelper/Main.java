@@ -62,7 +62,7 @@ import java.util.*;
 public class Main extends Application implements TradeManager.DealParseListener, PoeNinjaParser.PoeNinjaListener, PropertyManager.UICallback {
 
     private static final String title = "PoeTradeHelper";
-    private static final String versionText = "v0.8.3-SNAPSHOT";
+    private static final String versionText = "v0.8.3";
 
     @FXML
     private SplitPane splitPane;
