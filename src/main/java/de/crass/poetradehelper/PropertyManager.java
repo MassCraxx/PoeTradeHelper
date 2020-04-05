@@ -44,8 +44,7 @@ public class PropertyManager {
     public static final String VOICE_SPEAKER = "voice_speaker";
     public static final String UPDATE_DELAY_MINUTES = "auto_update_delay_minutes";
     public static final String FILTER_MULTIPLE_TRANSACTIONS = "filter_multiple_transactions";
-    private static final String WINDOW_WIDTH = "window_width";
-    private static final String WINDOW_HEIGHT = "window_height";
+    private static final String WINDOW_SIZE = "window_size";
 
     // DEFAULTS
     public static final String defaultLeague = "Standard";
@@ -114,8 +113,9 @@ public class PropertyManager {
 
         updateDelay = Integer.parseInt(appProps.getProperty(UPDATE_DELAY_MINUTES, "5"));
 
-        windowWidth = Double.parseDouble(appProps.getProperty(WINDOW_WIDTH, "650"));
-        windowHeight = Double.parseDouble(appProps.getProperty(WINDOW_HEIGHT, "650"));
+        String[] windowSize = appProps.getProperty(WINDOW_SIZE, "670.0,640.0").split(",");
+        windowWidth = Double.parseDouble(windowSize[0]);
+        windowHeight = Double.parseDouble(windowSize[1]);
     }
 
     void storeProperties() {
@@ -134,8 +134,7 @@ public class PropertyManager {
 
         appProps.setProperty(FILTER_MULTIPLE_TRANSACTIONS, String.valueOf(filterMultipleTransactionDeals));
 
-        appProps.setProperty(WINDOW_WIDTH, String.valueOf(windowWidth));
-        appProps.setProperty(WINDOW_HEIGHT, String.valueOf(windowHeight));
+        appProps.setProperty(WINDOW_SIZE, windowWidth + "," + windowHeight);
 
         try {
             appProps.store(new FileWriter(propFilename), "PoeTradeHelper Properties");
@@ -351,14 +350,14 @@ public class PropertyManager {
         return ignoredPlayers;
     }
 
-    public void addIgnoredPlayer(String player){
+    public void addIgnoredPlayer(String player) {
         LogManager.getInstance().log(OfferContextMenu.class, "Adding player to ignore list");
         List<String> newList = getIgnoredPlayers();
         newList.add(player);
         setProp("ignored_players", listToString(newList));
     }
 
-    public void removeIgnoredPlayer(String player){
+    public void removeIgnoredPlayer(String player) {
         LogManager.getInstance().log(getClass(), "Removing player from ignore list");
         ObservableList<String> newList = getIgnoredPlayers();
         newList.remove(player);
@@ -366,9 +365,13 @@ public class PropertyManager {
         setProp("ignored_players", listToString(newList));
     }
 
-    public void setWindowSize(double newWindowWidth, double windowHeight) {
-        this.windowWidth = newWindowWidth;
-        this.windowHeight = windowHeight;
+    public void setWindowSize(double newWindowWidth, double newWindowHeight) {
+        if (!Double.isNaN(newWindowWidth)) {
+            this.windowWidth = newWindowWidth;
+        }
+        if (!Double.isNaN(newWindowHeight)) {
+            this.windowHeight = newWindowHeight;
+        }
     }
 
     public double getWindowWidth() {

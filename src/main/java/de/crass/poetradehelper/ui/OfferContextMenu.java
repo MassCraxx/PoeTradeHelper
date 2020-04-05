@@ -31,20 +31,27 @@ public class OfferContextMenu extends ContextMenu {
 
         MenuItem copyItem = new MenuItem("Whisper to Clipboard");
         copyItem.setOnAction(event -> {
-            String playerName = getSelected().getPlayerName();
-
             //Switcheroo, because chat comes from the opposite perspective
             int buyAmount = (int) getSelected().getSellAmount();
             int sellAmount = (int) getSelected().getBuyAmount();
-            CurrencyID buyCurrency = getSelected().getSellID();
-            CurrencyID sellCurrency = getSelected().getBuyID();
-            String myString = "@" + playerName + " Hi, I'd like to buy your " +
-                    buyAmount + " " +
-                    buyCurrency.getDisplayName() + " for my " +
-                    sellAmount + " " +
-                    sellCurrency.getDisplayName() + " in " +
-                    PropertyManager.getInstance().getCurrentLeague() + ".";
-            StringSelection stringSelection = new StringSelection(myString);
+
+            String whisper = getSelected().getWhisper();
+            if (whisper == null || whisper.isEmpty()) {
+                String playerName = getSelected().getPlayerName();
+
+                CurrencyID buyCurrency = getSelected().getSellID();
+                CurrencyID sellCurrency = getSelected().getBuyID();
+                whisper = "@" + playerName + " Hi, I'd like to buy your " +
+                        buyAmount + " " +
+                        buyCurrency.getDisplayName() + " for my " +
+                        sellAmount + " " +
+                        sellCurrency.getDisplayName() + " in " +
+                        PropertyManager.getInstance().getCurrentLeague() + ".";
+            } else {
+                whisper = whisper.replace("{0}", String.valueOf(buyAmount));
+                whisper = whisper.replace("{1}", String.valueOf(sellAmount));
+            }
+            StringSelection stringSelection = new StringSelection(whisper);
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             clipboard.setContents(stringSelection, null);
         });

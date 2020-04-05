@@ -65,6 +65,10 @@ public class Main extends Application implements TradeManager.DealParseListener,
     private static final String versionText = "v0.8.3-SNAPSHOT";
 
     @FXML
+    private SplitPane splitPane;
+//    private static SplitPane splitPaneStatic;
+
+    @FXML
     private TabPane tabPane;
     public static TabPane tabPaneStatic;
 
@@ -232,13 +236,27 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        PropertyManager propManager = PropertyManager.getInstance();
-
         Parent root = FXMLLoader.load(getClass().getResource("layout.fxml"));
-        Scene scene = new Scene(root, propManager.getWindowWidth(), propManager.getWindowHeight());
+        Scene scene = new Scene(root);
         scene.getStylesheets().add(getClass().getResource("stylesheet.css").toExternalForm());
 
-        boolean activateKeys = propManager.getBooleanProp("tab_switch_key", false);
+        ChangeListener<Number> stageSizeListener = (observable, oldValue, newValue) ->
+                PropertyManager.getInstance().setWindowSize(primaryStage.getWidth(), primaryStage.getHeight());
+
+        primaryStage.widthProperty().addListener(stageSizeListener);
+        primaryStage.heightProperty().addListener(stageSizeListener);
+
+        primaryStage.setMinWidth(650);
+        primaryStage.setMinHeight(300);
+        primaryStage.setWidth(PropertyManager.getInstance().getWindowWidth());
+        primaryStage.setHeight(PropertyManager.getInstance().getWindowHeight());
+        primaryStage.setScene(scene);
+        primaryStage.getIcons().add(new Image(Main.class.getResourceAsStream("icon.png")));
+        primaryStage.show();
+
+        currentStage = primaryStage;
+
+        boolean activateKeys = PropertyManager.getInstance().getBooleanProp("tab_switch_key", false);
         if (activateKeys) {
             scene.setOnKeyPressed(event -> {
                 if (tabPane != null && tabPane.getSelectionModel() != null) {
@@ -250,20 +268,6 @@ public class Main extends Application implements TradeManager.DealParseListener,
                 }
             });
         }
-
-        ChangeListener<Number> stageSizeListener = (observable, oldValue, newValue) ->
-                PropertyManager.getInstance().setWindowSize(primaryStage.getWidth(), primaryStage.getHeight());
-
-        primaryStage.widthProperty().addListener(stageSizeListener);
-        primaryStage.heightProperty().addListener(stageSizeListener);
-
-        primaryStage.setMinWidth(650);
-        primaryStage.setMinHeight(300);
-        primaryStage.setScene(scene);
-        primaryStage.getIcons().add(new Image(Main.class.getResourceAsStream("icon.png")));
-        primaryStage.show();
-
-        currentStage = primaryStage;
 
         updateTitle();
     }
@@ -296,6 +300,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
     @Override
     public void stop() {
         LogManager.getInstance().log(getClass(), "Shutting down app.");
+//        PropertyManager.getInstance().setProp("window_divider", String.valueOf(splitPaneStatic.getDividerPositions()[0]));
         PropertyManager.getInstance().storeProperties();
 
         if (poeChatTTS != null && poeChatTTS.isActive()) {
@@ -314,6 +319,12 @@ public class Main extends Application implements TradeManager.DealParseListener,
     private int volumeClicked = 0;
 
     private void setupUI() {
+        // Attempt on persisting divide position failed, position changes unpredictably during runtime
+//        splitPane.setDividerPosition(0, Double.parseDouble(PropertyManager.getInstance().getProp("window_divider", "0.825")));
+        // For 6 items and 725 height use 0.86415
+        splitPane.setDividerPosition(0,0.8615);
+//        splitPaneStatic = splitPane;
+
         tabPaneStatic = tabPane;
         tabPane.setOnScroll(event -> {
             if (event.isShiftDown() || event.isControlDown()) {

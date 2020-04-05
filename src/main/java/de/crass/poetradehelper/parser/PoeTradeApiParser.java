@@ -99,6 +99,7 @@ public class PoeTradeApiParser extends WebParser {
                 if (object != JSONObject.NULL) {
                     JSONObject json = (JSONObject) object;
                     JSONObject listing = json.getJSONObject("listing");
+                    String whisper = listing.getString("whisper");
                     String charName = listing.getJSONObject("account").getString("lastCharacterName");
                     String account = listing.getJSONObject("account").getString("name");
 
@@ -119,6 +120,9 @@ public class PoeTradeApiParser extends WebParser {
                             stock,
                             System.currentTimeMillis());
                     offer.setQueryId(id);
+                    if (whisper != null && !whisper.isEmpty()) {
+                        offer.setWhisper(whisper);
+                    }
 
                     addOffer(offer);
                 } else {

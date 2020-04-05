@@ -13,6 +13,8 @@ public class CurrencyOffer {
     private boolean isPlayerOffer = false;
     private String queryID;
 
+    private String whisper;
+
     private long timestamp;
 
     public CurrencyOffer(String username, String accountName, CurrencyID sellID, float sellValue, CurrencyID buyID, float buyValue, int stock, long timestamp) {
@@ -81,5 +83,13 @@ public class CurrencyOffer {
 
     public boolean isIgnored() {
         return PropertyManager.getInstance().getIgnoredPlayers().contains(accountName);
+    }
+
+    public String getWhisper() {
+        return whisper;
+    }
+
+    public void setWhisper(String whisper) {
+        this.whisper = whisper;
     }
 }
