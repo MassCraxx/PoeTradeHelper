@@ -59,9 +59,6 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
         poeApiParser = new PoeApiParser();
         poeNinjaParser = new PoeNinjaParser();
 
-//        webParser = new PoeTradeApiParser(this);
-//        webParser = new PoeTradeWebParser(this);
-
         currentDeals = FXCollections.observableArrayList();
         playerDeals = FXCollections.observableArrayList();
     }
@@ -119,6 +116,10 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
     }
 
     public void updatePlayerOffers() {
+        if(playerDeals.isEmpty()){
+            LogManager.getInstance().log(getClass(), "No player offers found.");
+            return;
+        }
         updateOffers(false, true, getPlayerCurrencies());
     }
 
