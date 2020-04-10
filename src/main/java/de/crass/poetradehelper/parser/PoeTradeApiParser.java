@@ -6,6 +6,7 @@ import de.crass.poetradehelper.model.CurrencyID;
 import de.crass.poetradehelper.model.CurrencyOffer;
 import de.crass.poetradehelper.web.HttpManager;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -23,7 +24,7 @@ public class PoeTradeApiParser extends WebParser {
     }
 
     public void fetchOffers(CurrencyID primaryCurrency, CurrencyID secondaryCurrency, String currentLeague) throws IOException {
-        fetchOffers(primaryCurrency, secondaryCurrency, currentLeague, Integer.parseInt(PropertyManager.getInstance().getProp("trade_data_retries", "0")));
+        fetchOffers(primaryCurrency, secondaryCurrency, currentLeague, Integer.parseInt(PropertyManager.getInstance().getProp("trade_data_retries", "1")));
     }
 
     public void fetchOffers(CurrencyID primaryCurrency, CurrencyID secondaryCurrency, String currentLeague, int retries) throws IOException {
@@ -47,6 +48,10 @@ public class PoeTradeApiParser extends WebParser {
 
         try {
             JSONObject response = HttpManager.getInstance().postJSON(poeTradeURL + currentLeague, String.valueOf(param));
+            if (response == null) {
+                cancel();
+                return;
+            }
 
             JSONArray offers = response.getJSONArray("result");
             if (offers == null || offers.length() == 0) {
@@ -88,9 +93,6 @@ public class PoeTradeApiParser extends WebParser {
                 String msg = ((JSONObject) data.get("error")).getString("message");
                 LogManager.getInstance().log(getClass(), "Fetching failed! " + msg);
                 cancel();
-                if (TradeManager.getInstance().isAutoUpdating()) {
-                    TradeManager.getInstance().setAutoUpdate(false);
-                }
                 return;
             }
 
@@ -133,10 +135,18 @@ public class PoeTradeApiParser extends WebParser {
         } catch (SocketTimeoutException e) {
             if (!cancel && retries > 0) {
                 LogManager.getInstance().log(getClass(), IDENTIFIER + " took too long to respond. Retrying retrying " + retries + " more time(s)");
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
                 fetchOffers(primaryCurrency, secondaryCurrency, currentLeague, retries - 1);
             } else {
                 LogManager.getInstance().log(getClass(), IDENTIFIER + " took too long to respond. It may be overloaded.");
             }
+        } catch (JSONException jex){
+            LogManager.getInstance().log(getClass(), IDENTIFIER + " returned no valid JSON! API may have changed.");
+            jex.printStackTrace();
         }
     }
 

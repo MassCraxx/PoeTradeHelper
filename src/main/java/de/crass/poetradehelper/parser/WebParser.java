@@ -21,6 +21,7 @@ public abstract class WebParser {
     boolean updating = false;
     boolean cancel = false;
     public OfferParseListener parseListener;
+    private boolean cancelAutoUpdateOnCancel = PropertyManager.getInstance().getBooleanProp("cancel_auto_update_on_error", true);
 
 
     WebParser(OfferParseListener listener) {
@@ -102,6 +103,9 @@ public abstract class WebParser {
     protected abstract void fetchOffers(CurrencyID primaryCurrency, CurrencyID secondaryCurrency, String currentLeague) throws IOException, InterruptedException;
 
     public void cancel() {
+        if (cancelAutoUpdateOnCancel && TradeManager.getInstance().isAutoUpdating()) {
+            TradeManager.getInstance().setAutoUpdate(false);
+        }
         cancel = true;
     }
 

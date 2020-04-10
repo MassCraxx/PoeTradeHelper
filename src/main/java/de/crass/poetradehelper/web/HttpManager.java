@@ -37,7 +37,7 @@ public class HttpManager {
         return result;
     }
 
-    public JSONObject postJSON(String url, String requestBody) throws IOException {
+    public JSONObject postJSON(String url, String requestBody) throws IOException, JSONException {
         MediaType JSON = MediaType.parse("application/json; charset=utf-8");
         OkHttpClient client = new OkHttpClient();
 
@@ -47,6 +47,14 @@ public class HttpManager {
                 .post(body)
                 .build();
         Response response = client.newCall(request).execute();
+        if (response.code() != 200) {
+            LogManager.getInstance().log(getClass(), "Response Code for " + url + " was " + response.code());
+        }
+        if (!response.isSuccessful()) {
+            LogManager.getInstance().log(getClass(), "Post to " + url + " was not successful! " + response.message());
+            return null;
+        }
+
         JSONObject result = new JSONObject(response.body().string());
         response.close();
         return result;

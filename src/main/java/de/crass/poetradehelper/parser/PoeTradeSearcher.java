@@ -33,7 +33,7 @@ public class PoeTradeSearcher {
         String query = new PoeTradeQuery(null, type).getQuery();
         try {
             JSONObject response = HttpManager.getInstance().postJSON(url, query);
-            if (!response.has("result")) {
+            if (response == null || !response.has("result")) {
                 LogManager.getInstance().log(getClass(), "Invalid Response! " + response);
                 return null;
             }
@@ -52,7 +52,7 @@ public class PoeTradeSearcher {
         String query = new PoeTradeQuery(name, type).getQuery();
         try {
             JSONObject response = HttpManager.getInstance().postJSON(url, query);
-            if (!response.has("result")) {
+            if (response == null || !response.has("result")) {
                 LogManager.getInstance().log(getClass(), "Invalid Response! " + response);
                 return null;
             }
