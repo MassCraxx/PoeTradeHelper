@@ -11,7 +11,6 @@ import de.crass.poetradehelper.parser.PoeTradeApiParser;
 import de.crass.poetradehelper.parser.PoeTradeWebParser;
 import de.crass.poetradehelper.parser.TradeManager;
 import de.crass.poetradehelper.tts.PoeChatTTS;
-import de.crass.poetradehelper.ui.UIManager;
 import de.crass.poetradehelper.ui.*;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -58,6 +57,7 @@ import java.util.*;
 
 @SuppressWarnings("unchecked")
 public class Main extends Application implements TradeManager.DealParseListener, PoeNinjaParser.PoeNinjaListener, PropertyManager.UICallback {
+    //TODO: Show Whispered in context menu, show afk in offer table
 
     //TODO: Show Whispered in context menu, show afk in offer table
     private static final String title = "PoeTradeHelper";
@@ -299,7 +299,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
     @Override
     public void stop() {
         LogManager.getInstance().log(getClass(), "Shutting down app.");
-        UIManager.getInstance().shutdown();
+        OverlayManager.getInstance().shutdown();
 
 //        PropertyManager.getInstance().setProp("window_divider", String.valueOf(splitPaneStatic.getDividerPositions()[0]));
         PropertyManager.getInstance().storeProperties();
@@ -385,7 +385,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
 //            } else {
 //                tradeManager.updateOffers(false);
 //            }
-            UIManager.getInstance().showOverlayWindow();
+            OverlayManager.getInstance().showOverlayWindow();
         });
 
         // Offer tab
