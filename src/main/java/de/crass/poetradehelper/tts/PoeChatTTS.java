@@ -63,8 +63,8 @@ public class PoeChatTTS implements FileListener {
     private File configFile = new File("./ttsconfig.json");
     private Listener listener;
     private Pattern allowedChars = Pattern.compile(PropertyManager.getInstance().getProp("voice_allowed_chars", "[A-Za-z0-9%'.,!?()+-/&=$ ]+"));
-    private Pattern currencyPattern = Pattern.compile("] @From (.+?): .+your (\\d+ .+) for my (\\d+ .+) i");
-    private Pattern tradePattern = Pattern.compile("] @From (.+?):.+ buy your (.+) l.+(\\d+ .+) i.+left (\\d+).+top (\\d+)");
+    private Pattern currencyPattern = Pattern.compile("] @Fro.+\\s(.+):.+r (\\d+ .+) for my (\\d+ .+) i");
+    private Pattern tradePattern = Pattern.compile("] @Fro.+\\s(.+):.+r (.+) l.+ (\\d+ .+) i.+\"(.+)\".+left (\\d+).+top (\\d+)");
 
     private boolean notifyCurrencyRequests = PropertyManager.getInstance().getBooleanProp("notify_currency", true);
     private boolean notifyTradeRequests = PropertyManager.getInstance().getBooleanProp("notify_trade", true);
@@ -118,14 +118,15 @@ public class PoeChatTTS implements FileListener {
 
         Matcher matcher = currencyPattern.matcher(newLine);
         if (notifyCurrencyRequests && matcher.find() || notifyTradeRequests && (matcher = tradePattern.matcher(newLine)).find()) {
-            //TODO: Stash position
             int x = -1;
             int y = -1;
+            String stashTab = "";
             if (matcher.groupCount() > 4) {
-                x = Integer.parseInt(matcher.group(4));
-                y = Integer.parseInt(matcher.group(5));
+                stashTab = matcher.group(4);
+                x = Integer.parseInt(matcher.group(5));
+                y = Integer.parseInt(matcher.group(6));
             }
-            OverlayManager.getInstance().showNotificationOverlay(true, matcher.group(1), matcher.group(2), matcher.group(3), x, y);
+            OverlayManager.getInstance().showNotificationOverlay(true, matcher.group(1), matcher.group(2), matcher.group(3), stashTab, x, y);
         }
 
         for (PatternOutput patternOutput : parseConfig.getPatternToOutput()) {

@@ -35,8 +35,8 @@ public class OverlayManager {
         return instance;
     }
 
-    public void showNotificationOverlay(boolean in, String playerName, String item, String price, int stashX, int stashY) {
-        overlayFrames.add(new OverlayFrame(in, playerName, item, price, x, y, stashX, stashY));
+    public void showNotificationOverlay(boolean in, String playerName, String item, String price, String stashTab, int stashX, int stashY) {
+        overlayFrames.add(new OverlayFrame(in, playerName, item, price, x, y, stashTab, stashX, stashY));
     }
 
     public void shutdown() {
@@ -57,12 +57,12 @@ public class OverlayManager {
 
     private OverlayConfig getDefaultConfig() {
         List<ResponseButton> inButtons = new LinkedList<>();
-        inButtons.add(new ResponseButton("thx", "Thanks mate! Gl", false));
         inButtons.add(new ResponseButton("sec", "Just a sec", false));
-        inButtons.add(new ResponseButton("busy", "Sry pretty busy right now", false));
+        inButtons.add(new ResponseButton("busy", "Sry pretty busy right now, try again later", true));
         inButtons.add(new ResponseButton("sold", "Sold already", true));
         inButtons.add(new ResponseButton("oos", "Sry out of stock", true));
         inButtons.add(new ResponseButton("kk", "kk", false));
+        inButtons.add(new ResponseButton("thx", "Thanks mate! Gl", false));
         OverlayConfig config = new OverlayConfig();
         config.setIncomingButtons(inButtons);
         return config;

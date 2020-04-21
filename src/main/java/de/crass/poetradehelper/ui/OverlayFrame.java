@@ -28,7 +28,7 @@ public class OverlayFrame extends JFrame {
 
     private boolean persistPosition = PropertyManager.getInstance().getBooleanProp("overlay_persist_pos", false);
 
-    public OverlayFrame(boolean in, String playerName, String item, String price, int x, int y, int stashX, int stashY) {
+    public OverlayFrame(boolean in, String playerName, String item, String price, int x, int y, String stashTab, int stashX, int stashY) {
         super("PoeTradeHelper Overlay");
 
         try {
@@ -46,7 +46,7 @@ public class OverlayFrame extends JFrame {
 
         // Without this, the window is draggable from any non transparent
         // point, including points  inside textboxes.
-        getRootPane().putClientProperty("apple.awt.draggableWindowBackground", true);
+        getRootPane().putClientProperty("apple.awt.draggableWindowBackground", false);
 
         getContentPane().setLayout(new BorderLayout());
         getRootPane().setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, Color.DARK_GRAY));
@@ -65,7 +65,7 @@ public class OverlayFrame extends JFrame {
         JButton hideout = getButton("H", e -> hideout(playerName));
         JButton trade = getButton("T", e -> trade(playerName));
         JButton kick = getButton("-", e -> kick(in ? playerName : PropertyManager.getInstance().getPlayerList().get(0)));
-        JButton whisper = getButton("W", e -> whisper(playerName));
+        JButton whisper = getButton("W", e -> whisper(playerName, "", false));
         JButton close = getButton("X", e -> dispose());
 
         JPanel topButtonPanel = new JPanel();
@@ -96,7 +96,11 @@ public class OverlayFrame extends JFrame {
 //        text.setForeground(new Color(100,100,100));
         text.setForeground(textColor);
         text.setHorizontalTextPosition(SwingConstants.LEFT);
-        text.setText(item);
+        if (stashTab != null && !stashTab.isEmpty()) {
+            text.setText(item + " - (stashed in " + stashTab + ")");
+        } else {
+            text.setText(item);
+        }
         centerPanel.add(text);
 
         // Response buttons
@@ -112,7 +116,7 @@ public class OverlayFrame extends JFrame {
 
         for (ResponseButton button : buttons) {
             buttonPanel.add(getButton(button.getLabel(), e -> {
-                sendTextMessage(button.getMessage());
+                whisper(playerName, button.getMessage(), true);
                 if (button.isClose()) {
                     dispose();
                 }
@@ -200,30 +204,35 @@ public class OverlayFrame extends JFrame {
     }
 
     private void whois(String playerName) {
-        sendTextMessage("/whois " + playerName);
+        chatCommand("/whois " + playerName);
     }
 
-    private void whisper(String playerName) {
-        sendTextMessage("@" + playerName + " " + "hi");
+    private void whisper(String playerName, String msg, boolean send) {
+        chatCommand("@" + playerName + " " + msg, send);
     }
 
     private void kick(String playerName) {
-        sendTextMessage("/kick " + playerName);
+        chatCommand("/kick " + playerName);
+        dispose();
     }
 
     private void trade(String playerName) {
-        sendTextMessage("/tradewith " + playerName);
+        chatCommand("/tradewith " + playerName);
     }
 
     private void invite(String playerName) {
-        sendTextMessage("/invite " + playerName);
+        chatCommand("/invite " + playerName);
     }
 
     private void hideout(String playerName) {
-        sendTextMessage("/hideout " + playerName);
+        chatCommand("/hideout " + playerName);
     }
 
-    public void sendTextMessage(String msg) {
+    public void chatCommand(String msg) {
+        chatCommand(msg, true);
+    }
+
+    public void chatCommand(String msg, boolean send) {
         StringSelection selection = new StringSelection(msg);
         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, null);
         robot.keyPress(KeyEvent.VK_ENTER);
@@ -242,6 +251,11 @@ public class OverlayFrame extends JFrame {
         robot.keyPress(KeyEvent.VK_V);
         robot.keyRelease(KeyEvent.VK_V);
         robot.keyRelease(KeyEvent.VK_CONTROL);
+
+        if (send) {
+            robot.keyPress(KeyEvent.VK_ENTER);
+            robot.keyRelease(KeyEvent.VK_ENTER);
+        }
     }
 
     public void renderStashMarker(int x, int y) {
