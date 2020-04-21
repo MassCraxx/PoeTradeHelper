@@ -9,6 +9,7 @@ import de.crass.poetradehelper.Main;
 import de.crass.poetradehelper.PropertyManager;
 import de.crass.poetradehelper.model.ParseConfig;
 import de.crass.poetradehelper.model.PatternOutput;
+import de.crass.poetradehelper.ui.OverlayManager;
 import javafx.scene.control.TextField;
 
 import java.io.BufferedReader;
@@ -25,7 +26,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 //IDEA: Notify on tendency change - Check after parsing every deal for tendency check? / Store tendency in deal?
-public class PoeChatTTS implements FileListener{
+public class PoeChatTTS implements FileListener {
     private static final String bestVoiceEver = "ScanSoft Daniel_Full_22kHz";
 
     private String[] knownNames = {
@@ -62,6 +63,11 @@ public class PoeChatTTS implements FileListener{
     private File configFile = new File("./ttsconfig.json");
     private Listener listener;
     private Pattern allowedChars = Pattern.compile(PropertyManager.getInstance().getProp("voice_allowed_chars", "[A-Za-z0-9%'.,!?()+-/&=$ ]+"));
+    private Pattern currencyPattern = Pattern.compile("] @From (.+?): .+your (\\d+ .+) for my (\\d+ .+) i");
+    private Pattern tradePattern = Pattern.compile("] @From (.+?):.+ buy your (.+) l.+(\\d+ .+) i.+left (\\d+).+top (\\d+)");
+
+    private boolean notifyCurrencyRequests = PropertyManager.getInstance().getBooleanProp("notify_currency", true);
+    private boolean notifyTradeRequests = PropertyManager.getInstance().getBooleanProp("notify_trade", true);
 
     public PoeChatTTS(Listener listener) {
         this.listener = listener;
@@ -106,6 +112,20 @@ public class PoeChatTTS implements FileListener{
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+
+        // Process trade for overlay
+
+        Matcher matcher = currencyPattern.matcher(newLine);
+        if (notifyCurrencyRequests && matcher.find() || notifyTradeRequests && (matcher = tradePattern.matcher(newLine)).find()) {
+            //TODO: Stash position
+            int x = -1;
+            int y = -1;
+            if (matcher.groupCount() > 4) {
+                x = Integer.parseInt(matcher.group(4));
+                y = Integer.parseInt(matcher.group(5));
+            }
+            OverlayManager.getInstance().showNotificationOverlay(true, matcher.group(1), matcher.group(2), matcher.group(3), x, y);
         }
 
         for (PatternOutput patternOutput : parseConfig.getPatternToOutput()) {
@@ -320,7 +340,7 @@ public class PoeChatTTS implements FileListener{
         }
 
         String dir = PropertyManager.getInstance().getPathOfExilePath();
-        if(dir.charAt(dir.length() - 1) != '/'){
+        if (dir.charAt(dir.length() - 1) != '/') {
             dir += "/";
         }
 
@@ -331,7 +351,7 @@ public class PoeChatTTS implements FileListener{
             isRunning = true;
             LogManager.getInstance().log(getClass(), "TTS Watchdog started.");
         } else {
-            LogManager.getInstance().log(getClass(),"Check your PoE Path! Log file not found. " + file.getAbsolutePath() + " does not exist.");
+            LogManager.getInstance().log(getClass(), "Check your PoE Path! Log file not found. " + file.getAbsolutePath() + " does not exist.");
             onShutdown();
         }
 
@@ -370,8 +390,8 @@ public class PoeChatTTS implements FileListener{
     private String convertSlangToSpoken(String[] words) {
         StringBuilder result = new StringBuilder();
         boolean first = true;
-        for(String word : words){
-            if(!first){
+        for (String word : words) {
+            if (!first) {
                 result.append(" ");
             }
             first = false;
@@ -490,7 +510,7 @@ public class PoeChatTTS implements FileListener{
 
     public void notifyBadTendency() throws IOException {
         String badTendencyString = parseConfig.getPlaceholders().get("bad_tendency");
-        if(badTendencyString == null){
+        if (badTendencyString == null) {
             badTendencyString = getRandomString(new String[]{"Update your offers"});
         }
 

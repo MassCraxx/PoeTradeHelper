@@ -61,7 +61,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
     //TODO: Show Whispered in context menu, show afk in offer table
     private static final String title = "PoeTradeHelper";
-    private static final String versionText = "v0.8.4";
+    private static final String versionText = "v0.9-SNAPSHOT";
 
     @FXML
     private SplitPane splitPane;
@@ -378,14 +378,13 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
         updateButton.setTooltip(new Tooltip("Fetch offers from poe.trade for currency configured in settings"));
         updateButton.setOnAction(event -> {
-//            if (tradeManager.isUpdating()) {
-//                tradeManager.cancelUpdate();
-//                updateButton.setDisable(true);
-//                updateButton.setText("Cancel...");
-//            } else {
-//                tradeManager.updateOffers(false);
-//            }
-            OverlayManager.getInstance().showOverlayWindow();
+            if (tradeManager.isUpdating()) {
+                tradeManager.cancelUpdate();
+                updateButton.setDisable(true);
+                updateButton.setText("Cancel...");
+            } else {
+                tradeManager.updateOffers(false);
+            }
         });
 
         // Offer tab
