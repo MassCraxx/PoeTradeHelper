@@ -27,6 +27,7 @@ public class OverlayFrame extends JFrame {
     private JFrame markerFrame;
 
     private boolean persistPosition = PropertyManager.getInstance().getBooleanProp("overlay_persist_pos", false);
+    private boolean showMarkerOnEnter = PropertyManager.getInstance().getBooleanProp("overlay_marker_on_enter", false);
 
     public OverlayFrame(boolean in, String playerName, String item, String price, int x, int y, String stashTab, int stashX, int stashY) {
         super("PoeTradeHelper Overlay");
@@ -135,7 +136,12 @@ public class OverlayFrame extends JFrame {
                 switch (e.getButton()) {
                     case MouseEvent.BUTTON1:
                         if (stashX > 0 && stashY > 0) {
-                            renderStashMarker(stashX, stashY);
+                            if (markerFrame == null || !markerFrame.isVisible()) {
+                                renderStashMarker(stashX, stashY);
+                            } else {
+                                markerFrame.dispose();
+                                markerFrame = null;
+                            }
                         }
                         break;
                     case MouseEvent.BUTTON3: // right mouse click
@@ -161,6 +167,9 @@ public class OverlayFrame extends JFrame {
 
             @Override
             public void mouseEntered(MouseEvent e) {
+                if (showMarkerOnEnter && stashX > 0 && stashY > 0) {
+                    renderStashMarker(stashX, stashY);
+                }
             }
 
             @Override
@@ -303,14 +312,17 @@ public class OverlayFrame extends JFrame {
 
             markerFrame.getContentPane().add(getCellPlaceholder());
             markerFrame.pack();
+
+            int size = 53;
+            markerFrame.setSize(size, size);
+            int xLoc = 14 + size * (x - 1);
+            int yLoc = 158 + size * (y - 1);
+            markerFrame.setLocation(xLoc, yLoc);
         }
 
-        int size = 53;
-        markerFrame.setSize(size, size);
-        int xLoc = 14 + size * (x - 1);
-        int yLoc = 158 + size * (y - 1);
-        markerFrame.setLocation(xLoc, yLoc);
-        markerFrame.setVisible(true);
+        if (!markerFrame.isVisible()) {
+            markerFrame.setVisible(true);
+        }
     }
 
     // Mercury trade creates whole grid and sets visible what is active...

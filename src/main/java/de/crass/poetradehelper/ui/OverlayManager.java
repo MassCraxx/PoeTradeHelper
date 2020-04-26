@@ -57,11 +57,11 @@ public class OverlayManager {
 
     private OverlayConfig getDefaultConfig() {
         List<ResponseButton> inButtons = new LinkedList<>();
+        inButtons.add(new ResponseButton("kk", "kk", false));
         inButtons.add(new ResponseButton("sec", "Just a sec", false));
         inButtons.add(new ResponseButton("busy", "Sry pretty busy right now, try again later", true));
         inButtons.add(new ResponseButton("sold", "Sold already", true));
-        inButtons.add(new ResponseButton("oos", "Sry out of stock", true));
-        inButtons.add(new ResponseButton("kk", "kk", false));
+        inButtons.add(new ResponseButton("oos", "Sry, out of stock", true));
         inButtons.add(new ResponseButton("thx", "Thanks mate! Gl", false));
         OverlayConfig config = new OverlayConfig();
         config.setIncomingButtons(inButtons);
