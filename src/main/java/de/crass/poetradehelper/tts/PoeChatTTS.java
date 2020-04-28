@@ -64,7 +64,7 @@ public class PoeChatTTS implements FileListener {
     private Listener listener;
     private Pattern allowedChars = Pattern.compile(PropertyManager.getInstance().getProp("voice_allowed_chars", "[A-Za-z0-9%'.,!?()+-/&=$ ]+"));
     private Pattern currencyPattern = Pattern.compile("] @Fro.+\\s(.+):.+r (\\d+ .+) for my (\\d+ .+) i");
-    private Pattern tradePattern = Pattern.compile("] @Fro.+\\s(.+):.+r (.+) l.+ (\\d+ .+) i.+\"(.+)\".+left (\\d+).+top (\\d+)");
+    private Pattern tradePattern = Pattern.compile("] @Fro.+\\s(.+):.+your (.+) listed for (\\d+ .+) i.+\"(.+)\".+left (\\d+).+top (\\d+)");
 
     private boolean notifyCurrencyRequests = PropertyManager.getInstance().getBooleanProp("notify_currency", true);
     private boolean notifyTradeRequests = PropertyManager.getInstance().getBooleanProp("notify_trade", true);
