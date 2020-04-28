@@ -74,11 +74,11 @@ public class OverlayManager {
             try {
                 ObjectMapper mapper = new ObjectMapper();
                 OverlayConfig config = mapper.readValue(file, OverlayConfig.class);
-                LogManager.getInstance().log(getClass(), "Config successfully loaded.");
+                LogManager.getInstance().log(getClass(), "Overlay config successfully loaded.");
                 currentConfig = config;
                 return true;
             } catch (JsonMappingException j) {
-                LogManager.getInstance().log(getClass(), "Config corrupted! " + j.getMessage());
+                LogManager.getInstance().log(getClass(), "Overlay config corrupted! " + j.getMessage());
             } catch (IOException e) {
                 LogManager.getInstance().log(getClass(), "Error while loading config.");
                 e.printStackTrace();
@@ -88,12 +88,12 @@ public class OverlayManager {
             storeConfig();
             return true;
         }
-        LogManager.getInstance().log(getClass(), "Loading config failed.");
+        LogManager.getInstance().log(getClass(), "Loading overlay config failed.");
         return false;
     }
 
     private void storeConfig() {
-        LogManager.getInstance().log(getClass(), "Storing config file in " + configFile);
+        LogManager.getInstance().log(getClass(), "Storing overlay config file in " + configFile);
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
         ObjectWriter writer = mapper.writer();

@@ -186,7 +186,7 @@
                                     </AnchorPane>
                               </content>
                             </TitledPane>
-                            <TitledPane animated="false" text="Text To Speech">
+                            <TitledPane animated="false" text="Chat Log Parsing">
                               <content>
                                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                        <children>
@@ -203,13 +203,14 @@
                                                 <TextField fx:id="voiceShoutoutWords" layoutX="150.0" layoutY="244.0" AnchorPane.leftAnchor="120.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="200.0" />
                                                 <Text fill="#d8d8d8" layoutX="10.0" layoutY="276.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Blacklist Words" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="255.0" />
                                                 <TextField fx:id="voiceExcludeWords" layoutX="120.0" layoutY="241.0" AnchorPane.leftAnchor="120.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="250.0" />
-                                                <HBox layoutY="45.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                                                <HBox layoutY="45.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="55.0">
                                                    <children>
                                                       <Button fx:id="reloadConfigBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefWidth="280.0" text="Reload Config" HBox.hgrow="ALWAYS" />
-                                                      <Button fx:id="voiceTestButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefWidth="280.0" text="Test" HBox.hgrow="ALWAYS" />
+                                                      <Button fx:id="parseTestButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefWidth="280.0" text="Test" HBox.hgrow="ALWAYS" />
                                                    </children>
                                                 </HBox>
-                                                          <CheckBox fx:id="voiceActive" layoutX="30.0" layoutY="1.0" mnemonicParsing="false" text="Activate Chat Parsing" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                          <CheckBox fx:id="parseActive" layoutX="30.0" layoutY="1.0" mnemonicParsing="false" text="Activate Chat Parsing" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                <CheckBox fx:id="voiceActive" layoutY="18.0" mnemonicParsing="false" text="Enable Text To Speech Notification" AnchorPane.topAnchor="25.0" />
                                                       </children>
                                                   </AnchorPane>
                                        </children>

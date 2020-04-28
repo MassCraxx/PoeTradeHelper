@@ -10,7 +10,7 @@ import de.crass.poetradehelper.parser.PoeNinjaParser;
 import de.crass.poetradehelper.parser.PoeTradeApiParser;
 import de.crass.poetradehelper.parser.PoeTradeWebParser;
 import de.crass.poetradehelper.parser.TradeManager;
-import de.crass.poetradehelper.tts.PoeChatTTS;
+import de.crass.poetradehelper.tts.PoeLogReader;
 import de.crass.poetradehelper.ui.*;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -94,6 +94,9 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
     @FXML
     private CheckBox voiceActive;
+
+    @FXML
+    private CheckBox parseActive;
 
     @FXML
     private ListView<CurrencyID> currencyFilterList;
@@ -205,7 +208,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
     private TextField voiceExcludeWords;
 
     @FXML
-    private Button voiceTestButton;
+    private Button parseTestButton;
 
     @FXML
     private Text volumeTopicLabel;
@@ -220,7 +223,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
     private CheckBox filterMultiTrade;
 
     private static Stage currentStage;
-    public static PoeChatTTS poeChatTTS;
+    public static PoeLogReader poeConfigReader;
 
     private TradeManager tradeManager;
 
@@ -285,10 +288,13 @@ public class Main extends Application implements TradeManager.DealParseListener,
         setWebParser(PropertyManager.getInstance().getProp("trade_data_source", PoeTradeApiParser.IDENTIFIER));
 
         // Setup TTS
-        poeChatTTS = new PoeChatTTS(() -> {
-            voiceActive.setSelected(false);
+        poeConfigReader = new PoeLogReader(() -> {
+            parseActive.setSelected(false);
             poePath.setDisable(false);
         });
+        if (PropertyManager.getInstance().getBooleanProp("do_log_parsing", false)) {
+            poeConfigReader.startTTS();
+        }
 
         // Setup UI
         setupUI();
@@ -304,9 +310,9 @@ public class Main extends Application implements TradeManager.DealParseListener,
 //        PropertyManager.getInstance().setProp("window_divider", String.valueOf(splitPaneStatic.getDividerPositions()[0]));
         PropertyManager.getInstance().storeProperties();
 
-        if (poeChatTTS != null && poeChatTTS.isActive()) {
-            poeChatTTS.shutdown();
-            poeChatTTS = null;
+        if (poeConfigReader != null && poeConfigReader.isActive()) {
+            poeConfigReader.shutdown();
+            poeConfigReader = null;
         }
 
         if (TradeManager.getInstance() != null) {
@@ -323,7 +329,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
         // Attempt on persisting divide position failed, position changes unpredictably during runtime
 //        splitPane.setDividerPosition(0, Double.parseDouble(PropertyManager.getInstance().getProp("window_divider", "0.825")));
         // For 6 items and 725 height use 0.86415
-        splitPane.setDividerPosition(0,0.8615);
+        splitPane.setDividerPosition(0, 0.8615);
 //        splitPaneStatic = splitPane;
 
         tabPaneStatic = tabPane;
@@ -684,89 +690,93 @@ public class Main extends Application implements TradeManager.DealParseListener,
         webParsingCB.setValue(defaultParser);
         webParsingCB.setOnAction(event -> setWebParser(webParsingCB.getValue()));
 
-        // Setup Voice Controls
-        poeChatTTS.setWordIncludeTextField(voiceShoutoutWords);
-        poeChatTTS.setWordExcludeTextField(voiceExcludeWords);
-        List<String> supportedVoices = poeChatTTS.getSupportedVoices();
-        if (supportedVoices == null) {
-            setDisableVoiceControls();
+        // Setup parse
+        parseActive.setOnAction(event -> {
+            if (parseActive.isSelected()) {
+                poePath.setDisable(true);
+                String newPath = poePath.getText();
+                PropertyManager.getInstance().setPathOfExilePath(newPath);
+                poeConfigReader.startTTS();
+                PropertyManager.getInstance().setProp("do_log_parsing", "true");
+            } else {
+                poeConfigReader.stopTTS();
+                poePath.setDisable(false);
+                PropertyManager.getInstance().setProp("do_log_parsing", "false");
+            }
+        });
+        parseActive.setSelected(PropertyManager.getInstance().getBooleanProp("do_log_parsing", false));
 
-            voiceActive.setOnAction(event -> {
-                File jarDir = new File("");
-                LogManager.getInstance().log(getClass(), "Balcon not found! To enable TTS notifications, download balcon.exe from http://balabolka.site/balcon.zip place it in " + jarDir.getAbsolutePath() + " and restart the application.");
-                voiceActive.setSelected(false);
-            });
-        } else if (supportedVoices.isEmpty()) {
-            LogManager.getInstance().log(getClass(), "TTS is disabled: No supported voices found.");
-            setDisableVoiceControls();
-        } else {
-            voiceActive.setOnAction(event -> {
-                if (voiceActive.isSelected()) {
-                    poePath.setDisable(true);
-                    String newPath = poePath.getText();
-                    PropertyManager.getInstance().setPathOfExilePath(newPath);
-                    poeChatTTS.startTTS();
+        // Setup TTS
+        poeConfigReader.setWordIncludeTextField(voiceShoutoutWords);
+        poeConfigReader.setWordExcludeTextField(voiceExcludeWords);
+        voiceActive.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                List<String> supportedVoices = poeConfigReader.getSupportedVoices();
+                if (supportedVoices != null && !supportedVoices.isEmpty()) {
+                    poeConfigReader.setUseTTS(voiceActive.isSelected());
+                    voiceSpeakerCB.setItems(FXCollections.observableArrayList(supportedVoices));
+                    setDisableVoiceControls(false);
                 } else {
-                    poeChatTTS.stopTTS();
-                    poePath.setDisable(false);
+                    File jarDir = new File("");
+                    LogManager.getInstance().log(Main.class, "Balcon not found! To enable TTS notifications, download balcon.exe from http://balabolka.site/balcon.zip place it in " + jarDir.getAbsolutePath() + " and restart the application.");
+                    setDisableVoiceControls(true);
                 }
-            });
+                voiceActive.setSelected(poeConfigReader.doUseTTS());
+            }
+        });
 
-            voiceSpeakerCB.setItems(FXCollections.observableArrayList(supportedVoices));
-            voiceSpeakerCB.setValue(poeChatTTS.getVoice());
-            voiceSpeakerCB.setOnAction(event -> {
-                String selected = voiceSpeakerCB.getValue();
-                if (!selected.isEmpty()) {
-                    poeChatTTS.setVoice(selected);
+        voiceSpeakerCB.setValue(poeConfigReader.getVoice());
+        voiceSpeakerCB.setOnAction(event -> {
+            String selected = voiceSpeakerCB.getValue();
+            if (!selected.isEmpty()) {
+                poeConfigReader.setVoice(selected);
+            }
+        });
+
+        volumeLabel.setTooltip(new Tooltip("Set volume of the voice speaker"));
+
+        int volume = PropertyManager.getInstance().getVoiceVolume();
+        volumeLabel.setText(volume + " %");
+        volumeSlider.setValue(volume);
+        volumeSlider.valueProperty().addListener((observable, oldValue, newValue) -> volumeLabel.setText(newValue.intValue() + " %"));
+        volumeSlider.valueChangingProperty().addListener((observable, changeEnds, changeStarts) -> {
+            if (changeEnds) {
+                int newVolume = (int) volumeSlider.getValue();
+                poeConfigReader.setVolume(newVolume);
+                PropertyManager.getInstance().setVoiceVolume(String.valueOf(newVolume));
+                poeConfigReader.testSpeech();
+            }
+        });
+
+        // Who knew daniel was used in Pendulum's Bloodsugar?
+        volumeTopicLabel.setOnMouseClicked(event -> {
+            if (poeConfigReader.getVoice() != null && poeConfigReader.getVoice().contains("Daniel")) {
+                String msg;
+                volumeClicked++;
+                if (volumeClicked >= 5) {
+                    msg = "Ok, Fuck it, I lied! It's Drum and Bass, what you gonna do!";
+                } else {
+                    return;
                 }
-            });
-
-            volumeLabel.setTooltip(new Tooltip("Set volume of the voice speaker"));
-
-            int volume = PropertyManager.getInstance().getVoiceVolume();
-            volumeLabel.setText(volume + " %");
-            volumeSlider.setValue(volume);
-            volumeSlider.valueProperty().addListener((observable, oldValue, newValue) -> volumeLabel.setText(newValue.intValue() + " %"));
-            volumeSlider.valueChangingProperty().addListener((observable, changeEnds, changeStarts) -> {
-                if (changeEnds) {
-                    int newVolume = (int) volumeSlider.getValue();
-                    poeChatTTS.setVolume(newVolume);
-                    PropertyManager.getInstance().setVoiceVolume(String.valueOf(newVolume));
-                    poeChatTTS.testSpeech();
+                try {
+                    poeConfigReader.textToSpeech(msg, true);
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-            });
+            }
+        });
 
-            // Who knew daniel was used in Pendulum's Bloodsugar?
-            volumeTopicLabel.setOnMouseClicked(event -> {
-                if (poeChatTTS.getVoice() != null && poeChatTTS.getVoice().contains("Daniel")) {
-                    String msg;
-                    volumeClicked++;
-                    if (volumeClicked >= 5) {
-                        msg = "Ok, Fuck it, I lied! It's Drum and Bass, what you gonna do!";
-                    } else {
-                        return;
-                    }
-                    try {
-                        poeChatTTS.textToSpeech(msg, true);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
+        parseTestButton.setOnAction(event -> poeConfigReader.processTestMessage());
+        reloadConfigBtn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                poeConfigReader.loadTTSConfig();
+                OverlayManager.getInstance().loadConfig();
+            }
+        });
 
-            voiceTestButton.setOnAction(event -> poeChatTTS.testSpeech());
-
-            poePath.setText(PropertyManager.getInstance().getPathOfExilePath());
-
-            reloadConfigBtn.setOnAction(new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent event) {
-                    if (!poeChatTTS.loadConfig()) {
-                        LogManager.getInstance().log(getClass(), "Reload config failed.");
-                    }
-                }
-            });
-        }
+        poePath.setText(PropertyManager.getInstance().getPathOfExilePath());
 
         // Auto Update checkbox
         autoUpdate.setOnAction(event -> {
@@ -854,22 +864,22 @@ public class Main extends Application implements TradeManager.DealParseListener,
         }
     }
 
-    private void setDisableVoiceControls() {
-        Tooltip tooltip = new Tooltip("Place balcon.exe next to the app and restart to enable this feature.");
-        voiceActive.setTooltip(tooltip);
-        volumeLabel.setDisable(true);
-        volumeLabel.setTooltip(tooltip);
-        volumeSlider.setDisable(true);
-        volumeSlider.setTooltip(tooltip);
-        reloadConfigBtn.setDisable(true);
-        reloadConfigBtn.setTooltip(tooltip);
-        voiceTestButton.setDisable(true);
-        voiceTestButton.setTooltip(tooltip);
-        voiceShoutoutWords.setDisable(true);
-        voiceExcludeWords.setDisable(true);
-        voiceSpeakerCB.setDisable(true);
+    private void setDisableVoiceControls(boolean val) {
+//        Tooltip tooltip = new Tooltip("Place balcon.exe next to the app and restart to enable this feature.");
+//        parseActive.setTooltip(tooltip);
+        volumeLabel.setDisable(val);
+//        volumeLabel.setTooltip(tooltip);
+        volumeSlider.setDisable(val);
+//        volumeSlider.setTooltip(tooltip);
+//        reloadConfigBtn.setDisable(val);
+//        reloadConfigBtn.setTooltip(tooltip);
+//        voiceTestButton.setDisable(val);
+//        voiceTestButton.setTooltip(tooltip);
+        voiceShoutoutWords.setDisable(val);
+        voiceExcludeWords.setDisable(val);
+        voiceSpeakerCB.setDisable(val);
 
-        poePath.setDisable(true);
+//        poePath.setDisable(val);
     }
 
     private void updateTitle() {

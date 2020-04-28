@@ -17,7 +17,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import static de.crass.poetradehelper.Main.poeChatTTS;
+import static de.crass.poetradehelper.Main.poeConfigReader;
 
 /**
  * Created by mcrass on 19.07.2018.
@@ -340,10 +340,10 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
                     }
 
                     //FIXME
-                    if (!notified && poeChatTTS.isActive() && Boolean.parseBoolean(PropertyManager.getInstance().getProp("voice_notify_bad_tendency", "false"))) {
+                    if (!notified && poeConfigReader.isActive() && Boolean.parseBoolean(PropertyManager.getInstance().getProp("voice_notify_bad_tendency", "false"))) {
                         if (marketBuyPrice > 0 && playerBuyPrice > 0 && playerBuyPrice > marketBuyPrice || marketSellPrice > 0 && playerSellPrice > 0 && playerSellPrice < marketSellPrice) {
                             try {
-                                poeChatTTS.notifyBadTendency();
+                                poeConfigReader.notifyBadTendency();
                                 notified = true;
                             } catch (IOException e) {
                                 e.printStackTrace();

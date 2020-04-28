@@ -26,7 +26,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 //IDEA: Notify on tendency change - Check after parsing every deal for tendency check? / Store tendency in deal?
-public class PoeChatTTS implements FileListener {
+public class PoeLogReader implements FileListener {
     private static final String bestVoiceEver = "ScanSoft Daniel_Full_22kHz";
 
     private String[] knownNames = {
@@ -60,6 +60,7 @@ public class PoeChatTTS implements FileListener {
     private ExecutorService executorService;
 
     private boolean isRunning = false;
+    private boolean useTTS;
     private File configFile = new File("./ttsconfig.json");
     private Listener listener;
     private Pattern allowedChars = Pattern.compile(PropertyManager.getInstance().getProp("voice_allowed_chars", "[A-Za-z0-9%'.,!?()+-/&=$ ]+"));
@@ -69,7 +70,7 @@ public class PoeChatTTS implements FileListener {
     private boolean notifyCurrencyRequests = PropertyManager.getInstance().getBooleanProp("notify_currency", true);
     private boolean notifyTradeRequests = PropertyManager.getInstance().getBooleanProp("notify_trade", true);
 
-    public PoeChatTTS(Listener listener) {
+    public PoeLogReader(Listener listener) {
         this.listener = listener;
 
         init();
@@ -102,20 +103,7 @@ public class PoeChatTTS implements FileListener {
     private void processNewLine(String newLine) {
 //        LogManager.getInstance().log(getClass(), "Processing: " + newLine);
 
-        if (parseConfig == null) {
-            return;
-        }
-
-        if (parseConfig.getPatternToOutput().isEmpty()) {
-            try {
-                textToSpeech(newLine);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
         // Process trade for overlay
-
         Matcher matcher = currencyPattern.matcher(newLine);
         if (notifyCurrencyRequests && matcher.find() || notifyTradeRequests && (matcher = tradePattern.matcher(newLine)).find()) {
             int x = -1;
@@ -129,91 +117,103 @@ public class PoeChatTTS implements FileListener {
             OverlayManager.getInstance().showNotificationOverlay(true, matcher.group(1), matcher.group(2), matcher.group(3), stashTab, x, y);
         }
 
-        for (PatternOutput patternOutput : parseConfig.getPatternToOutput()) {
-            // Skip line if pattern is inactive
-            if (!patternOutput.isActive()) {
-                continue;
+        // Process line for TTS
+        if (useTTS && voice != null && parseConfig != null) {
+            if (parseConfig.getPatternToOutput().isEmpty()) {
+                try {
+                    textToSpeech(newLine);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return;
             }
 
-            // Check pattern
-            Pattern pattern = Pattern.compile(patternOutput.getPattern());
-            Matcher m = pattern.matcher(newLine);
-
-            if (m.find()) {
-                // Only parse if probability given
-                int probability = patternOutput.getProbability();
-                if (probability < 100) {
-                    int random = ThreadLocalRandom.current().nextInt(0, 100);
-                    if (random < probability) {
-                        LogManager.getInstance().log(getClass(), "Ignored (" + probability + "% probability)");
-                        continue;
-                    }
+            for (PatternOutput patternOutput : parseConfig.getPatternToOutput()) {
+                // Skip line if pattern is inactive
+                if (!patternOutput.isActive()) {
+                    continue;
                 }
 
-                String[] output = patternOutput.getOutput().split(";");
-                String voiceOutput = getRandomString(output);
+                // Check pattern
+                Pattern pattern = Pattern.compile(patternOutput.getPattern());
+                Matcher m = pattern.matcher(newLine);
 
-                StringBuilder log = new StringBuilder();
-                for (int g = 0; g <= m.groupCount(); g++) {
-                    String groupInput = m.group(g);
-                    groupInput = groupInput.replace("_", " ");
-                    // Check if readable
-                    if (!allowedChars.matcher(groupInput).matches()) {
-                        groupInput = "something i can not pronounce";
+                if (m.find()) {
+                    // Only parse if probability given
+                    int probability = patternOutput.getProbability();
+                    if (probability < 100) {
+                        int random = ThreadLocalRandom.current().nextInt(0, 100);
+                        if (random < probability) {
+                            LogManager.getInstance().log(getClass(), "Ignored (" + probability + "% probability)");
+                            continue;
+                        }
                     }
-                    voiceOutput = voiceOutput.replace("(" + g + ")", groupInput);
 
-                    log.append(g)
-                            .append(":(")
-                            .append(m.group(g))
-                            .append(") ");
-                }
-                LogManager.getInstance().log(getClass(), log.toString());
+                    String[] output = patternOutput.getOutput().split(";");
+                    String voiceOutput = getRandomString(output);
 
-                String[] words = voiceOutput.split("\\s+");
-                if (useIncludeExclude) {
-                    if (wordIncludeTextField != null && !wordIncludeTextField.getText().isEmpty()) {
-                        String[] includeWords = wordIncludeTextField.getText().split(",");
-                        String[] excludeWords = wordExcludeTextField.getText().split(",");
-                        boolean included = false;
-                        boolean excluded = false;
-                        for (String wordInMsg : words) {
-                            // If included found, skip included search
-                            if (!included) {
-                                for (String word : includeWords) {
-                                    if (word.equalsIgnoreCase(wordInMsg)) {
-                                        included = true;
+                    StringBuilder log = new StringBuilder();
+                    for (int g = 0; g <= m.groupCount(); g++) {
+                        String groupInput = m.group(g);
+                        groupInput = groupInput.replace("_", " ");
+                        // Check if readable
+                        if (!allowedChars.matcher(groupInput).matches()) {
+                            groupInput = "something i can not pronounce";
+                        }
+                        voiceOutput = voiceOutput.replace("(" + g + ")", groupInput);
+
+                        log.append(g)
+                                .append(":(")
+                                .append(m.group(g))
+                                .append(") ");
+                    }
+                    LogManager.getInstance().log(getClass(), log.toString());
+
+                    String[] words = voiceOutput.split("\\s+");
+                    if (useIncludeExclude) {
+                        if (wordIncludeTextField != null && !wordIncludeTextField.getText().isEmpty()) {
+                            String[] includeWords = wordIncludeTextField.getText().split(",");
+                            String[] excludeWords = wordExcludeTextField.getText().split(",");
+                            boolean included = false;
+                            boolean excluded = false;
+                            for (String wordInMsg : words) {
+                                // If included found, skip included search
+                                if (!included) {
+                                    for (String word : includeWords) {
+                                        if (word.equalsIgnoreCase(wordInMsg)) {
+                                            included = true;
+                                            break;
+                                        }
+                                    }
+                                    // if word was included, skip exclusion search for this i
+                                    if (included) {
+                                        continue;
+                                    }
+                                }
+
+                                for (String exWord : excludeWords) {
+                                    if (wordInMsg.equalsIgnoreCase(exWord)) {
+                                        excluded = true;
                                         break;
                                     }
                                 }
-                                // if word was included, skip exclusion search for this i
-                                if (included) {
-                                    continue;
-                                }
-                            }
-
-                            for (String exWord : excludeWords) {
-                                if (wordInMsg.equalsIgnoreCase(exWord)) {
-                                    excluded = true;
+                                // if word was excluded, cancel search
+                                if (excluded) {
                                     break;
                                 }
                             }
-                            // if word was excluded, cancel search
-                            if (excluded) {
-                                break;
+
+                            if (!included || excluded) {
+                                return;
                             }
                         }
-
-                        if (!included || excluded) {
-                            return;
-                        }
                     }
-                }
-                try {
-                    textToSpeech(replacePlaceholders(words));
-                    break;
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    try {
+                        textToSpeech(replacePlaceholders(words));
+                        break;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
@@ -333,11 +333,13 @@ public class PoeChatTTS implements FileListener {
     }
 
     public void startTTS() {
-        if (!loadConfig()) {
-            LogManager.getInstance().log(getClass(), "ERROR: StartTTS failed! No Config set.");
-            return;
-        } else if (parseConfig.getPatternToOutput().isEmpty()) {
-            LogManager.getInstance().log(getClass(), "Config contains no pattern, everything will be red.");
+        if(voice != null) {
+            if (!loadTTSConfig()) {
+                LogManager.getInstance().log(getClass(), "Error while loading config.");
+                return;
+            } else if (parseConfig != null && parseConfig.getPatternToOutput().isEmpty()) {
+                LogManager.getInstance().log(getClass(), "Config contains no pattern, everything will be red.");
+            }
         }
 
         String dir = PropertyManager.getInstance().getPathOfExilePath();
@@ -350,7 +352,6 @@ public class PoeChatTTS implements FileListener {
             startLogTail(file);
 
             isRunning = true;
-            LogManager.getInstance().log(getClass(), "TTS Watchdog started.");
         } else {
             LogManager.getInstance().log(getClass(), "Check your PoE Path! Log file not found. " + file.getAbsolutePath() + " does not exist.");
             onShutdown();
@@ -474,6 +475,10 @@ public class PoeChatTTS implements FileListener {
         return voice;
     }
 
+    public void processTestMessage(){
+        processNewLine("2020/04/28 16:11:55 10434343 acf [INFO Client 11664] @From <=‡----> FREE_Space: Hi, I would like to buy your Dusk Creed Small Cluster Jewel listed for 15 chaos in Delirium (stash tab \"xc\"; position: left 5, top 4)");
+    }
+
     public void testSpeech() {
         String test;
         if (parseConfig == null || (test = parseConfig.getPlaceholders().get("test")) == null) {
@@ -516,6 +521,15 @@ public class PoeChatTTS implements FileListener {
         }
 
         textToSpeech(badTendencyString);
+    }
+
+    public void setUseTTS(boolean val) {
+        loadTTSConfig();
+        useTTS = val;
+    }
+
+    public boolean doUseTTS() {
+        return useTTS;
     }
 
     public enum InternetSlang {
@@ -567,39 +581,42 @@ public class PoeChatTTS implements FileListener {
 
     }
 
-    public boolean loadConfig() {
-        File file = configFile;
-        if (file.exists()) {
-            try {
-                ObjectMapper mapper = new ObjectMapper();
-                ParseConfig config = mapper.readValue(file, ParseConfig.class);
-                LogManager.getInstance().log(getClass(), "Config successfully loaded.");
-                setParseConfig(config);
-                return true;
-            } catch (JsonMappingException j) {
-                LogManager.getInstance().log(getClass(), "Config corrupted! " + j.getMessage());
-            } catch (IOException e) {
-                LogManager.getInstance().log(getClass(), "Error while loading config.");
-                e.printStackTrace();
-            }
-        } else {
-            try {
-                URL url = Main.class.getResource("default_ttsconfig.json");
-                ObjectMapper mapper = new ObjectMapper();
-                ParseConfig config = mapper.readValue(url, ParseConfig.class);
-                LogManager.getInstance().log(getClass(), "Using default config.");
+    public boolean loadTTSConfig() {
+        if(voice != null) {
+            File file = configFile;
+            if (file.exists()) {
+                try {
+                    ObjectMapper mapper = new ObjectMapper();
+                    ParseConfig config = mapper.readValue(file, ParseConfig.class);
+                    LogManager.getInstance().log(getClass(), "TTS config successfully loaded.");
+                    setParseConfig(config);
+                    return true;
+                } catch (JsonMappingException j) {
+                    LogManager.getInstance().log(getClass(), "TTS config corrupted! " + j.getMessage());
+                } catch (IOException e) {
+                    LogManager.getInstance().log(getClass(), "Error while loading TTS config.");
+                    e.printStackTrace();
+                }
+            } else {
+                try {
+                    URL url = Main.class.getResource("default_ttsconfig.json");
+                    ObjectMapper mapper = new ObjectMapper();
+                    ParseConfig config = mapper.readValue(url, ParseConfig.class);
+                    LogManager.getInstance().log(getClass(), "Using default TTS config.");
 
-                storeConfig(config);
-                setParseConfig(config);
-                return true;
-            } catch (JsonMappingException j) {
-                LogManager.getInstance().log(getClass(), "Config corrupted! " + j.getMessage());
-            } catch (IOException e) {
-                LogManager.getInstance().log(getClass(), "Error while loading config.");
-                e.printStackTrace();
+                    storeConfig(config);
+                    setParseConfig(config);
+                    return true;
+                } catch (JsonMappingException j) {
+                    LogManager.getInstance().log(getClass(), "TTS Config corrupted! " + j.getMessage());
+                } catch (IOException e) {
+                    LogManager.getInstance().log(getClass(), "Error while loading TTS config.");
+                    e.printStackTrace();
+                }
             }
+            LogManager.getInstance().log(getClass(), "Loading TTS config failed.");
+            return false;
         }
-        LogManager.getInstance().log(getClass(), "Loading config failed.");
         return false;
     }
 
