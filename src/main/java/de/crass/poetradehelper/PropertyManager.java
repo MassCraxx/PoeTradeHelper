@@ -48,7 +48,7 @@ public class PropertyManager {
 
     // DEFAULTS
     public static final String defaultLeague = "Standard";
-    private final String defaultPrimary = "exa";
+    private final String defaultPrimary = "exalted";
     private final String defaultPoePath = "C:\\Program Files (x86)\\Grinding Gear Games\\Path of Exile\\";
 
     private final String defaultFilterStockOffers = "false";
@@ -56,8 +56,8 @@ public class PropertyManager {
     private final String defaultFilterExcessive = "true";
     private final String defaultExcessiveTreshold = "60";
 
-    private final String defaultCurrencyFilterString = "fuse,regret,jew,chisel,gcp,chrom,regal,alt,scour,alch";
-    private final String defaultPrimaryCurrencyString = "mir,mirror-shard,exa,blessing-chayula,divine,exalted-shard";
+    private final String defaultCurrencyFilterString = "fusing,regret,jewellers,chisel,gcp,chrome,regal,alt,scour,alch";
+    private final String defaultPrimaryCurrencyString = "mirror,mirror-shard,exalted,blessing-chayula,divine,exalted-shard";
 
     // Current Values
     private ObservableList<CurrencyID> currencyFilterList;
