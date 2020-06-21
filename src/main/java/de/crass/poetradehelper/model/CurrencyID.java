@@ -9,7 +9,7 @@ import java.util.Set;
 public class CurrencyID {
     public static CurrencyID ALCHEMY = new CurrencyID(3, "alch", "Orb of Alchemy");
     public static CurrencyID CHAOS = new CurrencyID(4, "chaos", "Chaos Orb");
-    public static CurrencyID EXALTED = new CurrencyID(6, "exa", "Exalted Orb");
+    public static CurrencyID EXALTED = new CurrencyID(6, "exalted", "Exalted Orb");
     public static CurrencyID REGAL = new CurrencyID(14, "regal", "Regal Orb");
 
     private int id;
