@@ -12,6 +12,7 @@ import de.crass.poetradehelper.model.PatternOutput;
 import de.crass.poetradehelper.ui.OverlayManager;
 import javafx.scene.control.TextField;
 
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -332,16 +333,7 @@ public class PoeLogReader implements FileListener {
         return result;
     }
 
-    public void startTTS() {
-        if(voice != null) {
-            if (!loadTTSConfig()) {
-                LogManager.getInstance().log(getClass(), "Error while loading config.");
-                return;
-            } else if (parseConfig != null && parseConfig.getPatternToOutput().isEmpty()) {
-                LogManager.getInstance().log(getClass(), "Config contains no pattern, everything will be red.");
-            }
-        }
-
+    public void startLogParsing() {
         String dir = PropertyManager.getInstance().getPathOfExilePath();
         if (dir.charAt(dir.length() - 1) != '/') {
             dir += "/";
@@ -523,9 +515,11 @@ public class PoeLogReader implements FileListener {
         textToSpeech(badTendencyString);
     }
 
-    public void setUseTTS(boolean val) {
-        loadTTSConfig();
-        useTTS = val;
+    public void setUseTTS(boolean enabled) {
+        if (enabled) {
+            loadTTSConfig();
+        }
+        useTTS = enabled;
     }
 
     public boolean doUseTTS() {
@@ -579,6 +573,15 @@ public class PoeLogReader implements FileListener {
     @Override
     public void onFileChanged(File file, boolean newFile) {
 
+    }
+
+    public void openTTSConfig() {
+        File file = configFile;
+        try {
+            Desktop.getDesktop().open(file);
+        } catch (IOException e) {
+            LogManager.getInstance().log(getClass(), "TTS Config not found!");
+        }
     }
 
     public boolean loadTTSConfig() {

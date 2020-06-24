@@ -84,6 +84,9 @@ public class Main extends Application implements TradeManager.DealParseListener,
     private Button reloadConfigBtn;
 
     @FXML
+    private Button openConfigBtn;
+
+    @FXML
     private ListView<CurrencyDeal> currencyList;
 
     @FXML
@@ -293,7 +296,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
             poePath.setDisable(false);
         });
         if (PropertyManager.getInstance().getBooleanProp("do_log_parsing", false)) {
-            poeConfigReader.startTTS();
+            poeConfigReader.startLogParsing();
         }
 
         // Setup UI
@@ -696,7 +699,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
                 poePath.setDisable(true);
                 String newPath = poePath.getText();
                 PropertyManager.getInstance().setPathOfExilePath(newPath);
-                poeConfigReader.startTTS();
+                poeConfigReader.startLogParsing();
                 PropertyManager.getInstance().setProp("do_log_parsing", "true");
             } else {
                 poeConfigReader.stopTTS();
@@ -729,7 +732,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
         voiceSpeakerCB.setValue(poeConfigReader.getVoice());
         voiceSpeakerCB.setOnAction(event -> {
             String selected = voiceSpeakerCB.getValue();
-            if (!selected.isEmpty()) {
+            if (selected != null && !selected.isEmpty()) {
                 poeConfigReader.setVoice(selected);
             }
         });
@@ -773,6 +776,13 @@ public class Main extends Application implements TradeManager.DealParseListener,
             public void handle(ActionEvent event) {
                 poeConfigReader.loadTTSConfig();
                 OverlayManager.getInstance().loadConfig();
+            }
+        });
+
+        openConfigBtn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                poeConfigReader.openTTSConfig();
             }
         });
 
