@@ -40,7 +40,7 @@ public class PoeLogReader implements FileListener {
             "One", "Check", "Boom", "Dude"};
 
     // Config
-    private ParseConfig parseConfig;
+    private ParseConfig ttsParseConfig;
 
     // Properties
     // 0 to 100
@@ -62,6 +62,8 @@ public class PoeLogReader implements FileListener {
 
     private boolean isRunning = false;
     private boolean useTTS;
+    private boolean showOverlay = true;
+
     private File configFile = new File("./ttsconfig.json");
     private Listener listener;
     private Pattern allowedChars = Pattern.compile(PropertyManager.getInstance().getProp("voice_allowed_chars", "[A-Za-z0-9%'.,!?()+-/&=$ ]+"));
@@ -83,22 +85,12 @@ public class PoeLogReader implements FileListener {
         setVoice(proMan.getProp(PropertyManager.VOICE_SPEAKER, null));
     }
 
-    public void setParseConfig(ParseConfig parseConfig) {
+    public void setTTSParseConfig(ParseConfig parseConfig) {
         if (parseConfig == null) {
             return;
         }
 
-//        boolean wasRunning = false;
-//        if(isRunning){
-//            wasRunning = true;
-//            stopTTS();
-//        }
-
-        this.parseConfig = parseConfig;
-
-//        if(wasRunning) {
-//            startTTS();
-//        }
+        this.ttsParseConfig = parseConfig;
     }
 
     private void processNewLine(String newLine) {
@@ -115,12 +107,15 @@ public class PoeLogReader implements FileListener {
                 x = Integer.parseInt(matcher.group(5));
                 y = Integer.parseInt(matcher.group(6));
             }
-            OverlayManager.getInstance().showNotificationOverlay(true, matcher.group(1), matcher.group(2), matcher.group(3), stashTab, x, y);
+
+            if (showOverlay) {
+                OverlayManager.getInstance().showNotificationOverlay(true, matcher.group(1), matcher.group(2), matcher.group(3), stashTab, x, y);
+            }
         }
 
         // Process line for TTS
-        if (useTTS && voice != null && parseConfig != null) {
-            if (parseConfig.getPatternToOutput().isEmpty()) {
+        if (useTTS && voice != null && ttsParseConfig != null) {
+            if (ttsParseConfig.getPatternToOutput().isEmpty()) {
                 try {
                     textToSpeech(newLine);
                 } catch (IOException e) {
@@ -129,7 +124,7 @@ public class PoeLogReader implements FileListener {
                 return;
             }
 
-            for (PatternOutput patternOutput : parseConfig.getPatternToOutput()) {
+            for (PatternOutput patternOutput : ttsParseConfig.getPatternToOutput()) {
                 // Skip line if pattern is inactive
                 if (!patternOutput.isActive()) {
                     continue;
@@ -247,7 +242,7 @@ public class PoeLogReader implements FileListener {
 
                 StringBuilder replacementBuilder = new StringBuilder();
                 for (String replacementKey : word.split("&")) {
-                    String replacementPart = parseConfig.getPlaceholders().get(replacementKey);
+                    String replacementPart = ttsParseConfig.getPlaceholders().get(replacementKey);
                     if (replacementPart != null) {
                         if (replacementBuilder.length() > 0) {
                             replacementBuilder.append(";");
@@ -344,14 +339,18 @@ public class PoeLogReader implements FileListener {
             startLogTail(file);
 
             isRunning = true;
+
+            if (showOverlay) {
+                // init, load config etc
+                OverlayManager.getInstance();
+            }
         } else {
             LogManager.getInstance().log(getClass(), "Check your PoE Path! Log file not found. " + file.getAbsolutePath() + " does not exist.");
             onShutdown();
         }
-
     }
 
-    public void stopTTS() {
+    public void stopLogParsing() {
         if (logTailer != null) {
             logTailer.stopRunning();
             logTailer = null;
@@ -359,7 +358,7 @@ public class PoeLogReader implements FileListener {
     }
 
     public void shutdown() {
-        stopTTS();
+        stopLogParsing();
 
         if (executorService != null) {
             executorService.shutdown();
@@ -467,13 +466,13 @@ public class PoeLogReader implements FileListener {
         return voice;
     }
 
-    public void processTestMessage(){
+    public void processTestMessage() {
         processNewLine("2020/04/28 16:11:55 10434343 acf [INFO Client 11664] @From <=‡----> FREE_Space: Hi, I would like to buy your Dusk Creed Small Cluster Jewel listed for 15 chaos in Delirium (stash tab \"xc\"; position: left 5, top 4)");
     }
 
     public void testSpeech() {
         String test;
-        if (parseConfig == null || (test = parseConfig.getPlaceholders().get("test")) == null) {
+        if (ttsParseConfig == null || (test = ttsParseConfig.getPlaceholders().get("test")) == null) {
             test = getRandomString(testPhrases);
         } else {
             test = replacePlaceholders(getRandomString(test.split(";")).split("\\s+"));
@@ -502,12 +501,12 @@ public class PoeLogReader implements FileListener {
         return wordExcludeTextField;
     }
 
-    public ParseConfig getParseConfig() {
-        return parseConfig;
+    public ParseConfig getTtsParseConfig() {
+        return ttsParseConfig;
     }
 
     public void notifyBadTendency() throws IOException {
-        String badTendencyString = parseConfig.getPlaceholders().get("bad_tendency");
+        String badTendencyString = ttsParseConfig.getPlaceholders().get("bad_tendency");
         if (badTendencyString == null) {
             badTendencyString = getRandomString(new String[]{"Update your offers"});
         }
@@ -576,23 +575,31 @@ public class PoeLogReader implements FileListener {
     }
 
     public void openTTSConfig() {
+        if (voice == null) {
+            LogManager.getInstance().log(getClass(), "TTS is not supported.");
+            return;
+        }
         File file = configFile;
-        try {
-            Desktop.getDesktop().open(file);
-        } catch (IOException e) {
-            LogManager.getInstance().log(getClass(), "TTS Config not found!");
+        if (file.exists()) {
+            try {
+                Desktop.getDesktop().open(file);
+            } catch (IOException e) {
+                LogManager.getInstance().log(getClass(), "TTS Config not found!");
+            }
+        } else {
+            loadTTSConfig();
         }
     }
 
     public boolean loadTTSConfig() {
-        if(voice != null) {
+        if (voice != null) {
             File file = configFile;
             if (file.exists()) {
                 try {
                     ObjectMapper mapper = new ObjectMapper();
                     ParseConfig config = mapper.readValue(file, ParseConfig.class);
                     LogManager.getInstance().log(getClass(), "TTS config successfully loaded.");
-                    setParseConfig(config);
+                    setTTSParseConfig(config);
                     return true;
                 } catch (JsonMappingException j) {
                     LogManager.getInstance().log(getClass(), "TTS config corrupted! " + j.getMessage());
@@ -608,7 +615,7 @@ public class PoeLogReader implements FileListener {
                     LogManager.getInstance().log(getClass(), "Using default TTS config.");
 
                     storeConfig(config);
-                    setParseConfig(config);
+                    setTTSParseConfig(config);
                     return true;
                 } catch (JsonMappingException j) {
                     LogManager.getInstance().log(getClass(), "TTS Config corrupted! " + j.getMessage());

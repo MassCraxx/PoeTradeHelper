@@ -205,8 +205,9 @@
                                                 <TextField fx:id="voiceExcludeWords" layoutX="120.0" layoutY="241.0" AnchorPane.leftAnchor="120.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="250.0" />
                                                 <HBox layoutY="45.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="55.0">
                                                    <children>
-                                                       <Button fx:id="openConfigBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefWidth="280.0" text="Open Config" HBox.hgrow="ALWAYS" />
-                                                       <Button fx:id="reloadConfigBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefWidth="280.0" text="Reload Config" HBox.hgrow="ALWAYS" />
+                                                       <Button fx:id="openTtsConfigBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefWidth="280.0" text="Open TTS Config" HBox.hgrow="ALWAYS" />
+                                                       <Button fx:id="openConfigBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefWidth="280.0" text="Open Overlay Config" HBox.hgrow="ALWAYS" />
+                                                       <Button fx:id="reloadConfigBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefWidth="280.0" text="Reload Configs" HBox.hgrow="ALWAYS" />
                                                       <Button fx:id="parseTestButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefWidth="280.0" text="Test" HBox.hgrow="ALWAYS" />
                                                    </children>
                                                 </HBox>

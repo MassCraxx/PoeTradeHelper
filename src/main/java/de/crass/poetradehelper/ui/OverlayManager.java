@@ -68,6 +68,19 @@ public class OverlayManager {
         return config;
     }
 
+    public void openOverlayConfig() {
+        File file = configFile;
+        if (file.exists()) {
+            try {
+                Desktop.getDesktop().open(file);
+            } catch (IOException e) {
+                LogManager.getInstance().log(getClass(), "Overlay Config not found!");
+            }
+        } else {
+            loadConfig();
+        }
+    }
+
     public boolean loadConfig() {
         File file = configFile;
         if (file.exists()) {

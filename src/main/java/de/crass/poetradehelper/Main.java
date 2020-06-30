@@ -87,6 +87,9 @@ public class Main extends Application implements TradeManager.DealParseListener,
     private Button openConfigBtn;
 
     @FXML
+    private Button openTtsConfigBtn;
+
+    @FXML
     private ListView<CurrencyDeal> currencyList;
 
     @FXML
@@ -702,7 +705,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
                 poeConfigReader.startLogParsing();
                 PropertyManager.getInstance().setProp("do_log_parsing", "true");
             } else {
-                poeConfigReader.stopTTS();
+                poeConfigReader.stopLogParsing();
                 poePath.setDisable(false);
                 PropertyManager.getInstance().setProp("do_log_parsing", "false");
             }
@@ -774,12 +777,21 @@ public class Main extends Application implements TradeManager.DealParseListener,
         reloadConfigBtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                poeConfigReader.loadTTSConfig();
                 OverlayManager.getInstance().loadConfig();
+                if (poeConfigReader.doUseTTS()) {
+                    poeConfigReader.loadTTSConfig();
+                }
             }
         });
 
         openConfigBtn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                OverlayManager.getInstance().openOverlayConfig();
+            }
+        });
+
+        openTtsConfigBtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 poeConfigReader.openTTSConfig();
