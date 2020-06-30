@@ -75,6 +75,9 @@ public class Main extends Application implements TradeManager.DealParseListener,
     public static TabPane tabPaneStatic;
 
     @FXML
+    private Accordion settingsPane;
+
+    @FXML
     private ListView<CurrencyDeal> playerDealList;
 
     @FXML
@@ -347,6 +350,8 @@ public class Main extends Application implements TradeManager.DealParseListener,
             }
         });
 
+        settingsPane.setExpandedPane(settingsPane.getPanes().get(0));
+
         DecimalFormatSymbols symbols = new DecimalFormatSymbols();
         symbols.setDecimalSeparator('.');
         dFormat.setDecimalFormatSymbols(symbols);
@@ -474,6 +479,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
                                     pseudoClassStateChanged(playerClass, true);
                                 } else {
                                     pseudoClassStateChanged(igoredClass, false);
+                                    pseudoClassStateChanged(playerClass, false);
                                 }
                             }
                         };
@@ -691,13 +697,10 @@ public class Main extends Application implements TradeManager.DealParseListener,
         leagueCB.setOnAction(event -> PropertyManager.getInstance().setLeague(leagueCB.getValue()));
 
         removePlayerBtn.setTooltip(new Tooltip("Reset Window to default size"));
-        resetWindowBtn.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                currentStage.setWidth(PropertyManager.defaultWindowWidth);
-                currentStage.setHeight(PropertyManager.defaultWindowHeight);
-                splitPane.setDividerPosition(0, 0.8615);
-            }
+        resetWindowBtn.setOnAction(event -> {
+            currentStage.setWidth(PropertyManager.defaultWindowWidth);
+            currentStage.setHeight(PropertyManager.defaultWindowHeight);
+            splitPane.setDividerPosition(0, 0.8615);
         });
 
         webParsingCB.setItems(FXCollections.observableArrayList(PoeTradeWebParser.IDENTIFIER, PoeTradeApiParser.IDENTIFIER));
