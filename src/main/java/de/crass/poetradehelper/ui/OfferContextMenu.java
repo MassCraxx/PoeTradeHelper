@@ -1,5 +1,6 @@
 package de.crass.poetradehelper.ui;
 
+import de.crass.poetradehelper.LogManager;
 import de.crass.poetradehelper.Main;
 import de.crass.poetradehelper.PropertyManager;
 import de.crass.poetradehelper.model.CurrencyID;
@@ -59,13 +60,27 @@ public class OfferContextMenu extends ContextMenu {
 
         ignoreItem = new MenuItem("Toggle ignore player");
         ignoreItem.setOnAction(event -> {
+            if (getSelected().isPlayerOffer()) {
+                LogManager.getInstance().log(OfferContextMenu.class, "Player offers are always ignored for overview.");
+                return;
+            }
+            String account = getSelected().getAccountName();
             if (getSelected().isIgnored()) {
-                PropertyManager.getInstance().removeIgnoredPlayer(getSelected().getAccountName());
+                LogManager.getInstance().log(OfferContextMenu.class, "Removing account " + account + " from ignore list.");
+                PropertyManager.getInstance().removeIgnoredPlayer(account);
             } else {
-                PropertyManager.getInstance().addIgnoredPlayer(getSelected().getAccountName());
+                LogManager.getInstance().log(OfferContextMenu.class, "Adding account " + account + " to ignore list.");
+                PropertyManager.getInstance().addIgnoredPlayer(account);
             }
             TradeManager.getInstance().parseDeals();
-            tableView.refresh();
+
+            // Refresh both offer tables
+            for (Object view : tableView.getParent().getChildrenUnmodifiable()) {
+                if (view instanceof TableView) {
+                    //noinspection rawtypes
+                    ((TableView) view).refresh();
+                }
+            }
         });
 
         getItems().addAll(copyItem, browserItem, new SeparatorMenuItem(), ignoreItem);
