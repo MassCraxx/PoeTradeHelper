@@ -21,7 +21,7 @@ public abstract class WebParser {
     boolean updating = false;
     boolean cancel = false;
     public OfferParseListener parseListener;
-    private boolean cancelAutoUpdateOnCancel = PropertyManager.getInstance().getBooleanProp("cancel_auto_update_on_error", true);
+    private boolean cancelAutoUpdateOnCancel = PropertyManager.getInstance().getBooleanProp("auto_update_cancel_on_error", true);
 
 
     WebParser(OfferParseListener listener) {
@@ -70,14 +70,14 @@ public abstract class WebParser {
                     removeOffers(primaryCurrency, secondaryCurrency);
 
                 // BUY
-                fetchOffers(primaryCurrency, secondaryCurrency, PropertyManager.getInstance().getCurrentLeague());
+                fetchOffers(secondaryCurrency, primaryCurrency, PropertyManager.getInstance().getCurrentLeague());
 
                 if (cancel) {
                     break;
                 }
 
                 // SELL
-                fetchOffers(secondaryCurrency, primaryCurrency, PropertyManager.getInstance().getCurrentLeague());
+                fetchOffers(primaryCurrency, secondaryCurrency, PropertyManager.getInstance().getCurrentLeague());
             }
 
             if (parseListener != null) {

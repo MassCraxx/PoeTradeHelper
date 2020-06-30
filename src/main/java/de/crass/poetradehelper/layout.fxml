@@ -115,7 +115,7 @@
                     <content>
                         <AnchorPane>
                             <children>
-                        <Accordion AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <Accordion AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" expandedPane="$general">
                           <panes>
                             <TitledPane fx:id="general" animated="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="General">
                               <content>
@@ -136,14 +136,16 @@
                                                         <Text fill="#d8d8d8" layoutX="12.0" layoutY="30.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="League" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                              </children>
                                           </AnchorPane>
-                                          <AnchorPane layoutX="416.0" layoutY="22.0" prefWidth="270.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="115.0">
+                                          <AnchorPane fx:id="autoUpdateLayout" layoutX="416.0" layoutY="22.0" prefWidth="270.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="10.0">
                                              <children>
-                                                        <CheckBox fx:id="autoUpdate" mnemonicParsing="false" text="Auto Update" AnchorPane.leftAnchor="0.0" />
-                                                <Slider fx:id="updateSlider" blockIncrement="5.0" majorTickUnit="15.0" max="65.0" min="5.0" minorTickCount="1" value="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="60.0" />
-                                                <Label fx:id="updateTime" text="5 min" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="56.0" />
-                                                <CheckBox fx:id="autoUpdatePlayerOffers" layoutY="19.0" mnemonicParsing="false" text="Always include player offers" AnchorPane.topAnchor="25.0" />
+                                                        <CheckBox fx:id="autoUpdate" mnemonicParsing="false" text="Enable Periodic Updates" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="25.0" />
+                                                <Slider fx:id="updateSlider" blockIncrement="5.0" majorTickUnit="15.0" max="65.0" min="5.0" minorTickCount="1" value="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="85.0" />
+                                                <Label fx:id="updateTime" text="5 min" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="81.0" />
+                                                <CheckBox fx:id="autoUpdatePlayerOffers" layoutY="19.0" mnemonicParsing="false" text="Always include player offers" AnchorPane.topAnchor="50.0" />
+                                                <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Auto Updating" AnchorPane.topAnchor="0.0" />
                                              </children>
                                           </AnchorPane>
+                                          <Button fx:id="resetWindowBtn" layoutX="29.6" layoutY="103.6" mnemonicParsing="false" prefHeight="26.0" prefWidth="270.0" text="Reset Window Size" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="80.0" />
                                        </children>
                                     </AnchorPane>
                               </content>

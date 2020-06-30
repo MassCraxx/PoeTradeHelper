@@ -1,7 +1,6 @@
 package de.crass.poetradehelper;
 
 import de.crass.poetradehelper.model.CurrencyID;
-import de.crass.poetradehelper.ui.OfferContextMenu;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableStringValue;
 import javafx.collections.FXCollections;
@@ -47,7 +46,10 @@ public class PropertyManager {
     private static final String WINDOW_SIZE = "window_size";
 
     // DEFAULTS
+    public static final Double defaultWindowWidth = 670.0;
+    public static final Double defaultWindowHeight = 640.0;
     public static final String defaultLeague = "Standard";
+
     private final String defaultPrimary = "exalted";
     private final String defaultPoePath = "C:\\Program Files (x86)\\Grinding Gear Games\\Path of Exile\\";
 
@@ -69,7 +71,6 @@ public class PropertyManager {
     private boolean filterNoApi;
     private boolean filterOutOfStock;
     private boolean filterExcessive;
-    private int updateDelay;
     private int excessiveTreshold;
     private String currentLeague;
     private ObservableStringValue test;
@@ -111,9 +112,7 @@ public class PropertyManager {
 
         filterMultipleTransactionDeals = Boolean.parseBoolean(appProps.getProperty(FILTER_MULTIPLE_TRANSACTIONS, "false"));
 
-        updateDelay = Integer.parseInt(appProps.getProperty(UPDATE_DELAY_MINUTES, "5"));
-
-        String[] windowSize = appProps.getProperty(WINDOW_SIZE, "670.0,640.0").split(",");
+        String[] windowSize = appProps.getProperty(WINDOW_SIZE, defaultWindowWidth + "," + defaultWindowHeight).split(",");
         windowWidth = Double.parseDouble(windowSize[0]);
         windowHeight = Double.parseDouble(windowSize[1]);
     }
@@ -129,8 +128,6 @@ public class PropertyManager {
         appProps.setProperty(FILTER_OUTOFSTOCK, String.valueOf(filterOutOfStock));
         appProps.setProperty(FILTER_EXCESSIVE, String.valueOf(filterExcessive));
         appProps.setProperty(EXCESSIVE_TRESHOLD, String.valueOf(excessiveTreshold));
-
-        appProps.setProperty(UPDATE_DELAY_MINUTES, String.valueOf(updateDelay));
 
         appProps.setProperty(FILTER_MULTIPLE_TRANSACTIONS, String.valueOf(filterMultipleTransactionDeals));
 
@@ -218,7 +215,9 @@ public class PropertyManager {
         String result = getProp(key);
         if (defaultValue != null && (result == null || result.isEmpty())) {
             result = defaultValue;
-            setProp(key, result);
+            if (!key.startsWith("auto_update")) {
+                setProp(key, result);
+            }
         }
         return result;
     }
@@ -296,11 +295,11 @@ public class PropertyManager {
     }
 
     public int getUpdateDelay() {
-        return updateDelay;
+        return Integer.parseInt(getProp(UPDATE_DELAY_MINUTES, "5"));
     }
 
     public void setUpdateDelay(int updateDelay) {
-        this.updateDelay = updateDelay;
+        setProp(UPDATE_DELAY_MINUTES, String.valueOf(updateDelay));
     }
 
     public void resetLeague() {
@@ -351,14 +350,12 @@ public class PropertyManager {
     }
 
     public void addIgnoredPlayer(String player) {
-        LogManager.getInstance().log(OfferContextMenu.class, "Adding player to ignore list");
         List<String> newList = getIgnoredPlayers();
         newList.add(player);
         setProp("ignored_players", listToString(newList));
     }
 
     public void removeIgnoredPlayer(String player) {
-        LogManager.getInstance().log(getClass(), "Removing player from ignore list");
         ObservableList<String> newList = getIgnoredPlayers();
         newList.remove(player);
         ignoredPlayers = newList;

@@ -24,6 +24,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.css.PseudoClass;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -40,6 +41,7 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Callback;
@@ -62,7 +64,7 @@ import java.util.*;
 public class Main extends Application implements TradeManager.DealParseListener, PoeNinjaParser.PoeNinjaListener, PropertyManager.UICallback {
 
     private static final String title = "PoeTradeHelper";
-    private static final String versionText = "v0.8.5";
+    private static final String versionText = "v0.8.6";
 
     @FXML
     private SplitPane splitPane;
@@ -124,6 +126,9 @@ public class Main extends Application implements TradeManager.DealParseListener,
     private ComboBox<String> leagueCB;
 
     @FXML
+    private Button resetWindowBtn;
+
+    @FXML
     private Slider volumeSlider;
 
     @FXML
@@ -173,6 +178,9 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
     @FXML
     private Button openConversionInBrowser;
+
+    @FXML
+    private AnchorPane autoUpdateLayout;
 
     @FXML
     private CheckBox autoUpdate;
@@ -322,7 +330,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
         // Attempt on persisting divide position failed, position changes unpredictably during runtime
 //        splitPane.setDividerPosition(0, Double.parseDouble(PropertyManager.getInstance().getProp("window_divider", "0.825")));
         // For 6 items and 725 height use 0.86415
-        splitPane.setDividerPosition(0,0.8615);
+        splitPane.setDividerPosition(0, 0.8615);
 //        splitPaneStatic = splitPane;
 
         tabPaneStatic = tabPane;
@@ -350,13 +358,16 @@ public class Main extends Application implements TradeManager.DealParseListener,
         version.setText(versionText);
         version.setOnMouseClicked(event -> {
             versionClicked++;
-            if (versionClicked % 10 == 0) {
-                PropertyManager.getInstance().setProp("auto_update_enabled", "true");
-                JOptionPane.showMessageDialog(null, "Automatic Update setting enabled! Please don't abuse this.");
-                autoUpdate.setVisible(true);
-                autoUpdatePlayerOffers.setVisible(true);
-                updateTime.setVisible(true);
-                updateSlider.setVisible(true);
+            if (versionClicked == 10) {
+                if (!PropertyManager.getInstance().getBooleanProp("auto_update_enabled", false)) {
+                    PropertyManager.getInstance().setProp("auto_update_enabled", "true");
+                    JOptionPane.showMessageDialog(null, "Ah yes, I see you are worthy. Please don't abuse your power.\n\nAutomatic Update setting unlocked!");
+                    autoUpdateLayout.setVisible(true);
+                } else {
+                    JOptionPane.showMessageDialog(null, "Very nice clicking, but Automatic Update settings are already unlocked.");
+                }
+            } else if (versionClicked % 10 == 0) {
+                JOptionPane.showMessageDialog(null, "Ok. You can stop now, there is nothing more to achieve here...");
             }
         });
 
@@ -446,18 +457,30 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
         buyOfferTable.setContextMenu(new OfferContextMenu(buyOfferTable, offerSecondary));
 
-        buyOfferTable.setRowFactory(row -> new TableRow<CurrencyOffer>() {
-            @Override
-            public void updateItem(CurrencyOffer item, boolean empty) {
-                super.updateItem(item, empty);
+        final PseudoClass igoredClass = PseudoClass.getPseudoClass("ignored");
+        final PseudoClass playerClass = PseudoClass.getPseudoClass("player");
+        Callback<TableView<CurrencyOffer>, TableRow<CurrencyOffer>> offerRowFactory =
+                new Callback<TableView<CurrencyOffer>, TableRow<CurrencyOffer>>() {
+                    @Override
+                    public TableRow<CurrencyOffer> call(TableView<CurrencyOffer> row) {
+                        return new TableRow<CurrencyOffer>() {
+                            @Override
+                            public void updateItem(CurrencyOffer item, boolean empty) {
+                                super.updateItem(item, empty);
 
-                if (item != null && item.isIgnored()) {
-                    setStyle("-fx-background-color: gray");
-                } else {
-                    setStyle(null);
-                }
-            }
-        });
+                                if (item != null && item.isIgnored()) {
+                                    pseudoClassStateChanged(igoredClass, true);
+                                } else if (item != null && item.isPlayerOffer()) {
+                                    pseudoClassStateChanged(playerClass, true);
+                                } else {
+                                    pseudoClassStateChanged(igoredClass, false);
+                                }
+                            }
+                        };
+                    }
+                };
+
+        buyOfferTable.setRowFactory(offerRowFactory);
 
         // Sell table
         TableColumn<CurrencyOffer, String> sellValueColumn = new TableColumn<>();
@@ -491,18 +514,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
         sellOfferTable.getColumns().addAll(sellValueColumn, sellPercentageColumn, sellStockColumn, sellPlayerColumn);
         sellOfferTable.setContextMenu(new OfferContextMenu(sellOfferTable, offerSecondary));
 
-        sellOfferTable.setRowFactory(param -> new TableRow<CurrencyOffer>() {
-            @Override
-            public void updateItem(CurrencyOffer item, boolean empty) {
-                super.updateItem(item, empty);
-
-                if (item != null && item.isIgnored()) {
-                    setStyle("-fx-background-color: gray");
-                } else {
-                    setStyle(null);
-                }
-            }
-        });
+        sellOfferTable.setRowFactory(offerRowFactory);
 
         refreshBtn.setOnAction(event -> {
             CurrencyID newValue = offerSecondary.getValue();
@@ -678,6 +690,16 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
         leagueCB.setOnAction(event -> PropertyManager.getInstance().setLeague(leagueCB.getValue()));
 
+        removePlayerBtn.setTooltip(new Tooltip("Reset Window to default size"));
+        resetWindowBtn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                currentStage.setWidth(PropertyManager.defaultWindowWidth);
+                currentStage.setHeight(PropertyManager.defaultWindowHeight);
+                splitPane.setDividerPosition(0, 0.8615);
+            }
+        });
+
         webParsingCB.setItems(FXCollections.observableArrayList(PoeTradeWebParser.IDENTIFIER, PoeTradeApiParser.IDENTIFIER));
         String defaultParser = PropertyManager.getInstance().getProp("trade_data_source", PoeTradeApiParser.IDENTIFIER);
         webParsingCB.setValue(defaultParser);
@@ -795,10 +817,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
         updateTime.setText(updateDelay + " min");
 
         if (!PropertyManager.getInstance().getBooleanProp("auto_update_enabled", false)) {
-            autoUpdate.setVisible(false);
-            autoUpdatePlayerOffers.setVisible(false);
-            updateTime.setVisible(false);
-            updateSlider.setVisible(false);
+            autoUpdateLayout.setVisible(false);
         }
     }
 

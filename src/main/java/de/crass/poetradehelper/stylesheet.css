@@ -158,3 +158,11 @@
     -fx-cell-size: 2.0em; /* 24 */
     -fx-text-fill: -fx-text-inner-color;
 }
+
+.table-row-cell:ignored .table-cell {
+    -fx-text-fill: gray;
+}
+
+.table-row-cell:player .table-cell {
+    -fx-text-fill: green;
+}
