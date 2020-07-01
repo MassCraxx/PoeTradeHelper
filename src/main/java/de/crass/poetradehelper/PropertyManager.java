@@ -6,7 +6,6 @@ import javafx.beans.value.ObservableStringValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import javax.swing.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
@@ -48,7 +47,7 @@ public class PropertyManager {
     // DEFAULTS
     public static final Double defaultWindowWidth = 670.0;
     public static final Double defaultWindowHeight = 640.0;
-    public static final String defaultLeague = "Standard";
+    public static final String defaultLeague = null;
 
     private final String defaultPrimary = "exalted";
     private final String defaultPoePath = "C:\\Program Files (x86)\\Grinding Gear Games\\Path of Exile\\";
@@ -196,6 +195,9 @@ public class PropertyManager {
             LogManager.getInstance().log(getClass(), "Prevented setting null as league.");
             return;
         }
+        if (league.equals(currentLeague)) {
+            return;
+        }
         LogManager.getInstance().log(getClass(), "Setting " + league + " as new league.");
         currentLeague = league;
 
@@ -300,11 +302,6 @@ public class PropertyManager {
 
     public void setUpdateDelay(int updateDelay) {
         setProp(UPDATE_DELAY_MINUTES, String.valueOf(updateDelay));
-    }
-
-    public void resetLeague() {
-        JOptionPane.showMessageDialog(null, "League " + currentLeague + " ended - resetting to " + defaultLeague + ".");
-        callbackUI(LEAGUE_KEY, defaultLeague);
     }
 
     public int getExcessiveTreshold() {

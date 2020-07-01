@@ -8,6 +8,7 @@ import javafx.collections.ObservableList;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.swing.*;
 import java.io.IOException;
 import java.net.UnknownHostException;
 
@@ -33,12 +34,18 @@ class PoeApiParser {
                     LogManager.getInstance().log(PoeApiParser.class, "Fetching current leagues...");
                     String response = HttpManager.getInstance().get(leagueParseURL, leagueParams);
 
-                    if(response == null) {
+                    if (response == null) {
                         LogManager.getInstance().log(getClass(), "Fetching league failed! No connection to " + leagueParseURL);
+                        if (PropertyManager.getInstance().getCurrentLeague() == null) {
+                            PropertyManager.getInstance().setLeague("Standard");
+                        }
                         return;
-                    }else if(!response.startsWith("[")){
+                    } else if (!response.startsWith("[")) {
                         LogManager.getInstance().log(getClass(), "Fetching league failed! PoE under maintenance?");
                         currentLeagues.add("Standard");
+                        if (PropertyManager.getInstance().getCurrentLeague() == null) {
+                            PropertyManager.getInstance().setLeague("Standard");
+                        }
                         return;
                     }
 
@@ -46,6 +53,9 @@ class PoeApiParser {
                     if (jsonArray.length() == 0) {
                         LogManager.getInstance().log(getClass(), "Error: Could not retrieve leagues.");
                         currentLeagues.add("Standard");
+                        if (PropertyManager.getInstance().getCurrentLeague() == null) {
+                            PropertyManager.getInstance().setLeague("Standard");
+                        }
                         return;
                     }
 
@@ -60,14 +70,26 @@ class PoeApiParser {
                     }
 
                     if (!currentLeagues.contains(PropertyManager.getInstance().getCurrentLeague())) {
-                        LogManager.getInstance().log(PoeApiParser.class, "Saved league " + PropertyManager.getInstance().getCurrentLeague() + " is not valid anymore. Resetting to Standard.");
-                        PropertyManager.getInstance().resetLeague();
+                        String currentTempLeague = "Standard";
+
+                        if (currentLeagues.size() > 2) {
+                            currentTempLeague = currentLeagues.get(2);
+                        }
+
+                        if (PropertyManager.getInstance().getCurrentLeague() != null) {
+                            LogManager.getInstance().log(PoeApiParser.class, "Saved league " + PropertyManager.getInstance().getCurrentLeague() + " is not valid anymore. Setting to " + currentTempLeague);
+                            JOptionPane.showMessageDialog(null, "League " + PropertyManager.getInstance().getCurrentLeague() + " ended - setting to " + currentTempLeague + ".");
+                        }
+                        PropertyManager.getInstance().setLeague(currentTempLeague);
                     }
                 } catch (IOException e) {
-                    if(e instanceof UnknownHostException){
+                    if (e instanceof UnknownHostException) {
                         LogManager.getInstance().log(getClass(), "Fetching league failed! No connection to " + leagueParseURL);
-                    }else {
+                    } else {
                         e.printStackTrace();
+                    }
+                    if (PropertyManager.getInstance().getCurrentLeague() == null) {
+                        PropertyManager.getInstance().setLeague("Standard");
                     }
                 }
             }

@@ -59,7 +59,6 @@ import java.util.*;
 
 @SuppressWarnings("unchecked")
 public class Main extends Application implements TradeManager.DealParseListener, PoeNinjaParser.PoeNinjaListener, PropertyManager.UICallback {
-    //TODO: Set tmp league as default
 
     private static final String title = "PoeTradeHelper";
     private static final String versionText = "v0.9-SNAPSHOT";
@@ -740,6 +739,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
             currentStage.setWidth(PropertyManager.defaultWindowWidth);
             currentStage.setHeight(PropertyManager.defaultWindowHeight);
             splitPane.setDividerPosition(0, 0.8615);
+            OverlayManager.getInstance().setOverlayLocation(new Point(-1, -1));
         });
 
         webParsingCB.setItems(FXCollections.observableArrayList(PoeTradeWebParser.IDENTIFIER, PoeTradeApiParser.IDENTIFIER));
