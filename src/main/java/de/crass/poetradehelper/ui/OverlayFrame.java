@@ -1,6 +1,7 @@
 package de.crass.poetradehelper.ui;
 
 import de.crass.poetradehelper.PropertyManager;
+import de.crass.poetradehelper.model.OverlayConfig;
 import de.crass.poetradehelper.model.ResponseButton;
 
 import javax.swing.*;
@@ -19,18 +20,20 @@ import java.util.List;
 
 public class OverlayFrame extends JFrame {
     private Robot robot;
-    private float screenSize = 1920;
-    private Color backgroundColor = Color.decode("#110E0D");
-    private Color altColor = Color.decode("#323534");
-    private Color textColor = new Color(220, 220, 220);
+    private float screenWidth;
+    private final Color backgroundColor = Color.decode("#110E0D");
+    private final Color altColor = Color.decode("#323534");
+    private final Color textColor = new Color(220, 220, 220);
 
     private JFrame markerFrame;
 
     private boolean persistPosition = PropertyManager.getInstance().getBooleanProp("overlay_persist_pos", false);
     private boolean showMarkerOnEnter = PropertyManager.getInstance().getBooleanProp("overlay_marker_on_enter", false);
 
-    public OverlayFrame(boolean in, String playerName, String item, String price, int x, int y, String stashTab, int stashX, int stashY) {
+    public OverlayFrame(OverlayConfig config, boolean in, String playerName, String item, String price, int x, int y, String stashTab, int stashX, int stashY) {
         super("PoeTradeHelper Overlay");
+
+        screenWidth = Toolkit.getDefaultToolkit().getScreenSize().width;
 
         try {
             robot = new Robot();
@@ -65,6 +68,7 @@ public class OverlayFrame extends JFrame {
         JButton invite = getButton("+", e -> invite(playerName));
         JButton hideout = getButton("H", e -> hideout(playerName));
         JButton trade = getButton("T", e -> trade(playerName));
+        //FIXME will only work with first accountname
         JButton kick = getButton("-", e -> kick(in ? playerName : PropertyManager.getInstance().getPlayerList().get(0)));
         JButton whisper = getButton("W", e -> whisper(playerName, "", false));
         JButton close = getButton("X", e -> dispose());
@@ -110,15 +114,15 @@ public class OverlayFrame extends JFrame {
 
         List<ResponseButton> buttons;
         if (in) {
-            buttons = OverlayManager.getInstance().getOverlayConfig().getIncomingButtons();
+            buttons = config.getIncomingButtons();
         } else {
-            buttons = OverlayManager.getInstance().getOverlayConfig().getOutgoingButtons();
+            buttons = config.getOutgoingButtons();
         }
 
         for (ResponseButton button : buttons) {
             buttonPanel.add(getButton(button.getLabel(), e -> {
                 whisper(playerName, button.getMessage(), true);
-                if (button.isClose()) {
+                if (button.isCloseSelf()) {
                     dispose();
                 }
             }));
@@ -193,7 +197,7 @@ public class OverlayFrame extends JFrame {
         int width = 400;
         setSize(width, 100);
         if (x == -1) {
-            x = Math.round(screenSize / 2f - width / 2f);
+            x = Math.round(screenWidth / 2f - width / 2f);
         }
         setLocation(x, y);
         setVisible(true);

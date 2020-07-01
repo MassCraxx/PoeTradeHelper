@@ -59,9 +59,8 @@ import java.util.*;
 
 @SuppressWarnings("unchecked")
 public class Main extends Application implements TradeManager.DealParseListener, PoeNinjaParser.PoeNinjaListener, PropertyManager.UICallback {
-    //TODO: Show Whispered in context menu, show afk in offer table
+    //TODO: Set tmp league as default
 
-    //TODO: Show Whispered in context menu, show afk in offer table
     private static final String title = "PoeTradeHelper";
     private static final String versionText = "v0.9-SNAPSHOT";
 
@@ -98,10 +97,13 @@ public class Main extends Application implements TradeManager.DealParseListener,
     private ListView<CurrencyDeal> currencyList;
 
     @FXML
-    private CheckBox filterWithoutAPI;
+    private CheckBox filterWithoutStockInfo;
 
     @FXML
     private CheckBox filterExcessive;
+
+    @FXML
+    private AnchorPane voiceLayout;
 
     @FXML
     private CheckBox voiceActive;
@@ -152,7 +154,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
     private Button updateButton;
 
     @FXML
-    private CheckBox filterInvalid;
+    private CheckBox filterOutOfStock;
 
     @FXML
     private ListView<String> playerListView;
@@ -240,7 +242,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
     private CheckBox filterMultiTrade;
 
     private static Stage currentStage;
-    public static PoeLogReader poeConfigReader;
+    public static PoeLogReader poeLogReader;
 
     private TradeManager tradeManager;
 
@@ -305,12 +307,22 @@ public class Main extends Application implements TradeManager.DealParseListener,
         setWebParser(PropertyManager.getInstance().getProp("trade_data_source", PoeTradeApiParser.IDENTIFIER));
 
         // Setup TTS
-        poeConfigReader = new PoeLogReader(() -> {
-            parseActive.setSelected(false);
-            poePath.setDisable(false);
+        poeLogReader = new PoeLogReader(new PoeLogReader.Listener() {
+            @Override
+            public void onStarted() {
+                poePath.setDisable(true);
+                PropertyManager.getInstance().setProp("do_log_parsing", "true");
+            }
+
+            @Override
+            public void onShutDown() {
+                parseActive.setSelected(false);
+                poePath.setDisable(false);
+                PropertyManager.getInstance().setProp("do_log_parsing", "false");
+            }
         });
         if (PropertyManager.getInstance().getBooleanProp("do_log_parsing", false)) {
-            poeConfigReader.startLogParsing();
+            poeLogReader.startLogParsing();
         }
 
         // Setup UI
@@ -327,9 +339,9 @@ public class Main extends Application implements TradeManager.DealParseListener,
 //        PropertyManager.getInstance().setProp("window_divider", String.valueOf(splitPaneStatic.getDividerPositions()[0]));
         PropertyManager.getInstance().storeProperties();
 
-        if (poeConfigReader != null && poeConfigReader.isActive()) {
-            poeConfigReader.shutdown();
-            poeConfigReader = null;
+        if (poeLogReader != null && poeLogReader.isActive()) {
+            poeLogReader.shutdown();
+            poeLogReader = null;
         }
 
         if (TradeManager.getInstance() != null) {
@@ -475,7 +487,9 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
         buyOfferTable.setContextMenu(new OfferContextMenu(buyOfferTable, offerSecondary));
 
-        final PseudoClass igoredClass = PseudoClass.getPseudoClass("ignored");
+        final PseudoClass whisperedClass = PseudoClass.getPseudoClass("whispered");
+        final PseudoClass afkClass = PseudoClass.getPseudoClass("afk");
+        final PseudoClass ignoredClass = PseudoClass.getPseudoClass("ignored");
         final PseudoClass playerClass = PseudoClass.getPseudoClass("player");
         Callback<TableView<CurrencyOffer>, TableRow<CurrencyOffer>> offerRowFactory =
                 new Callback<TableView<CurrencyOffer>, TableRow<CurrencyOffer>>() {
@@ -486,12 +500,24 @@ public class Main extends Application implements TradeManager.DealParseListener,
                             public void updateItem(CurrencyOffer item, boolean empty) {
                                 super.updateItem(item, empty);
 
+                                if (item != null && item.getTimesWhispered() > 0) {
+                                    pseudoClassStateChanged(whisperedClass, true);
+                                } else {
+                                    pseudoClassStateChanged(whisperedClass, false);
+                                }
+
+                                if (item != null && item.getAfk()) {
+                                    pseudoClassStateChanged(afkClass, true);
+                                } else {
+                                    pseudoClassStateChanged(afkClass, false);
+                                }
+
                                 if (item != null && item.isIgnored()) {
-                                    pseudoClassStateChanged(igoredClass, true);
+                                    pseudoClassStateChanged(ignoredClass, true);
                                 } else if (item != null && item.isPlayerOffer()) {
                                     pseudoClassStateChanged(playerClass, true);
                                 } else {
-                                    pseudoClassStateChanged(igoredClass, false);
+                                    pseudoClassStateChanged(ignoredClass, false);
                                     pseudoClassStateChanged(playerClass, false);
                                 }
                             }
@@ -617,17 +643,17 @@ public class Main extends Application implements TradeManager.DealParseListener,
             sellOfferTable.setItems(null);
         });
 
-        filterInvalid.setSelected(PropertyManager.getInstance().getFilterOutOfStock());
-        filterInvalid.setTooltip(new Tooltip("Ignore all offers that do have a stock value but not enough on stock to sell"));
-        filterInvalid.setOnAction(event -> {
-            PropertyManager.getInstance().setFilterOutOfStock(filterInvalid.isSelected());
+        filterOutOfStock.setSelected(PropertyManager.getInstance().getFilterOutOfStock());
+        filterOutOfStock.setTooltip(new Tooltip("Ignore all offers that do have a stock value but not enough on stock to sell"));
+        filterOutOfStock.setOnAction(event -> {
+            PropertyManager.getInstance().setFilterOutOfStock(filterOutOfStock.isSelected());
             tradeManager.parseDeals();
         });
 
-        filterWithoutAPI.setSelected(PropertyManager.getInstance().getFilterNoApi());
-        filterWithoutAPI.setTooltip(new Tooltip("Ignore all offers that don't have stock information"));
-        filterWithoutAPI.setOnAction(event -> {
-            PropertyManager.getInstance().setFilterNoApi(filterWithoutAPI.isSelected());
+        filterWithoutStockInfo.setSelected(PropertyManager.getInstance().getFilterNoStockInfo());
+        filterWithoutStockInfo.setTooltip(new Tooltip("Ignore all offers that don't have stock information"));
+        filterWithoutStockInfo.setOnAction(event -> {
+            PropertyManager.getInstance().setFilterNoStockInfo(filterWithoutStockInfo.isSelected());
             tradeManager.parseDeals();
         });
 
@@ -718,50 +744,56 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
         webParsingCB.setItems(FXCollections.observableArrayList(PoeTradeWebParser.IDENTIFIER, PoeTradeApiParser.IDENTIFIER));
         String defaultParser = PropertyManager.getInstance().getProp("trade_data_source", PoeTradeApiParser.IDENTIFIER);
+        if (defaultParser.equals(PoeTradeApiParser.IDENTIFIER)) {
+            filterWithoutStockInfo.setSelected(true);
+            filterOutOfStock.setSelected(true);
+        }
         webParsingCB.setValue(defaultParser);
         webParsingCB.setOnAction(event -> setWebParser(webParsingCB.getValue()));
 
         // Setup parse
         parseActive.setOnAction(event -> {
             if (parseActive.isSelected()) {
-                poePath.setDisable(true);
                 String newPath = poePath.getText();
                 PropertyManager.getInstance().setPathOfExilePath(newPath);
-                poeConfigReader.startLogParsing();
-                PropertyManager.getInstance().setProp("do_log_parsing", "true");
+                poeLogReader.startLogParsing();
             } else {
-                poeConfigReader.stopLogParsing();
-                poePath.setDisable(false);
-                PropertyManager.getInstance().setProp("do_log_parsing", "false");
+                poeLogReader.stopLogParsing();
             }
         });
         parseActive.setSelected(PropertyManager.getInstance().getBooleanProp("do_log_parsing", false));
 
         // Setup TTS
-        poeConfigReader.setWordIncludeTextField(voiceShoutoutWords);
-        poeConfigReader.setWordExcludeTextField(voiceExcludeWords);
+        poeLogReader.setWordIncludeTextField(voiceShoutoutWords);
+        poeLogReader.setWordExcludeTextField(voiceExcludeWords);
         voiceActive.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                List<String> supportedVoices = poeConfigReader.getSupportedVoices();
-                if (supportedVoices != null && !supportedVoices.isEmpty()) {
-                    poeConfigReader.setUseTTS(voiceActive.isSelected());
-                    voiceSpeakerCB.setItems(FXCollections.observableArrayList(supportedVoices));
+                if (poeLogReader.isBalconAvailable()) {
+                    if (voiceSpeakerCB.getItems().isEmpty()) {
+                        List<String> supportedVoices = poeLogReader.getSupportedVoices();
+                        voiceSpeakerCB.setItems(FXCollections.observableArrayList(supportedVoices));
+                    }
+                    poeLogReader.setUseTTS(voiceActive.isSelected());
                     setDisableVoiceControls(false);
                 } else {
                     File jarDir = new File("");
                     LogManager.getInstance().log(Main.class, "Balcon not found! To enable TTS notifications, download balcon.exe from http://balabolka.site/balcon.zip place it in " + jarDir.getAbsolutePath() + " and restart the application.");
                     setDisableVoiceControls(true);
                 }
-                voiceActive.setSelected(poeConfigReader.doUseTTS());
+                voiceActive.setSelected(poeLogReader.doUseTTS());
             }
         });
 
-        voiceSpeakerCB.setValue(poeConfigReader.getVoice());
+        if (!poeLogReader.isBalconAvailable()) {
+            voiceLayout.setVisible(false);
+            openTtsConfigBtn.setDisable(true);
+        }
+        voiceSpeakerCB.setValue(poeLogReader.getVoice());
         voiceSpeakerCB.setOnAction(event -> {
             String selected = voiceSpeakerCB.getValue();
             if (selected != null && !selected.isEmpty()) {
-                poeConfigReader.setVoice(selected);
+                poeLogReader.setVoice(selected);
             }
         });
 
@@ -774,15 +806,20 @@ public class Main extends Application implements TradeManager.DealParseListener,
         volumeSlider.valueChangingProperty().addListener((observable, changeEnds, changeStarts) -> {
             if (changeEnds) {
                 int newVolume = (int) volumeSlider.getValue();
-                poeConfigReader.setVolume(newVolume);
+                poeLogReader.setVolume(newVolume);
                 PropertyManager.getInstance().setVoiceVolume(String.valueOf(newVolume));
-                poeConfigReader.testSpeech();
+                if (poeLogReader.isBalconAvailable()) {
+                    poeLogReader.testSpeech();
+                } else {
+                    File jarDir = new File("");
+                    LogManager.getInstance().log(getClass(), "Balcon not found! To enable TTS notifications, download balcon.exe from http://balabolka.site/balcon.zip place it in " + jarDir.getAbsolutePath() + " and restart the application.");
+                }
             }
         });
 
         // Who knew daniel was used in Pendulum's Bloodsugar?
         volumeTopicLabel.setOnMouseClicked(event -> {
-            if (poeConfigReader.getVoice() != null && poeConfigReader.getVoice().contains("Daniel")) {
+            if (poeLogReader.getVoice() != null && poeLogReader.getVoice().contains("Daniel")) {
                 String msg;
                 volumeClicked++;
                 if (volumeClicked >= 5) {
@@ -791,20 +828,28 @@ public class Main extends Application implements TradeManager.DealParseListener,
                     return;
                 }
                 try {
-                    poeConfigReader.textToSpeech(msg, true);
+                    poeLogReader.textToSpeech(msg, true);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         });
 
-        parseTestButton.setOnAction(event -> poeConfigReader.processTestMessage());
+        openTtsConfigBtn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                poeLogReader.openTTSConfig();
+            }
+        });
+
+        // Setup Overlay
+        parseTestButton.setOnAction(event -> poeLogReader.processTestMessage());
         reloadConfigBtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 OverlayManager.getInstance().loadConfig();
-                if (poeConfigReader.doUseTTS()) {
-                    poeConfigReader.loadTTSConfig();
+                if (poeLogReader.doUseTTS()) {
+                    poeLogReader.loadTTSConfig();
                 }
             }
         });
@@ -813,13 +858,6 @@ public class Main extends Application implements TradeManager.DealParseListener,
             @Override
             public void handle(ActionEvent event) {
                 OverlayManager.getInstance().openOverlayConfig();
-            }
-        });
-
-        openTtsConfigBtn.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                poeConfigReader.openTTSConfig();
             }
         });
 
@@ -860,17 +898,17 @@ public class Main extends Application implements TradeManager.DealParseListener,
     private void setWebParser(String newValue) {
         if (newValue.equals(PoeTradeApiParser.IDENTIFIER)) {
             //pathofexile.com does this by default.
-            filterInvalid.setSelected(true);
-            filterWithoutAPI.setSelected(true);
+            filterOutOfStock.setSelected(true);
+            filterWithoutStockInfo.setSelected(true);
             PropertyManager.getInstance().setFilterOutOfStock(false);
-            PropertyManager.getInstance().setFilterNoApi(false);
-            filterInvalid.setDisable(true);
-            filterWithoutAPI.setDisable(true);
+            PropertyManager.getInstance().setFilterNoStockInfo(false);
+            filterOutOfStock.setDisable(true);
+            filterWithoutStockInfo.setDisable(true);
         } else {
-            filterInvalid.setSelected(false);
-            filterWithoutAPI.setSelected(false);
-            filterInvalid.setDisable(false);
-            filterWithoutAPI.setDisable(false);
+            filterOutOfStock.setSelected(false);
+            filterWithoutStockInfo.setSelected(false);
+            filterOutOfStock.setDisable(false);
+            filterWithoutStockInfo.setDisable(false);
         }
         tradeManager.setWebParser(newValue);
         resetUiItems();
@@ -909,21 +947,10 @@ public class Main extends Application implements TradeManager.DealParseListener,
     }
 
     private void setDisableVoiceControls(boolean val) {
-//        Tooltip tooltip = new Tooltip("Place balcon.exe next to the app and restart to enable this feature.");
-//        parseActive.setTooltip(tooltip);
         volumeLabel.setDisable(val);
-//        volumeLabel.setTooltip(tooltip);
-        volumeSlider.setDisable(val);
-//        volumeSlider.setTooltip(tooltip);
-//        reloadConfigBtn.setDisable(val);
-//        reloadConfigBtn.setTooltip(tooltip);
-//        voiceTestButton.setDisable(val);
-//        voiceTestButton.setTooltip(tooltip);
         voiceShoutoutWords.setDisable(val);
         voiceExcludeWords.setDisable(val);
         voiceSpeakerCB.setDisable(val);
-
-//        poePath.setDisable(val);
     }
 
     private void updateTitle() {

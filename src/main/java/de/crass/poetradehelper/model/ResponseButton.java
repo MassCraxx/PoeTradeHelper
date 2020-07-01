@@ -3,14 +3,14 @@ package de.crass.poetradehelper.model;
 public class ResponseButton {
     String label;
     String message;
-    boolean close = false;
+    boolean closeSelf = false;
 
     public ResponseButton(){}
 
-    public ResponseButton(String label, String message, boolean close){
+    public ResponseButton(String label, String message, boolean closeSelf){
         this.label = label;
         this.message = message;
-        this.close = close;
+        this.closeSelf = closeSelf;
     }
 
     public String getLabel() {
@@ -29,11 +29,11 @@ public class ResponseButton {
         this.message = message;
     }
 
-    public boolean isClose() {
-        return close;
+    public boolean isCloseSelf() {
+        return closeSelf;
     }
 
-    public void setClose(boolean close) {
-        this.close = close;
+    public void setCloseSelf(boolean closeSelf) {
+        this.closeSelf = closeSelf;
     }
 }

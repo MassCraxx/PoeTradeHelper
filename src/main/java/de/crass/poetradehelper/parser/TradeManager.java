@@ -17,7 +17,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import static de.crass.poetradehelper.Main.poeConfigReader;
+import static de.crass.poetradehelper.Main.poeLogReader;
 
 /**
  * Created by mcrass on 19.07.2018.
@@ -105,7 +105,7 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
                     }
                 }
             } else {
-                currencyIDList = PropertyManager.getInstance().getFilterList();
+                currencyIDList = new LinkedList<>(currencyIDs);
             }
 
             webParser.updateCurrencies(currencyIDList, clear, async);
@@ -340,10 +340,10 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
                     }
 
                     //FIXME
-                    if (!notified && poeConfigReader.isActive() && Boolean.parseBoolean(PropertyManager.getInstance().getProp("voice_notify_bad_tendency", "false"))) {
+                    if (!notified && poeLogReader.isActive() && Boolean.parseBoolean(PropertyManager.getInstance().getProp("voice_notify_bad_tendency", "false"))) {
                         if (marketBuyPrice > 0 && playerBuyPrice > 0 && playerBuyPrice > marketBuyPrice || marketSellPrice > 0 && playerSellPrice > 0 && playerSellPrice < marketSellPrice) {
                             try {
-                                poeConfigReader.notifyBadTendency();
+                                poeLogReader.notifyBadTendency();
                                 notified = true;
                             } catch (IOException e) {
                                 e.printStackTrace();
@@ -385,7 +385,7 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
 
     private CurrencyOffer getBestOffer(List<CurrencyOffer> list) {
         return getBestOffer(list,
-                PropertyManager.getInstance().getFilterNoApi(),
+                PropertyManager.getInstance().getFilterNoStockInfo(),
                 PropertyManager.getInstance().getFilterOutOfStock(),
                 PropertyManager.getInstance().getFilterExcessive());
     }

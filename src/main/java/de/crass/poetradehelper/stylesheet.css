@@ -166,3 +166,11 @@
 .table-row-cell:player .table-cell {
     -fx-text-fill: green;
 }
+
+.table-row-cell:afk .table-cell {
+    -fx-font-style: italic;
+}
+
+.table-row-cell:whispered .text {
+    -fx-strikethrough: true;
+}

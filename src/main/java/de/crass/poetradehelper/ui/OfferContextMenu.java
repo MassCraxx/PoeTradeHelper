@@ -32,16 +32,18 @@ public class OfferContextMenu extends ContextMenu {
 
         MenuItem copyItem = new MenuItem("Whisper to Clipboard");
         copyItem.setOnAction(event -> {
+            CurrencyOffer selected = getSelected();
+
             //Switcheroo, because chat comes from the opposite perspective
-            int buyAmount = (int) getSelected().getSellAmount();
-            int sellAmount = (int) getSelected().getBuyAmount();
+            int buyAmount = (int) selected.getSellAmount();
+            int sellAmount = (int) selected.getBuyAmount();
 
-            String whisper = getSelected().getWhisper();
+            String whisper = selected.getWhisper();
             if (whisper == null || whisper.isEmpty()) {
-                String playerName = getSelected().getPlayerName();
+                String playerName = selected.getPlayerName();
 
-                CurrencyID buyCurrency = getSelected().getSellID();
-                CurrencyID sellCurrency = getSelected().getBuyID();
+                CurrencyID buyCurrency = selected.getSellID();
+                CurrencyID sellCurrency = selected.getBuyID();
                 whisper = "@" + playerName + " Hi, I'd like to buy your " +
                         buyAmount + " " +
                         buyCurrency.getDisplayName() + " for my " +
@@ -55,6 +57,8 @@ public class OfferContextMenu extends ContextMenu {
             StringSelection stringSelection = new StringSelection(whisper);
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             clipboard.setContents(stringSelection, null);
+            selected.setTimesWhispered(selected.getTimesWhispered() + 1);
+            tableView.refresh();
         });
         MenuItem ignoreItem;
 

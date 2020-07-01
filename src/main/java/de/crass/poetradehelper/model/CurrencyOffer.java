@@ -14,8 +14,10 @@ public class CurrencyOffer {
     private String queryID;
 
     private String whisper;
+    private int timesWhispered;
 
     private long timestamp;
+    private boolean afk;
 
     public CurrencyOffer(String username, String accountName, CurrencyID sellID, float sellValue, CurrencyID buyID, float buyValue, int stock, long timestamp) {
         this.playerName = username;
@@ -91,5 +93,21 @@ public class CurrencyOffer {
 
     public void setWhisper(String whisper) {
         this.whisper = whisper;
+    }
+
+    public int getTimesWhispered() {
+        return timesWhispered;
+    }
+
+    public void setTimesWhispered(int timesWhispered) {
+        this.timesWhispered = timesWhispered;
+    }
+
+    public void setAfk(boolean afk) {
+        this.afk = afk;
+    }
+
+    public boolean getAfk() {
+        return afk;
     }
 }

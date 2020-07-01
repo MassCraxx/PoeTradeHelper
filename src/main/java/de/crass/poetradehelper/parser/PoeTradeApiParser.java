@@ -104,6 +104,10 @@ public class PoeTradeApiParser extends WebParser {
                     String whisper = listing.getString("whisper");
                     String charName = listing.getJSONObject("account").getString("lastCharacterName");
                     String account = listing.getJSONObject("account").getString("name");
+                    boolean afk = false;
+                    if (listing.getJSONObject("account").getJSONObject("online").has("status")) {
+                        afk = "afk".equalsIgnoreCase(listing.getJSONObject("account").getJSONObject("online").getString("status"));
+                    }
 
                     JSONObject price = listing.getJSONObject("price");
                     CurrencyID buyID = CurrencyID.getByTradeID(price.getJSONObject("exchange").getString("currency"));
@@ -122,6 +126,7 @@ public class PoeTradeApiParser extends WebParser {
                             stock,
                             System.currentTimeMillis());
                     offer.setQueryId(id);
+                    offer.setAfk(afk);
                     if (whisper != null && !whisper.isEmpty()) {
                         offer.setWhisper(whisper);
                     }

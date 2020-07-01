@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import de.crass.poetradehelper.LogManager;
+import de.crass.poetradehelper.PropertyManager;
 import de.crass.poetradehelper.model.OverlayConfig;
 import de.crass.poetradehelper.model.ResponseButton;
 
@@ -18,8 +19,8 @@ public class OverlayManager {
     public static OverlayManager instance;
 
     List<OverlayFrame> overlayFrames = new LinkedList<>();
-    private int x = -1;
-    private int y = -1;
+    private int x = Integer.parseInt(PropertyManager.getInstance().getProp("overlay_x", "-1"));
+    private int y = Integer.parseInt(PropertyManager.getInstance().getProp("overlay_y", "-1"));
 
     private OverlayConfig currentConfig;
     private File configFile = new File("overlayconfig.json");
@@ -36,7 +37,7 @@ public class OverlayManager {
     }
 
     public void showNotificationOverlay(boolean in, String playerName, String item, String price, String stashTab, int stashX, int stashY) {
-        overlayFrames.add(new OverlayFrame(in, playerName, item, price, x, y, stashTab, stashX, stashY));
+        overlayFrames.add(new OverlayFrame(currentConfig, in, playerName, item, price, x, y, stashTab, stashX, stashY));
     }
 
     public void shutdown() {
@@ -46,13 +47,8 @@ public class OverlayManager {
     public void setOverlayLocation(Point point) {
         this.x = point.x;
         this.y = point.y;
-    }
-
-    public OverlayConfig getOverlayConfig() {
-        if (currentConfig == null) {
-            currentConfig = getDefaultConfig();
-        }
-        return currentConfig;
+        PropertyManager.getInstance().setProp("overlay_x", String.valueOf(x));
+        PropertyManager.getInstance().setProp("overlay_y", String.valueOf(y));
     }
 
     private OverlayConfig getDefaultConfig() {
@@ -63,8 +59,15 @@ public class OverlayManager {
         inButtons.add(new ResponseButton("sold", "Sold already", true));
         inButtons.add(new ResponseButton("oos", "Sry, out of stock", true));
         inButtons.add(new ResponseButton("thx", "Thanks mate! Gl", false));
+        List<ResponseButton> outButtons = new LinkedList<>();
+        outButtons.add(new ResponseButton("kk", "kk", false));
+        outButtons.add(new ResponseButton("u there", "Are you available for a trade? Please write me back when you are ready.", false));
+        outButtons.add(new ResponseButton("omw", "Just a sec, I am on my way.", false));
+        outButtons.add(new ResponseButton("thx", "Thanks mate! Gl", false));
+
         OverlayConfig config = new OverlayConfig();
         config.setIncomingButtons(inButtons);
+        config.setOutgoingButtons(outButtons);
         return config;
     }
 
@@ -81,7 +84,7 @@ public class OverlayManager {
         }
     }
 
-    public boolean loadConfig() {
+    public void loadConfig() {
         File file = configFile;
         if (file.exists()) {
             try {
@@ -89,20 +92,16 @@ public class OverlayManager {
                 OverlayConfig config = mapper.readValue(file, OverlayConfig.class);
                 LogManager.getInstance().log(getClass(), "Overlay config successfully loaded.");
                 currentConfig = config;
-                return true;
             } catch (JsonMappingException j) {
-                LogManager.getInstance().log(getClass(), "Overlay config corrupted! " + j.getMessage());
+                LogManager.getInstance().log(getClass(), "Loading overlay config failed. Overlay config corrupted! " + j.getMessage());
             } catch (IOException e) {
-                LogManager.getInstance().log(getClass(), "Error while loading config.");
+                LogManager.getInstance().log(getClass(), "Loading overlay config failed. Error while loading config.");
                 e.printStackTrace();
             }
         } else {
             currentConfig = getDefaultConfig();
             storeConfig();
-            return true;
         }
-        LogManager.getInstance().log(getClass(), "Loading overlay config failed.");
-        return false;
     }
 
     private void storeConfig() {

@@ -7,6 +7,9 @@ public class OverlayConfig {
     List<ResponseButton> incomingButtons = new LinkedList<>();
     List<ResponseButton> outgoingButtons = new LinkedList<>();
 
+    boolean notifyIncoming = true;
+    boolean notifyOutgoing = false;
+
     public List<ResponseButton> getIncomingButtons() {
         return incomingButtons;
     }
@@ -21,5 +24,21 @@ public class OverlayConfig {
 
     public void setOutgoingButtons(List<ResponseButton> outgoingButtons) {
         this.outgoingButtons = outgoingButtons;
+    }
+
+    public boolean getNotifyIncoming() {
+        return notifyIncoming;
+    }
+
+    public void setNotifyIncoming(boolean notifyIncoming) {
+        this.notifyIncoming = notifyIncoming;
+    }
+
+    public boolean getNotifyOutgoing() {
+        return notifyOutgoing;
+    }
+
+    public void setNotifyOutgoing(boolean notifyOutgoing) {
+        this.notifyOutgoing = notifyOutgoing;
     }
 }

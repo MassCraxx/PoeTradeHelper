@@ -294,38 +294,35 @@ public class PoeLogReader implements FileListener {
         this.speed = speed;
     }
 
-    public boolean isVoiceSupported(String preferredVoice) {
-        try {
-            return executeCommand("balcon -l").contains(preferredVoice);
-        } catch (InterruptedException | IOException e) {
-//            LogManager.getInstance().log(getClass(), "Exception during checking voice support. " + e);
+    private Boolean balconAvailable;
+
+    public boolean isBalconAvailable() {
+        if (balconAvailable == null) {
+            balconAvailable = new File("balcon.exe").exists();
         }
-        return false;
+        return balconAvailable;
     }
 
+    public boolean isVoiceSupported(String preferredVoice) {
+        return getSupportedVoices().contains(preferredVoice);
+    }
+
+    private List<String> supportedVoices = new LinkedList<>();
+
     public List<String> getSupportedVoices() {
-        List<String> result = new LinkedList<>();
-        try {
-            String[] voices = executeCommand("balcon -l").split("\n");
+        if (isBalconAvailable() && supportedVoices.isEmpty()) {
+            try {
+                String[] voices = executeCommand("balcon -l").split("\n");
 
-            for (int i = 2; i < voices.length; i++) {
-                result.add(voices[i].trim());
+                for (int i = 2; i < voices.length; i++) {
+                    supportedVoices.add(voices[i].trim());
+                }
+            } catch (InterruptedException | IOException e) {
+                LogManager.getInstance().log(getClass(), "Exception during checking voice support. " + e);
+                return null;
             }
-        } catch (InterruptedException | IOException e) {
-            // Normal if balcon not found
-//            LogManager.getInstance().log(getClass(), "Exception during checking voice support. " + e);
-            return null;
         }
-
-        // If found and no voice set yet, set bestVoiceEver as voice.
-        if (voice == null && result.contains(bestVoiceEver)) {
-            setVoice(bestVoiceEver);
-        } // Else set first found. Remove this for continuous checking for bestVoiceEver...
-        else if (voice == null && !result.isEmpty()) {
-            setVoice(result.get(0));
-        }
-
-        return result;
+        return supportedVoices;
     }
 
     public void startLogParsing() {
@@ -663,6 +660,8 @@ public class PoeLogReader implements FileListener {
     }
 
     public interface Listener {
+        void onStarted();
+
         void onShutDown();
     }
 }

@@ -68,7 +68,7 @@ public class PropertyManager {
     private ObservableList<String> ignoredPlayers;
 
     private CurrencyID primaryCurrency;
-    private boolean filterNoApi;
+    private boolean filterNoStockInfo;
     private boolean filterOutOfStock;
     private boolean filterExcessive;
     private int excessiveTreshold;
@@ -105,7 +105,7 @@ public class PropertyManager {
         playerList = FXCollections.observableArrayList(stringToList(appProps.getProperty(PLAYER_LIST, null)));
         primaryCurrency = CurrencyID.getByTradeID(appProps.getProperty(PRIMARY_CURRENCY, defaultPrimary));
 
-        filterNoApi = Boolean.parseBoolean(appProps.getProperty(FILTER_NOAPI, defaultFilterStockOffers));
+        filterNoStockInfo = Boolean.parseBoolean(appProps.getProperty(FILTER_NOAPI, defaultFilterStockOffers));
         filterOutOfStock = Boolean.parseBoolean(appProps.getProperty(FILTER_OUTOFSTOCK, defaultFilterInvalidStockOffers));
         filterExcessive = Boolean.parseBoolean(appProps.getProperty(FILTER_EXCESSIVE, defaultFilterExcessive));
         excessiveTreshold = Integer.parseInt(appProps.getProperty(EXCESSIVE_TRESHOLD, defaultExcessiveTreshold));
@@ -124,7 +124,7 @@ public class PropertyManager {
         appProps.setProperty(PLAYER_LIST, listToString(playerList));
         appProps.setProperty(PRIMARY_CURRENCY, primaryCurrency.getTradeID());
 
-        appProps.setProperty(FILTER_NOAPI, String.valueOf(filterNoApi));
+        appProps.setProperty(FILTER_NOAPI, String.valueOf(filterNoStockInfo));
         appProps.setProperty(FILTER_OUTOFSTOCK, String.valueOf(filterOutOfStock));
         appProps.setProperty(FILTER_EXCESSIVE, String.valueOf(filterExcessive));
         appProps.setProperty(EXCESSIVE_TRESHOLD, String.valueOf(excessiveTreshold));
@@ -167,8 +167,8 @@ public class PropertyManager {
         return playerList;
     }
 
-    public boolean getFilterNoApi() {
-        return filterNoApi;
+    public boolean getFilterNoStockInfo() {
+        return filterNoStockInfo;
     }
 
     public boolean getFilterOutOfStock() {
@@ -179,8 +179,8 @@ public class PropertyManager {
         return filterExcessive;
     }
 
-    public void setFilterNoApi(boolean filterNoApi) {
-        this.filterNoApi = filterNoApi;
+    public void setFilterNoStockInfo(boolean filterNoStockInfo) {
+        this.filterNoStockInfo = filterNoStockInfo;
     }
 
     public void setFilterOutOfStock(boolean filterOutOfStock) {
