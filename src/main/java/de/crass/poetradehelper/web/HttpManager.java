@@ -18,7 +18,7 @@ public class HttpManager {
     private OkHttpClient client = new OkHttpClient();
 
     public static HttpManager getInstance() {
-        if(instance == null){
+        if (instance == null) {
             instance = new HttpManager();
         }
         return instance;
@@ -48,10 +48,15 @@ public class HttpManager {
                 .build();
         Response response = client.newCall(request).execute();
         if (response.code() != 200) {
-            LogManager.getInstance().log(getClass(), "Response Code for " + url + " was " + response.code());
+            LogManager.getInstance().debug(getClass(), "Response Code for " + url + " was " + response.code());
         }
         if (!response.isSuccessful()) {
-            LogManager.getInstance().log(getClass(), "Post to " + url + " was not successful! " + response.message());
+            if ("Not Allowed".equalsIgnoreCase(response.message()) && response.code() == 405) {
+                String tinyUrl = url.substring(0, url.indexOf('/', 9));
+                LogManager.getInstance().log(getClass(), "Request failed! " + tinyUrl + " may be under maintenance.");
+            } else {
+                LogManager.getInstance().log(getClass(), "Post to " + url + " was not successful! " + response.message());
+            }
             return null;
         }
 
@@ -62,7 +67,7 @@ public class HttpManager {
 
     public JSONObject getJson(String fetchURL, String params) throws IOException, JSONException {
         String json = get(fetchURL, params);
-        if(json == null || json.isEmpty()){
+        if (json == null || json.isEmpty()) {
             LogManager.getInstance().log(getClass(), "Response from " + fetchURL + " was empty! Maybe the page is offline, check your internet connectivity");
             return null;
         }

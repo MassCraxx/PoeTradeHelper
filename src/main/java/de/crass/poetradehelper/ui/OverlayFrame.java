@@ -69,16 +69,20 @@ public class OverlayFrame extends JFrame {
             }
 
             @Override
-            public void mousePressed(MouseEvent e) {}
+            public void mousePressed(MouseEvent e) {
+            }
 
             @Override
-            public void mouseReleased(MouseEvent e) {}
+            public void mouseReleased(MouseEvent e) {
+            }
 
             @Override
-            public void mouseEntered(MouseEvent e) {}
+            public void mouseEntered(MouseEvent e) {
+            }
 
             @Override
-            public void mouseExited(MouseEvent e) {}
+            public void mouseExited(MouseEvent e) {
+            }
         });
 
         JLabel priceLabel = new JLabel(price, SwingConstants.CENTER);
@@ -88,8 +92,19 @@ public class OverlayFrame extends JFrame {
         JButton invite = getButton("+", e -> invite(playerName));
         JButton hideout = getButton("H", e -> hideout(playerName));
         JButton trade = getButton("T", e -> trade(playerName));
-        //FIXME will only work with first accountname
-        JButton kick = getButton("-", e -> kick(in ? playerName : PropertyManager.getInstance().getPlayerList().get(0)));
+        JButton kick = getButton("-", e -> {
+            //FIXME will only work with first accountname
+            String ownPlayer = PropertyManager.getInstance().getPlayerList().get(0);
+            if (!in) {
+                if (ownPlayer != null && !ownPlayer.isEmpty()) {
+                    kick(ownPlayer);
+                } else {
+                    LogManager.getInstance().log(getClass(), "You must set a player account in the settings to leave a party.");
+                }
+            } else {
+                kick(playerName);
+            }
+        });
         JButton whisper = getButton("W", e -> whisper(playerName, "", false));
         JButton close = getButton("X", e -> dispose());
         JButton repeat = getButton("\"", e -> whisper(playerName, msg, true));

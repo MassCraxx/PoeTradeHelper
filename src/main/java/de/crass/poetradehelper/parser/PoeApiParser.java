@@ -41,7 +41,7 @@ class PoeApiParser {
                         }
                         return;
                     } else if (!response.startsWith("[")) {
-                        LogManager.getInstance().log(getClass(), "Fetching league failed! PoE under maintenance?");
+                        LogManager.getInstance().log(PoeApiParser.class, "Fetching league failed! PoE under maintenance?");
                         currentLeagues.add("Standard");
                         if (PropertyManager.getInstance().getCurrentLeague() == null) {
                             PropertyManager.getInstance().setLeague("Standard");
