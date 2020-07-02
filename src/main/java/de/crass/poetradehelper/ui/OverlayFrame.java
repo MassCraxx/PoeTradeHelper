@@ -1,5 +1,7 @@
 package de.crass.poetradehelper.ui;
 
+import de.crass.poetradehelper.LogManager;
+import de.crass.poetradehelper.Main;
 import de.crass.poetradehelper.PropertyManager;
 import de.crass.poetradehelper.model.OverlayConfig;
 import de.crass.poetradehelper.model.ResponseButton;
@@ -60,11 +62,29 @@ public class OverlayFrame extends JFrame {
         playerNameLabel.setForeground(textColor);
         playerNameLabel.setHorizontalTextPosition(SwingConstants.LEFT);
         playerNameLabel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+        playerNameLabel.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                whois(playerName);
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {}
+
+            @Override
+            public void mouseReleased(MouseEvent e) {}
+
+            @Override
+            public void mouseEntered(MouseEvent e) {}
+
+            @Override
+            public void mouseExited(MouseEvent e) {}
+        });
 
         JLabel priceLabel = new JLabel(price, SwingConstants.CENTER);
         priceLabel.setForeground(textColor);
 
-        JButton whois = getButton("?", e -> whois(playerName));
+//        JButton whois = getButton("?", e -> whois(playerName));
         JButton invite = getButton("+", e -> invite(playerName));
         JButton hideout = getButton("H", e -> hideout(playerName));
         JButton trade = getButton("T", e -> trade(playerName));
@@ -76,8 +96,8 @@ public class OverlayFrame extends JFrame {
 
         JPanel topButtonPanel = new JPanel();
         topButtonPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
+
         if (in) {
-            topButtonPanel.add(whois);
             topButtonPanel.add(invite);
         } else {
             topButtonPanel.add(repeat);
@@ -123,8 +143,7 @@ public class OverlayFrame extends JFrame {
 
         for (ResponseButton button : buttons) {
             buttonPanel.add(getButton(button.getLabel(), e -> {
-                whisper(playerName, button.getMessage(), true);
-                if (button.isCloseSelf()) {
+                if (whisper(playerName, button.getMessage(), true) && button.isCloseSelf()) {
                     dispose();
                 }
             }));
@@ -219,116 +238,127 @@ public class OverlayFrame extends JFrame {
         return button;
     }
 
-    private void whois(String playerName) {
-        chatCommand("/whois " + playerName);
+    private boolean whois(String playerName) {
+        return chatCommand("/whois " + playerName);
     }
 
-    private void whisper(String playerName, String msg, boolean send) {
-        chatCommand("@" + playerName + " " + msg, send);
+    private boolean whisper(String playerName, String msg, boolean send) {
+        return chatCommand("@" + playerName + " " + msg, send);
     }
 
-    private void kick(String playerName) {
-        chatCommand("/kick " + playerName);
-        dispose();
+    private boolean kick(String playerName) {
+        if (chatCommand("/kick " + playerName)) {
+            dispose();
+            return true;
+        }
+        return false;
     }
 
-    private void trade(String playerName) {
-        chatCommand("/tradewith " + playerName);
+    private boolean trade(String playerName) {
+        return chatCommand("/tradewith " + playerName);
     }
 
-    private void invite(String playerName) {
-        chatCommand("/invite " + playerName);
+    private boolean invite(String playerName) {
+        return chatCommand("/invite " + playerName);
     }
 
-    private void hideout(String playerName) {
-        chatCommand("/hideout " + playerName);
+    private boolean hideout(String playerName) {
+        return chatCommand("/hideout " + playerName);
     }
 
-    public void chatCommand(String msg) {
-        chatCommand(msg, true);
+    public boolean chatCommand(String msg) {
+        return chatCommand(msg, true);
     }
 
-    public void chatCommand(String msg, boolean send) {
-        StringSelection selection = new StringSelection(msg);
-        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, null);
-        robot.keyPress(KeyEvent.VK_ENTER);
-        robot.keyRelease(KeyEvent.VK_ENTER);
-
-        // Remove old text window content
-        robot.keyPress(KeyEvent.VK_CONTROL);
-        robot.keyPress(KeyEvent.VK_A);
-        robot.keyRelease(KeyEvent.VK_CONTROL);
-        robot.keyRelease(KeyEvent.VK_A);
-        robot.keyPress(KeyEvent.VK_BACK_SPACE);
-        robot.keyRelease(KeyEvent.VK_BACK_SPACE);
-
-        // Paste
-        robot.keyPress(KeyEvent.VK_CONTROL);
-        robot.keyPress(KeyEvent.VK_V);
-        robot.keyRelease(KeyEvent.VK_V);
-        robot.keyRelease(KeyEvent.VK_CONTROL);
-
-        if (send) {
+    public boolean chatCommand(String msg, boolean send) {
+        if (Main.poeToForeground()) {
+            StringSelection selection = new StringSelection(msg);
+            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, null);
             robot.keyPress(KeyEvent.VK_ENTER);
             robot.keyRelease(KeyEvent.VK_ENTER);
+
+            // Remove old text window content
+            robot.keyPress(KeyEvent.VK_CONTROL);
+            robot.keyPress(KeyEvent.VK_A);
+            robot.keyRelease(KeyEvent.VK_CONTROL);
+            robot.keyRelease(KeyEvent.VK_A);
+            robot.keyPress(KeyEvent.VK_BACK_SPACE);
+            robot.keyRelease(KeyEvent.VK_BACK_SPACE);
+
+            // Paste
+            robot.keyPress(KeyEvent.VK_CONTROL);
+            robot.keyPress(KeyEvent.VK_V);
+            robot.keyRelease(KeyEvent.VK_V);
+            robot.keyRelease(KeyEvent.VK_CONTROL);
+
+            if (send) {
+                robot.keyPress(KeyEvent.VK_ENTER);
+                robot.keyRelease(KeyEvent.VK_ENTER);
+            }
+            return true;
+        } else {
+            LogManager.getInstance().log(getClass(), "Could not find a running PoE Instance.");
         }
+        return false;
     }
 
     public void renderStashMarker(int x, int y) {
-        if (markerFrame == null) {
-            markerFrame = new JFrame("Transparent Window");
+        if (Main.poeToForeground()) {
+            if (markerFrame == null) {
+                markerFrame = new JFrame("Transparent Window");
 
-            markerFrame.getRootPane().setOpaque(false);
-            markerFrame.setUndecorated(true);
-            markerFrame.setBackground(new Color(0, 0, 0, 0));
-            markerFrame.setLocationRelativeTo(null);
-            markerFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            markerFrame.setFocusableWindowState(false);
-            markerFrame.setFocusable(false);
-            markerFrame.setAlwaysOnTop(true);
-            markerFrame.setVisible(false);
-            markerFrame.addMouseListener(new MouseListener() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
+                markerFrame.getRootPane().setOpaque(false);
+                markerFrame.setUndecorated(true);
+                markerFrame.setBackground(new Color(0, 0, 0, 0));
+                markerFrame.setLocationRelativeTo(null);
+                markerFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                markerFrame.setFocusableWindowState(false);
+                markerFrame.setFocusable(false);
+                markerFrame.setAlwaysOnTop(true);
+                markerFrame.setVisible(false);
+                markerFrame.addMouseListener(new MouseListener() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
 
-                }
+                    }
 
-                @Override
-                public void mousePressed(MouseEvent e) {
+                    @Override
+                    public void mousePressed(MouseEvent e) {
 
-                }
+                    }
 
-                @Override
-                public void mouseReleased(MouseEvent e) {
+                    @Override
+                    public void mouseReleased(MouseEvent e) {
 
-                }
+                    }
 
-                @Override
-                public void mouseEntered(MouseEvent e) {
-                    markerFrame.dispose();
-                    markerFrame = null;
-                }
+                    @Override
+                    public void mouseEntered(MouseEvent e) {
+                        markerFrame.dispose();
+                        markerFrame = null;
+                    }
 
-                @Override
-                public void mouseExited(MouseEvent e) {
+                    @Override
+                    public void mouseExited(MouseEvent e) {
 
-                }
-            });
+                    }
+                });
 
-            markerFrame.getContentPane().setLayout(new BorderLayout());
+                markerFrame.getContentPane().setLayout(new BorderLayout());
 
-            markerFrame.getContentPane().add(getCellPlaceholder());
-            markerFrame.pack();
+                markerFrame.getContentPane().add(getCellPlaceholder());
+                markerFrame.pack();
 
-            int size = 53;
-            markerFrame.setSize(size, size);
-            int xLoc = 14 + size * (x - 1);
-            int yLoc = 158 + size * (y - 1);
-            markerFrame.setLocation(xLoc, yLoc);
-        }
+                int size = 53;
+                markerFrame.setSize(size, size);
+                int xLoc = 14 + size * (x - 1);
+                int yLoc = 158 + size * (y - 1);
+                markerFrame.setLocation(xLoc, yLoc);
+            }
 
-        if (!markerFrame.isVisible()) {
-            markerFrame.setVisible(true);
+            if (!markerFrame.isVisible()) {
+                markerFrame.setVisible(true);
+            }
         }
     }
 

@@ -62,6 +62,7 @@ public class OverlayManager {
         List<ResponseButton> outButtons = new LinkedList<>();
         outButtons.add(new ResponseButton("kk", "kk", false));
         outButtons.add(new ResponseButton("u there", "Are you available for a trade? Please write me back when you are ready.", false));
+        outButtons.add(new ResponseButton("nvm", "Sorry, nevermind. Gl", true));
         outButtons.add(new ResponseButton("omw", "Just a sec, I am on my way.", false));
         outButtons.add(new ResponseButton("thx", "Thanks mate! Gl", false));
 

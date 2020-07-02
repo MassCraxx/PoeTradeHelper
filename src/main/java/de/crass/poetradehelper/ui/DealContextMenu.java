@@ -45,7 +45,7 @@ class DealContextMenu extends ContextMenu {
         MenuItem updateItem = new MenuItem("Update Currency");
         updateItem.setOnAction(event -> TradeManager.getInstance().updateOffersForCurrency(deal.getSecondaryCurrencyID(), true));
 
-        MenuItem updatePlayerItem = new MenuItem("Update Player Offers");
+        MenuItem updatePlayerItem = new MenuItem("Update All Player Offers");
         updatePlayerItem.setOnAction(event -> TradeManager.getInstance().updatePlayerOffers());
 
         MenuItem removeItem = new MenuItem("Remove from Overview");
@@ -60,12 +60,12 @@ class DealContextMenu extends ContextMenu {
                 buyValueItem,
                 sellValueItem,
                 new SeparatorMenuItem(),
+                updateItem,
+                updatePlayerItem,
+                new SeparatorMenuItem(),
                 offersItem,
                 buyItem,
                 sellItem,
-                new SeparatorMenuItem(),
-                updateItem,
-                updatePlayerItem,
                 new SeparatorMenuItem(),
                 removeItem);
     }

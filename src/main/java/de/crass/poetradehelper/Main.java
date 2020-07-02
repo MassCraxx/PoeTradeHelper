@@ -3,6 +3,8 @@ package de.crass.poetradehelper;
   Created by mcrass on 19.07.2018.
  */
 
+import com.sun.jna.platform.win32.User32;
+import com.sun.jna.platform.win32.WinDef;
 import de.crass.poetradehelper.model.CurrencyDeal;
 import de.crass.poetradehelper.model.CurrencyID;
 import de.crass.poetradehelper.model.CurrencyOffer;
@@ -37,6 +39,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -254,6 +258,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
     private TradeManager tradeManager;
 
     public static boolean currencyFilterChanged = false;
+    public static Tab lastTab;
 
     private static DecimalFormat dFormat = new DecimalFormat("#0.##");
     private static DecimalFormat valueFormat;
@@ -283,6 +288,15 @@ public class Main extends Application implements TradeManager.DealParseListener,
         primaryStage.show();
 
         currentStage = primaryStage;
+
+        scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                if (lastTab != null && event.getCode() == KeyCode.TAB || event.getCode() == KeyCode.DEAD_CIRCUMFLEX) {
+                    tabPaneStatic.getSelectionModel().select(lastTab);
+                }
+            }
+        });
 
         updateTitle();
     }
@@ -366,6 +380,15 @@ public class Main extends Application implements TradeManager.DealParseListener,
                 }
             }
         });
+
+        tabPane.getSelectionModel().selectedItemProperty().addListener(
+                new ChangeListener<Tab>() {
+                    @Override
+                    public void changed(ObservableValue<? extends Tab> ov, Tab t, Tab t1) {
+                        lastTab = t;
+                    }
+                }
+        );
 
         settingsPane.setExpandedPane(settingsPane.getPanes().get(0));
 
@@ -1157,8 +1180,8 @@ public class Main extends Application implements TradeManager.DealParseListener,
         }
     }
 
-    public static boolean containsIgnoreCase(String str, String searchStr)     {
-        if(str == null || searchStr == null) return false;
+    public static boolean containsIgnoreCase(String str, String searchStr) {
+        if (str == null || searchStr == null) return false;
 
         final int length = searchStr.length();
         if (length == 0)
@@ -1169,5 +1192,28 @@ public class Main extends Application implements TradeManager.DealParseListener,
                 return true;
         }
         return false;
+    }
+
+    public static Boolean isOnWindowsOS = com.sun.jna.Platform.isWindows();
+    public static String poeWindowClass = "POEWindowClass";
+    public static String poeWindowName = "Path of Exile";
+    public static boolean poeToForeground() {
+        if (isOnWindowsOS) {
+            WinDef.HWND poeWindow = User32.INSTANCE.FindWindow(poeWindowClass, null); // window class
+            if (poeWindow == null) {
+                poeWindow = User32.INSTANCE.FindWindow(null, poeWindowName); // window title
+            }
+            if (poeWindow != null) {
+                WinDef.HWND foregroundWindow = User32.INSTANCE.GetForegroundWindow();
+                if (poeWindow.equals(foregroundWindow)) {
+                    return true;
+                }
+                boolean show = User32.INSTANCE.ShowWindow(poeWindow, 9);        // SW_RESTORE
+                boolean foreground = User32.INSTANCE.SetForegroundWindow(poeWindow);   // bring to front
+                return show & foreground;
+            }
+            return false;
+        }
+        return true;
     }
 }
