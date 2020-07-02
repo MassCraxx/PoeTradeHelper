@@ -34,10 +34,20 @@ public class PoeLogReader implements FileListener {
             "that same guy from before,;someone who could not get enough;some guy who came back"};
 
     private String[] shoutOuts = {
-            "mentioned something of interest in the chat", "says something interesting in the chat"};
+            "(1) got mentioned in the chat!",
+            "Someone in the chat is talking about (1)"};
 
     private String[] testPhrases = {
             "One", "Check", "Boom", "Dude"};
+
+    private String[] inTestMessages = {
+            "2020/04/28 16:11:55 10434343 acf [INFO Client 11664] @From <=‡----> FREE_Space: Hi, I would like to buy your Dusk Creed Small Cluster Jewel listed for 15 chaos in Delirium (stash tab \"xc\"; position: left 5, top 4)",
+            "2020/04/15 20:48:45 31274312 acf [INFO Client 13456] @From Legion_undead: Hi, I'd like to buy your 1 Exalted Orb for my 740 Cartographer's Chisel in Delirium.",
+    };
+    private String[] outTestMessages = {
+            "2020/04/14 00:28:54 32415359 acf [INFO Client 1944] @To Critikills: Hi, I would like to buy your level 19 0% Multistrike Support listed for 5 chaos in Delirium (stash tab \"cheap 2\"; position: left 2, top 5)",
+            "2020/07/01 23:12:00 24271359 b5c [INFO Client 3916] @To Dowlost_NW_SVD: Hi, I would like to buy your Ryslatha's Coil Studded Belt listed for 5.5 exalted in Harvest (stash tab \"S2\"; position: left 11, top 12)"
+    };
 
     // Config
     private ParseConfig ttsParseConfig;
@@ -52,7 +62,7 @@ public class PoeLogReader implements FileListener {
     // RemoveMe?
     private TextField wordIncludeTextField;
     private TextField wordExcludeTextField;
-    private boolean useIncludeExclude = false;
+    private boolean useIncludeExclude = true;
 
     // Threads and Processes
     private List<Process> speechProcesses = new LinkedList<>();
@@ -67,8 +77,10 @@ public class PoeLogReader implements FileListener {
     private File configFile = new File("./ttsconfig.json");
     private Listener listener;
     private Pattern allowedChars = Pattern.compile(PropertyManager.getInstance().getProp("voice_allowed_chars", "[A-Za-z0-9%'.,!?()+-/&=$ ]+"));
-    private Pattern currencyPattern = Pattern.compile("] @Fro.+\\s(.+):.+r (\\d+ .+) for my (\\d+ .+) i");
-    private Pattern tradePattern = Pattern.compile("] @Fro.+\\s(.+):.+your (.+) listed for (\\d+ .+) i.+\"(.+)\".+left (\\d+).+top (\\d+)");
+
+    private Pattern tradePattern = Pattern.compile("@.+ (.+):.+your (.+) listed for (\\d.+) i.+\"(.+)\".+left (\\d+).+top (\\d+).+");
+    private Pattern currencyPattern = Pattern.compile("@.+ (.+):.+r (\\d+ .+) for my (\\d+ .+) i.+");
+    private Pattern unpricedTradePattern = Pattern.compile("@.+ (.+):.+your (.+) i.+\"(.+)\".+left (\\d+).+top (\\d+).+");
 
     private boolean notifyCurrencyRequests = PropertyManager.getInstance().getBooleanProp("notify_currency", true);
     private boolean notifyTradeRequests = PropertyManager.getInstance().getBooleanProp("notify_trade", true);
@@ -97,19 +109,30 @@ public class PoeLogReader implements FileListener {
 //        LogManager.getInstance().log(getClass(), "Processing: " + newLine);
 
         // Process trade for overlay
-        Matcher matcher = currencyPattern.matcher(newLine);
-        if (notifyCurrencyRequests && matcher.find() || notifyTradeRequests && (matcher = tradePattern.matcher(newLine)).find()) {
-            int x = -1;
-            int y = -1;
-            String stashTab = "";
-            if (matcher.groupCount() > 4) {
-                stashTab = matcher.group(4);
-                x = Integer.parseInt(matcher.group(5));
-                y = Integer.parseInt(matcher.group(6));
-            }
+        Matcher matcher;
 
-            if (showOverlay) {
-                OverlayManager.getInstance().showNotificationOverlay(true, matcher.group(1), matcher.group(2), matcher.group(3), stashTab, x, y);
+        boolean in = newLine.contains("@From");
+        boolean out = newLine.contains("@To");
+        if ((in && PropertyManager.getInstance().getBooleanProp(PropertyManager.NOTIFY_INCOMING, true) ||
+                (out && PropertyManager.getInstance().getBooleanProp(PropertyManager.NOTIFY_OUTGOING, true)))) {
+            if (notifyTradeRequests && (matcher = tradePattern.matcher(newLine)).find() ||
+                    notifyCurrencyRequests && (matcher = currencyPattern.matcher(newLine)).find() ||
+                    notifyTradeRequests && (matcher = unpricedTradePattern.matcher(newLine)).find()) {
+                int x = -1;
+                int y = -1;
+                String stashTab = "";
+                if (matcher.groupCount() >= 4) {
+                    stashTab = matcher.group(4);
+                    if (matcher.groupCount() >= 6) {
+                        x = Integer.parseInt(matcher.group(5));
+                        y = Integer.parseInt(matcher.group(6));
+                    }
+                }
+
+                if (showOverlay) {
+                    String msg = matcher.group(0).substring(matcher.group(0).indexOf(":") + 2);
+                    OverlayManager.getInstance().showNotificationOverlay(in, matcher.group(1), matcher.group(2), matcher.group(3), stashTab, x, y, msg);
+                }
             }
         }
 
@@ -122,6 +145,52 @@ public class PoeLogReader implements FileListener {
                     e.printStackTrace();
                 }
                 return;
+            }
+
+            if (useIncludeExclude) {
+                if (wordIncludeTextField != null && !wordIncludeTextField.getText().isEmpty()) {
+                    String[] includeWords = wordIncludeTextField.getText().split(",");
+                    String[] excludeWords = wordExcludeTextField.getText().split(",");
+                    String includedWord = "Nothing";
+                    boolean included = false;
+                    boolean excluded = false;
+
+                    for (String include : includeWords) {
+                        if (!include.isEmpty() && Main.containsIgnoreCase(newLine, include)) {
+                            included = true;
+                            includedWord = include;
+                            break;
+                        }
+                    }
+
+                    if (included) {
+                        for (String exclude : excludeWords) {
+                            if (!exclude.isEmpty() && newLine.contains(exclude)) {
+                                excluded = true;
+                                break;
+                            }
+                        }
+
+                        if (!excluded) {
+                            try {
+                                String notify;
+                                if (ttsParseConfig == null || (notify = ttsParseConfig.getPlaceholders().get("shoutout")) == null) {
+                                    notify = getRandomString(shoutOuts);
+                                } else {
+                                    notify = replacePlaceholders(getRandomString(notify.split(";")).split("\\s+"));
+                                }
+                                //TODO: Playername in shoutout
+//                                notify = notify.replace("(1)", playerName);
+                                notify = notify.replace("(1)", includedWord);
+
+                                textToSpeech(notify);
+                                return;
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }
             }
 
             for (PatternOutput patternOutput : ttsParseConfig.getPatternToOutput()) {
@@ -166,44 +235,7 @@ public class PoeLogReader implements FileListener {
                     LogManager.getInstance().log(getClass(), log.toString());
 
                     String[] words = voiceOutput.split("\\s+");
-                    if (useIncludeExclude) {
-                        if (wordIncludeTextField != null && !wordIncludeTextField.getText().isEmpty()) {
-                            String[] includeWords = wordIncludeTextField.getText().split(",");
-                            String[] excludeWords = wordExcludeTextField.getText().split(",");
-                            boolean included = false;
-                            boolean excluded = false;
-                            for (String wordInMsg : words) {
-                                // If included found, skip included search
-                                if (!included) {
-                                    for (String word : includeWords) {
-                                        if (word.equalsIgnoreCase(wordInMsg)) {
-                                            included = true;
-                                            break;
-                                        }
-                                    }
-                                    // if word was included, skip exclusion search for this i
-                                    if (included) {
-                                        continue;
-                                    }
-                                }
 
-                                for (String exWord : excludeWords) {
-                                    if (wordInMsg.equalsIgnoreCase(exWord)) {
-                                        excluded = true;
-                                        break;
-                                    }
-                                }
-                                // if word was excluded, cancel search
-                                if (excluded) {
-                                    break;
-                                }
-                            }
-
-                            if (!included || excluded) {
-                                return;
-                            }
-                        }
-                    }
                     try {
                         textToSpeech(replacePlaceholders(words));
                         break;
@@ -316,6 +348,11 @@ public class PoeLogReader implements FileListener {
 
                 for (int i = 2; i < voices.length; i++) {
                     supportedVoices.add(voices[i].trim());
+
+                    if (PropertyManager.getInstance().getProp(PropertyManager.VOICE_SPEAKER, null) == null
+                            && voices[i].trim().equals(bestVoiceEver)) {
+                        setVoice(bestVoiceEver);
+                    }
                 }
             } catch (InterruptedException | IOException e) {
                 LogManager.getInstance().log(getClass(), "Exception during checking voice support. " + e);
@@ -336,6 +373,7 @@ public class PoeLogReader implements FileListener {
             startLogTail(file);
 
             isRunning = true;
+            PropertyManager.getInstance().setProp("do_log_parsing", "true");
 
             if (showOverlay) {
                 // init, load config etc
@@ -348,6 +386,8 @@ public class PoeLogReader implements FileListener {
     }
 
     public void stopLogParsing() {
+        PropertyManager.getInstance().setProp("do_log_parsing", "false");
+
         if (logTailer != null) {
             logTailer.stopRunning();
             logTailer = null;
@@ -355,14 +395,17 @@ public class PoeLogReader implements FileListener {
     }
 
     public void shutdown() {
-        stopLogParsing();
+        if (logTailer != null) {
+            logTailer.stopRunning();
+            logTailer = null;
+        }
 
         if (executorService != null) {
             executorService.shutdown();
         }
     }
 
-    private String getRandomString(String[] list) {
+    private String getRandomString(String... list) {
         return getRandomString(list, 100);
     }
 
@@ -463,8 +506,10 @@ public class PoeLogReader implements FileListener {
         return voice;
     }
 
-    public void processTestMessage() {
-        processNewLine("2020/04/28 16:11:55 10434343 acf [INFO Client 11664] @From <=‡----> FREE_Space: Hi, I would like to buy your Dusk Creed Small Cluster Jewel listed for 15 chaos in Delirium (stash tab \"xc\"; position: left 5, top 4)");
+    public void processTestMessage(boolean in) {
+        String msg = getRandomString(in ? inTestMessages : outTestMessages);
+        processNewLine(msg);
+        LogManager.getInstance().log(getClass(), "Test: " + msg.substring(msg.indexOf("@")));
     }
 
     public void testSpeech() {
@@ -505,7 +550,7 @@ public class PoeLogReader implements FileListener {
     public void notifyBadTendency() throws IOException {
         String badTendencyString = ttsParseConfig.getPlaceholders().get("bad_tendency");
         if (badTendencyString == null) {
-            badTendencyString = getRandomString(new String[]{"Update your offers"});
+            badTendencyString = getRandomString("Update your offers");
         }
 
         textToSpeech(badTendencyString);
@@ -595,13 +640,13 @@ public class PoeLogReader implements FileListener {
                 try {
                     ObjectMapper mapper = new ObjectMapper();
                     ParseConfig config = mapper.readValue(file, ParseConfig.class);
-                    LogManager.getInstance().log(getClass(), "TTS config successfully loaded.");
+                    LogManager.getInstance().log(getClass(), "TTS config '" + configFile.getName() + "' successfully loaded.");
                     setTTSParseConfig(config);
                     return true;
                 } catch (JsonMappingException j) {
-                    LogManager.getInstance().log(getClass(), "TTS config corrupted! " + j.getMessage());
+                    LogManager.getInstance().log(getClass(), "TTS config '" + configFile.getName() + "' corrupted! " + j.getMessage());
                 } catch (IOException e) {
-                    LogManager.getInstance().log(getClass(), "Error while loading TTS config.");
+                    LogManager.getInstance().log(getClass(), "Error while loading TTS config '" + configFile.getName() + "'");
                     e.printStackTrace();
                 }
             } else {

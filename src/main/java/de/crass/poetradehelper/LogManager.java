@@ -26,18 +26,19 @@ public class LogManager {
         this.console = console;
     }
 
+    @SuppressWarnings("rawtypes")
     public void log(Class clazz, String log) {
-        log(clazz.getSimpleName(), log);
+        log(clazz.getSimpleName(), log, false);
     }
 
-    public void log(String clazz, String log) {
+    public void log(String clazz, String log, boolean debug) {
         String timestamp = '>' + getTime() + '<';
         String consoleLog = timestamp + ' ' + '[' + clazz + ']' + ' ' + log;
         System.out.println(consoleLog);
 
         String msg = timestamp + ' ' + log;
 
-        if (console != null) {
+        if (!debug && console != null) {
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
@@ -47,6 +48,11 @@ public class LogManager {
                 }
             });
         }
+    }
+
+    @SuppressWarnings("rawtypes")
+    public void debug(Class clazz, String log){
+        log(clazz.getSimpleName(), log, true);
     }
 
     public String getTime() {

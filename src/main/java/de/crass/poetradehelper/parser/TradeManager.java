@@ -161,9 +161,7 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
             HashSet<Pair<CurrencyID, CurrencyID>> processedKeys = new HashSet<>();
 
             List<CurrencyDeal> newDeals = new LinkedList<>();
-            if (marketOffers == null || marketOffers.isEmpty()) {
-                LogManager.getInstance().log(TradeManager.class, "No offers to parse.");
-            } else {
+            if (marketOffers != null && !marketOffers.isEmpty()) {
 //                LogManager.getInstance().log(TradeManager.class, "Parsing offers...");
 
                 // Iterate through all combinations, check inverted offer, but every pair only once
@@ -375,6 +373,8 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
 
                 newPlayerDeals.sort(diffValueSorter);
                 playerDeals.setAll(newPlayerDeals);
+            } else {
+                LogManager.getInstance().debug(TradeManager.class, "No offers to parse.");
             }
 
             if (listener != null) {
@@ -484,7 +484,7 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
         }
         int updateDelay = PropertyManager.getInstance().getUpdateDelay() * 60;
         autoUpdateFuture = autoUpdateExecutor.schedule(() -> {
-            LogManager.getInstance().log("AutoUpdate", "Invoke Automatic Update");
+            LogManager.getInstance().log("AutoUpdate", "Invoke Automatic Update", false);
             Set<CurrencyID> toUpdate = new HashSet<>(PropertyManager.getInstance().getFilterList());
             if (PropertyManager.getInstance().getBooleanProp("auto_update_player_offers", false)) {
                 toUpdate.addAll(getPlayerCurrencies());

@@ -60,7 +60,13 @@ public class LogTailer implements Runnable {
                     while ((currentLine = readWriteFileAccess.readLine()) != null) {
                         currentLine = new String(currentLine.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
                         if (!currentLine.trim().isEmpty()) {
-                            listener.onNewLine(logFile, currentLine);
+                            String finalCurrentLine = currentLine;
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    listener.onNewLine(logFile, finalCurrentLine);
+                                }
+                            }).start();
                         }
                     }
                     lastKnownPosition = readWriteFileAccess.getFilePointer();

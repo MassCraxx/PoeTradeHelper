@@ -27,10 +27,10 @@ public class OverlayFrame extends JFrame {
 
     private JFrame markerFrame;
 
-    private boolean persistPosition = PropertyManager.getInstance().getBooleanProp("overlay_persist_pos", false);
+    private boolean persistPosition = PropertyManager.getInstance().getBooleanProp("overlay_persist_pos", true);
     private boolean showMarkerOnEnter = PropertyManager.getInstance().getBooleanProp("overlay_marker_on_enter", false);
 
-    public OverlayFrame(OverlayConfig config, boolean in, String playerName, String item, String price, int x, int y, String stashTab, int stashX, int stashY) {
+    public OverlayFrame(OverlayConfig config, boolean in, String playerName, String item, String price, int x, int y, String stashTab, int stashX, int stashY, String msg) {
         super("PoeTradeHelper Overlay");
 
         screenWidth = Toolkit.getDefaultToolkit().getScreenSize().width;
@@ -72,6 +72,7 @@ public class OverlayFrame extends JFrame {
         JButton kick = getButton("-", e -> kick(in ? playerName : PropertyManager.getInstance().getPlayerList().get(0)));
         JButton whisper = getButton("W", e -> whisper(playerName, "", false));
         JButton close = getButton("X", e -> dispose());
+        JButton repeat = getButton("\"", e -> whisper(playerName, msg, true));
 
         JPanel topButtonPanel = new JPanel();
         topButtonPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
@@ -79,6 +80,7 @@ public class OverlayFrame extends JFrame {
             topButtonPanel.add(whois);
             topButtonPanel.add(invite);
         } else {
+            topButtonPanel.add(repeat);
             topButtonPanel.add(hideout);
         }
         topButtonPanel.add(trade);
@@ -101,7 +103,7 @@ public class OverlayFrame extends JFrame {
 //        text.setForeground(new Color(100,100,100));
         text.setForeground(textColor);
         text.setHorizontalTextPosition(SwingConstants.LEFT);
-        if (stashTab != null && !stashTab.isEmpty()) {
+        if (in && stashTab != null && !stashTab.isEmpty()) {
             text.setText(item + " - (stashed in " + stashTab + ")");
         } else {
             text.setText(item);
@@ -139,7 +141,7 @@ public class OverlayFrame extends JFrame {
             public void mouseClicked(MouseEvent e) {
                 switch (e.getButton()) {
                     case MouseEvent.BUTTON1:
-                        if (stashX > 0 && stashY > 0) {
+                        if (in && stashX > 0 && stashY > 0) {
                             if (markerFrame == null || !markerFrame.isVisible()) {
                                 renderStashMarker(stashX, stashY);
                             } else {
@@ -198,6 +200,7 @@ public class OverlayFrame extends JFrame {
         setSize(width, 100);
         if (x == -1) {
             x = Math.round(screenWidth / 2f - width / 2f);
+            x = in ? x : x + width - 1;
         }
         setLocation(x, y);
         setVisible(true);

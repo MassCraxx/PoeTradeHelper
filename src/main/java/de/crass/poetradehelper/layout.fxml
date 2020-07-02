@@ -206,31 +206,46 @@
                                        <children>
                                                   <AnchorPane maxWidth="1.7976931348623157E308" prefWidth="270.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="5.0">
                                                       <children>
-                                                <HBox layoutY="45.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="80.0">
+                                                <VBox layoutY="80.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="80.0">
                                                    <children>
-                                                       <Button fx:id="reloadConfigBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefWidth="280.0" text="Reload Configs" HBox.hgrow="ALWAYS" />
-                                                      <Button fx:id="parseTestButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefWidth="280.0" text="Test Incoming" HBox.hgrow="ALWAYS" />
-                                                       <Button fx:id="openConfigBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefWidth="280.0" text="Open Overlay Config" />
-                                                       <Button fx:id="openTtsConfigBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefWidth="280.0" text="Open TTS Config" />
+                                                      <HBox>
+                                                         <children>
+                                                             <Button fx:id="reloadConfigBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Reload Configs" HBox.hgrow="ALWAYS" />
+                                                             <Button fx:id="openConfigBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Open Overlay Config" HBox.hgrow="ALWAYS" />
+                                                             <Button fx:id="openTtsConfigBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Open TTS Config" HBox.hgrow="ALWAYS" />
+                                                         </children>
+                                                      </HBox>
+                                                      <HBox>
+                                                         <children>
+                                                            <Button fx:id="parseTestButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Test Incoming" HBox.hgrow="ALWAYS" />
+                                                            <Button fx:id="parseOutTestButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Test Outgoing" HBox.hgrow="ALWAYS" />
+                                                         </children>
+                                                      </HBox>
+                                                   </children>
+                                                </VBox>
+                                                <HBox layoutY="50.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="50.0">
+                                                   <children>
+                                                      <CheckBox fx:id="parseActive" mnemonicParsing="false" prefWidth="500.0" text="Activate Chat Parsing" HBox.hgrow="ALWAYS" />
+                                                      <CheckBox fx:id="overlayIn" layoutX="10.0" layoutY="10.0" mnemonicParsing="false" prefWidth="500.0" text="Pop-Up on Incoming" HBox.hgrow="ALWAYS" />
+                                                      <CheckBox fx:id="overlayOut" layoutX="145.0" layoutY="10.0" mnemonicParsing="false" prefWidth="500.0" text="Pop-Up on Outgoing" HBox.hgrow="ALWAYS" />
                                                    </children>
                                                 </HBox>
-                                                          <CheckBox fx:id="parseActive" layoutX="30.0" layoutY="1.0" mnemonicParsing="false" text="Activate Chat Parsing" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="50.0" />
-                                                <AnchorPane fx:id="voiceLayout" prefHeight="200.0" prefWidth="200.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="160.0">
+                                                <AnchorPane fx:id="voiceLayout" layoutY="185.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="185.0">
                                                    <children>
                                                                 <ComboBox fx:id="voiceSpeakerCB" disable="true" prefWidth="200.0" AnchorPane.leftAnchor="120.0" AnchorPane.rightAnchor="270.0" AnchorPane.topAnchor="0.0" />
                                                                 <Slider fx:id="volumeSlider" prefHeight="18.0" prefWidth="150.0" value="100.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="7.0" />
                                                                 <Label fx:id="volumeLabel" text="100%" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0" />
                                                                 <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Speaker" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="5.0" />
                                                                 <Text fx:id="volumeTopicLabel" fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Volume" AnchorPane.rightAnchor="205.0" AnchorPane.topAnchor="5.0" />
-                                                      <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Whitelist Words" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="55.0" />
+                                                      <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Shoutout Words" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="55.0" />
                                                       <TextField fx:id="voiceShoutoutWords" disable="true" AnchorPane.leftAnchor="120.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="50.0" />
-                                                      <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Blacklist Words" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="105.0" />
+                                                      <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Ignore Words" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="105.0" />
                                                       <TextField fx:id="voiceExcludeWords" disable="true" AnchorPane.leftAnchor="120.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="100.0" />
                                                    </children>
                                                 </AnchorPane>
                                                           <Text fill="#d8d8d8" layoutX="16.0" layoutY="86.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="PoE Path" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="5.0" />
                                                           <TextField fx:id="poePath" layoutX="-2.0" layoutY="72.0" prefHeight="31.0" prefWidth="513.0" AnchorPane.leftAnchor="120.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                                <CheckBox fx:id="voiceActive" layoutX="-17.0" layoutY="93.0" mnemonicParsing="false" text="Enable Text To Speech Notification" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="125.0" />
+                                                <CheckBox fx:id="voiceActive" layoutY="155.0" mnemonicParsing="false" text="Enable Text-To-Speech Notification on Incoming Message (requires Balabolka)" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="155.0" />
                                                       </children>
                                                   </AnchorPane>
                                        </children>

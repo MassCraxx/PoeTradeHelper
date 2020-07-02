@@ -37,7 +37,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -109,6 +108,12 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
     @FXML
     private CheckBox parseActive;
+
+    @FXML
+    private CheckBox overlayIn;
+
+    @FXML
+    private CheckBox overlayOut;
 
     @FXML
     private ListView<CurrencyID> currencyFilterList;
@@ -229,6 +234,9 @@ public class Main extends Application implements TradeManager.DealParseListener,
     private Button parseTestButton;
 
     @FXML
+    private Button parseOutTestButton;
+
+    @FXML
     private Text volumeTopicLabel;
 
     @FXML
@@ -276,19 +284,6 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
         currentStage = primaryStage;
 
-        boolean activateKeys = PropertyManager.getInstance().getBooleanProp("tab_switch_key", false);
-        if (activateKeys) {
-            scene.setOnKeyPressed(event -> {
-                if (tabPane != null && tabPane.getSelectionModel() != null) {
-                    if (event.getCode().equals(KeyCode.LEFT)) {
-                        tabPane.getSelectionModel().selectPrevious();
-                    } else if (event.getCode().equals(KeyCode.RIGHT)) {
-                        tabPane.getSelectionModel().selectNext();
-                    }
-                }
-            });
-        }
-
         updateTitle();
     }
 
@@ -303,21 +298,19 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
         // Prop man
         PropertyManager.getInstance().setUICallback(this);
-        setWebParser(PropertyManager.getInstance().getProp("trade_data_source", PoeTradeApiParser.IDENTIFIER));
+        setWebParser(PropertyManager.getInstance().getCurrentWebParser());
 
         // Setup TTS
         poeLogReader = new PoeLogReader(new PoeLogReader.Listener() {
             @Override
             public void onStarted() {
                 poePath.setDisable(true);
-                PropertyManager.getInstance().setProp("do_log_parsing", "true");
             }
 
             @Override
             public void onShutDown() {
                 parseActive.setSelected(false);
                 poePath.setDisable(false);
-                PropertyManager.getInstance().setProp("do_log_parsing", "false");
             }
         });
         if (PropertyManager.getInstance().getBooleanProp("do_log_parsing", false)) {
@@ -338,7 +331,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
 //        PropertyManager.getInstance().setProp("window_divider", String.valueOf(splitPaneStatic.getDividerPositions()[0]));
         PropertyManager.getInstance().storeProperties();
 
-        if (poeLogReader != null && poeLogReader.isActive()) {
+        if (poeLogReader != null) {
             poeLogReader.shutdown();
             poeLogReader = null;
         }
@@ -663,7 +656,8 @@ public class Main extends Application implements TradeManager.DealParseListener,
             tradeManager.parseDeals();
         });
 
-        excessiveTresholdSlider.setTooltip(new Tooltip("If \"Filter Excessive\" is active, all deals where the buy and sell value difference exceeds a given percentage of the higher value are ignored.\nE.g. 50% means all offers will be ignored where the buy and sell difference is more than 50% of the primary currency value"));
+//        excessiveTresholdSlider.setTooltip(new Tooltip("If \"Filter Excessive\" is active, all deals where the buy and sell value difference exceeds a given percentage of the higher value are ignored.\nE.g. 50% means all offers will be ignored where the buy and sell difference is more than 50% of the primary currency value"));
+        excessiveTresholdSlider.setTooltip(new Tooltip("If \"Filter Excessive\" is active, offers with a buy to sell value difference more than % of the primary currency value will be ignored.\n\n100% - No Filtering, 0% - Only show 1-1 deals"));
         int excessiveTreshold = PropertyManager.getInstance().getExcessiveTreshold();
         excessiveTresholdSlider.setValue(excessiveTreshold);
         excessiveTresholdLabel.setText(excessiveTreshold + " %");
@@ -743,7 +737,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
         });
 
         webParsingCB.setItems(FXCollections.observableArrayList(PoeTradeWebParser.IDENTIFIER, PoeTradeApiParser.IDENTIFIER));
-        String defaultParser = PropertyManager.getInstance().getProp("trade_data_source", PoeTradeApiParser.IDENTIFIER);
+        String defaultParser = PropertyManager.getInstance().getCurrentWebParser();
         if (defaultParser.equals(PoeTradeApiParser.IDENTIFIER)) {
             filterWithoutStockInfo.setSelected(true);
             filterOutOfStock.setSelected(true);
@@ -762,6 +756,22 @@ public class Main extends Application implements TradeManager.DealParseListener,
             }
         });
         parseActive.setSelected(PropertyManager.getInstance().getBooleanProp("do_log_parsing", false));
+
+        overlayIn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                PropertyManager.getInstance().setProp(PropertyManager.NOTIFY_INCOMING, String.valueOf(overlayIn.isSelected()));
+            }
+        });
+        overlayIn.setSelected(PropertyManager.getInstance().getBooleanProp(PropertyManager.NOTIFY_INCOMING, true));
+
+        overlayOut.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                PropertyManager.getInstance().setProp(PropertyManager.NOTIFY_OUTGOING, String.valueOf(overlayOut.isSelected()));
+            }
+        });
+        overlayOut.setSelected(PropertyManager.getInstance().getBooleanProp(PropertyManager.NOTIFY_OUTGOING, true));
 
         // Setup TTS
         poeLogReader.setWordIncludeTextField(voiceShoutoutWords);
@@ -843,7 +853,8 @@ public class Main extends Application implements TradeManager.DealParseListener,
         });
 
         // Setup Overlay
-        parseTestButton.setOnAction(event -> poeLogReader.processTestMessage());
+        parseTestButton.setOnAction(event -> poeLogReader.processTestMessage(true));
+        parseOutTestButton.setOnAction(event -> poeLogReader.processTestMessage(false));
         reloadConfigBtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -975,7 +986,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
     @Override
     public void onUpdateFinished() {
-        LogManager.getInstance().log(TradeManager.class, "Update took " + prettyFloat((System.currentTimeMillis() - updateStart) / 1000f) + " seconds");
+        LogManager.getInstance().debug(TradeManager.class, "Update took " + prettyFloat((System.currentTimeMillis() - updateStart) / 1000f) + " seconds");
         CurrencyID newValue = offerSecondary.getValue();
         if (newValue != null) {
             buyOfferTable.setItems(tradeManager.getBuyOffers(newValue));
@@ -1011,8 +1022,11 @@ public class Main extends Application implements TradeManager.DealParseListener,
 
     @Override
     public void onParsingFinished() {
-        float time = System.currentTimeMillis() - parseStartTime;
-        LogManager.getInstance().log(TradeManager.class, "Parsing took " + prettyFloat(time, true, false) + " milliseconds");
+        if (!TradeManager.getInstance().getCurrentDeals().isEmpty()) {
+            float time = System.currentTimeMillis() - parseStartTime;
+            LogManager.getInstance().log(TradeManager.class, "Parsing took " + prettyFloat(time, true, false) + " milliseconds");
+        }
+
 
         resetUI();
     }
@@ -1035,6 +1049,8 @@ public class Main extends Application implements TradeManager.DealParseListener,
             resetUiItems();
         } else if (PropertyManager.POE_PATH.equals(key)) {
             poePath.setText(value);
+        } else if (PropertyManager.VOICE_SPEAKER.equals(key)) {
+            voiceSpeakerCB.setValue(value);
         }
     }
 
@@ -1141,4 +1157,17 @@ public class Main extends Application implements TradeManager.DealParseListener,
         }
     }
 
+    public static boolean containsIgnoreCase(String str, String searchStr)     {
+        if(str == null || searchStr == null) return false;
+
+        final int length = searchStr.length();
+        if (length == 0)
+            return true;
+
+        for (int i = str.length() - length; i >= 0; i--) {
+            if (str.regionMatches(true, i, searchStr, 0, length))
+                return true;
+        }
+        return false;
+    }
 }

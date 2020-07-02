@@ -1,6 +1,7 @@
 package de.crass.poetradehelper;
 
 import de.crass.poetradehelper.model.CurrencyID;
+import de.crass.poetradehelper.parser.PoeTradeApiParser;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableStringValue;
 import javafx.collections.FXCollections;
@@ -10,10 +11,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * Created by mcrass on 19.07.2018.
@@ -33,8 +31,8 @@ public class PropertyManager {
     public static final String FILTER_NOAPI = "filter_noapi";
     public static final String FILTER_OUTOFSTOCK = "filter_outofstock";
     public static final String FILTER_EXCESSIVE = "filter_excessive";
-    public static final String EXCESSIVE_TRESHOLD = "excessive_treshold";
-    public static final String CURRENCY_LIST = "currency_list";
+    public static final String EXCESSIVE_TRESHOLD = "filter_excessive_treshold";
+    public static final String CURRENCY_LIST = "secondary_currency_list";
     public static final String PRIMARY_CURRENCY_LIST = "primary_currency_list";
     public static final String PLAYER_LIST = "player_list";
     public static final String POE_PATH = "poe_path";
@@ -43,6 +41,8 @@ public class PropertyManager {
     public static final String UPDATE_DELAY_MINUTES = "auto_update_delay_minutes";
     public static final String FILTER_MULTIPLE_TRANSACTIONS = "filter_multiple_transactions";
     private static final String WINDOW_SIZE = "window_size";
+    public static final String NOTIFY_INCOMING = "overlay_notify_incoming";
+    public static final String NOTIFY_OUTGOING = "overlay_notify_outgoing";
 
     // DEFAULTS
     public static final Double defaultWindowWidth = 670.0;
@@ -55,9 +55,9 @@ public class PropertyManager {
     private final String defaultFilterStockOffers = "false";
     private final String defaultFilterInvalidStockOffers = "false";
     private final String defaultFilterExcessive = "true";
-    private final String defaultExcessiveTreshold = "60";
+    private final String defaultExcessiveTreshold = "65";
 
-    private final String defaultCurrencyFilterString = "fusing,regret,jewellers,chisel,gcp,chrome,regal,alt,scour,alch";
+    private final String defaultCurrencyFilterString = "fusing,vaal,chisel,gcp,scour,alch,alt";
     private final String defaultPrimaryCurrencyString = "mirror,mirror-shard,exalted,blessing-chayula,divine,exalted-shard";
 
     // Current Values
@@ -85,7 +85,12 @@ public class PropertyManager {
     }
 
     private void loadProperties() {
-        appProps = new Properties();
+        appProps = new Properties() {
+            @Override
+            public synchronized Enumeration<Object> keys() {
+                return Collections.enumeration(new TreeSet<>(super.keySet()));
+            }
+        };
 
         // Try load from disk
         File propFile = new File(propFilename);
@@ -99,7 +104,7 @@ public class PropertyManager {
 
         // Only converting on load and store
         currentLeague = appProps.getProperty(LEAGUE_KEY, defaultLeague);
-        currencyFilterList = FXCollections.observableArrayList(stringToCurrencyList(appProps.getProperty(CURRENCY_LIST, defaultCurrencyFilterString)));
+        currencyFilterList = FXCollections.observableArrayList(stringToCurrencyList(appProps.getProperty(CURRENCY_LIST, appProps.getProperty("currency_list",defaultCurrencyFilterString))));
         primaryCurrencyList = FXCollections.observableArrayList(stringToCurrencyList(appProps.getProperty(PRIMARY_CURRENCY_LIST, defaultPrimaryCurrencyString)));
         playerList = FXCollections.observableArrayList(stringToList(appProps.getProperty(PLAYER_LIST, null)));
         primaryCurrency = CurrencyID.getByTradeID(appProps.getProperty(PRIMARY_CURRENCY, defaultPrimary));
@@ -357,6 +362,10 @@ public class PropertyManager {
         newList.remove(player);
         ignoredPlayers = newList;
         setProp("ignored_players", listToString(newList));
+    }
+
+    public String getCurrentWebParser(){
+        return PropertyManager.getInstance().getProp("trade_data_source", PoeTradeApiParser.IDENTIFIER);
     }
 
     public void setWindowSize(double newWindowWidth, double newWindowHeight) {

@@ -1,5 +1,6 @@
 {
   "placeholders": {
+    "shoutout": "(1) got mentioned in the chat!;Someone in the chat is talking about (1)",
     "test": "This is a test",
     "buy": "wants to buy your;wants your;wants to trade your",
     "name": "an exile;someone;some guy;a player;some dude;this cheeky scrub lord;that newbie",

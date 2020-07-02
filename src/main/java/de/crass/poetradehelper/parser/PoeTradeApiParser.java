@@ -19,6 +19,8 @@ public class PoeTradeApiParser extends WebParser {
     public static final String poeFetchURL = "https://www.pathofexile.com/api/trade/fetch/";
     public static final String poeSearchURL = "https://www.pathofexile.com/trade/exchange/";
 
+    public static final int OFFER_FETCH_AMOUNT = Integer.parseInt(PropertyManager.getInstance().getProp("trade_offer_fetch_size", "15"));
+
     PoeTradeApiParser(OfferParseListener listener) {
         super(listener);
     }
@@ -79,7 +81,7 @@ public class PoeTradeApiParser extends WebParser {
                 query.append(offerQuery.toString());
 
                 // Consider looping in 20er steps
-                if (count == 20) {
+                if (count == OFFER_FETCH_AMOUNT) {
                     break;
                 }
             }

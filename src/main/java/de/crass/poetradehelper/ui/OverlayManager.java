@@ -36,8 +36,8 @@ public class OverlayManager {
         return instance;
     }
 
-    public void showNotificationOverlay(boolean in, String playerName, String item, String price, String stashTab, int stashX, int stashY) {
-        overlayFrames.add(new OverlayFrame(currentConfig, in, playerName, item, price, x, y, stashTab, stashX, stashY));
+    public void showNotificationOverlay(boolean in, String playerName, String item, String price, String stashTab, int stashX, int stashY, String msg) {
+        overlayFrames.add(new OverlayFrame(currentConfig, in, playerName, item, price, x, y, stashTab, stashX, stashY, msg));
     }
 
     public void shutdown() {
@@ -90,12 +90,12 @@ public class OverlayManager {
             try {
                 ObjectMapper mapper = new ObjectMapper();
                 OverlayConfig config = mapper.readValue(file, OverlayConfig.class);
-                LogManager.getInstance().log(getClass(), "Overlay config successfully loaded.");
+                LogManager.getInstance().log(getClass(), "Overlay config '" + configFile.getName() + "' successfully loaded.");
                 currentConfig = config;
             } catch (JsonMappingException j) {
-                LogManager.getInstance().log(getClass(), "Loading overlay config failed. Overlay config corrupted! " + j.getMessage());
+                LogManager.getInstance().log(getClass(), "Loading overlay config '" + configFile.getName() + "' failed. Overlay config corrupted! " + j.getMessage());
             } catch (IOException e) {
-                LogManager.getInstance().log(getClass(), "Loading overlay config failed. Error while loading config.");
+                LogManager.getInstance().log(getClass(), "Loading overlay config '" + configFile.getName() + "' failed. Error while loading config.");
                 e.printStackTrace();
             }
         } else {
@@ -125,5 +125,9 @@ public class OverlayManager {
                 }
             }
         }
+    }
+
+    public OverlayConfig getCurrentConfig() {
+        return currentConfig;
     }
 }

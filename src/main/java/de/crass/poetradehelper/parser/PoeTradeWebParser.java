@@ -20,13 +20,10 @@ import static de.crass.poetradehelper.PropertyManager.offlineMode;
 public class PoeTradeWebParser extends WebParser{
     public static final String IDENTIFIER = "poe.trade";
 
-    //TODO: Switch to (observable) sets
-    //TODO: https://stackoverflow.com/questions/1732348/regex-match-open-tags-except-xhtml-self-contained-tags
-
     private final static String poeTradeCurrencyURL = "http://currency.poe.trade/search";
 
     private final static int parseStartIndex = 435845;
-    private final static int fetchDelay = 500;
+    private final static int fetchDelay = 100;
     private final static boolean writeCache = false;
 
     private final static Pattern OFFER_PATTERN = Pattern.compile(

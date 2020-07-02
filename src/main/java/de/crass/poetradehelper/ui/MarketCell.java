@@ -1,7 +1,9 @@
 package de.crass.poetradehelper.ui;
 
 import de.crass.poetradehelper.Main;
+import de.crass.poetradehelper.PropertyManager;
 import de.crass.poetradehelper.model.CurrencyDeal;
+import de.crass.poetradehelper.parser.PoeTradeApiParser;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.CacheHint;
@@ -77,7 +79,7 @@ public class MarketCell<T> extends javafx.scene.control.ListCell<CurrencyDeal> {
             }
 
             String url = deal.getSecondaryCurrencyID().getID() + ".png";
-            setImage(url,currencyIcon);
+            setImage(url, currencyIcon);
             currencyIcon.setCache(true);
             currencyIcon.setCacheHint(CacheHint.SPEED);
 
@@ -85,7 +87,12 @@ public class MarketCell<T> extends javafx.scene.control.ListCell<CurrencyDeal> {
             float sell = deal.getSellAmount();
 
             timestamp.setText(timeFormat.format(new Date(deal.getTimestamp())));
-            offersText.setText(prettyFloat(deal.getOffers()));
+            String offersTextString = prettyFloat(deal.getOffers());
+            if (PropertyManager.getInstance().getCurrentWebParser().equals(PoeTradeApiParser.IDENTIFIER)
+                    && deal.getOffers() == PoeTradeApiParser.OFFER_FETCH_AMOUNT * 2) {
+                offersTextString = ">" + offersTextString;
+            }
+            offersText.setText(offersTextString);
             buyOffer.setText(prettyFloat(buy, true, true));
             sellOffer.setText(prettyFloat(sell, true, true));
             diff.setText(prettyFloat((deal.getDiff()), true, false));
