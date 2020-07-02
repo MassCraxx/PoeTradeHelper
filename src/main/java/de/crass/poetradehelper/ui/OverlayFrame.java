@@ -3,8 +3,10 @@ package de.crass.poetradehelper.ui;
 import de.crass.poetradehelper.LogManager;
 import de.crass.poetradehelper.Main;
 import de.crass.poetradehelper.PropertyManager;
+import de.crass.poetradehelper.model.CurrencyID;
 import de.crass.poetradehelper.model.OverlayConfig;
 import de.crass.poetradehelper.model.ResponseButton;
+import de.crass.poetradehelper.parser.TradeManager;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -19,6 +21,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class OverlayFrame extends JFrame {
     private Robot robot;
@@ -26,6 +30,8 @@ public class OverlayFrame extends JFrame {
     private final Color backgroundColor = Color.decode("#110E0D");
     private final Color altColor = Color.decode("#323534");
     private final Color textColor = new Color(220, 220, 220);
+
+    private Pattern pricePattern = Pattern.compile("(\\d+)\\s(.+)");
 
     private JFrame markerFrame;
 
@@ -87,6 +93,44 @@ public class OverlayFrame extends JFrame {
 
         JLabel priceLabel = new JLabel(price, SwingConstants.CENTER);
         priceLabel.setForeground(textColor);
+        priceLabel.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                Matcher m = pricePattern.matcher(price);
+                if (m.find() && m.groupCount() >= 2) {
+                    CurrencyID currencyID = CurrencyID.getByTradeID(m.group(2));
+                    if (currencyID == null) {
+                        currencyID = CurrencyID.getByDisplayName(m.group(2));
+                    }
+
+                    if (currencyID != null && Main.thisToForeground(3)) {
+                        int amount = Integer.parseInt(m.group(1));
+                        TradeManager.getInstance().updateCurrencyValues(false);
+                        //TODO: Fill value text boxes
+                    }
+                }
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+
+            }
+        });
 
 //        JButton whois = getButton("?", e -> whois(playerName));
         JButton invite = getButton("+", e -> invite(playerName));

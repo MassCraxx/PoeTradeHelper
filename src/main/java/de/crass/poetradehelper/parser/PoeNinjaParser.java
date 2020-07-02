@@ -21,7 +21,7 @@ public class PoeNinjaParser {
     private String cacheFileName = "_data.dat";
 
     private boolean useOfflineCache = true;
-    private long updateDelay = 6 * 60 * 60 * 1000; // 6 hours
+    private long updateDelay = 3 * 60 * 60 * 1000; // 3 hours
 
     private PoeNinjaListener listener;
 

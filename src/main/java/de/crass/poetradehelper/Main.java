@@ -625,7 +625,7 @@ public class Main extends Application implements TradeManager.DealParseListener,
         valueTable.getColumns().clear();
         valueTable.getColumns().addAll(column, column2);
 
-        updateValuesButton.setOnAction(event -> tradeManager.updateCurrencyValues());
+        updateValuesButton.setOnAction(event -> tradeManager.updateCurrencyValues(true));
 
         valueInputCB.setItems(currencies);
         valueInputCB.setValue(CurrencyID.EXALTED);
@@ -1197,6 +1197,8 @@ public class Main extends Application implements TradeManager.DealParseListener,
     public static Boolean isOnWindowsOS = com.sun.jna.Platform.isWindows();
     public static String poeWindowClass = "POEWindowClass";
     public static String poeWindowName = "Path of Exile";
+    public static String thisWindowClass = "GlassWndClass-GlassWindowClass-2";
+
     public static boolean poeToForeground() {
         if (isOnWindowsOS) {
             WinDef.HWND poeWindow = User32.INSTANCE.FindWindow(poeWindowClass, null); // window class
@@ -1214,6 +1216,24 @@ public class Main extends Application implements TradeManager.DealParseListener,
             }
             return false;
         }
+        return true;
+    }
+
+    public static boolean thisToForeground(int tabIndex) {
+        tabPaneStatic.getSelectionModel().select(tabIndex);
+        if (isOnWindowsOS) {
+            WinDef.HWND thisWindow = User32.INSTANCE.FindWindow(thisWindowClass, null); // window class
+            if (thisWindow != null) {
+                boolean show = User32.INSTANCE.ShowWindow(thisWindow, 9);        // SW_RESTORE
+                boolean foreground = User32.INSTANCE.SetForegroundWindow(thisWindow);   // bring to front
+                return show & foreground;
+            } else {
+                // Should never happen
+                return false;
+            }
+        }
+        //TODO: Set value in valueInput and valueOutput
+
         return true;
     }
 }
