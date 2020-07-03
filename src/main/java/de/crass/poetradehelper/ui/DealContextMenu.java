@@ -18,8 +18,7 @@ class DealContextMenu extends ContextMenu {
 
         MenuItem offersItem = new MenuItem("Open in Offers Tab");
         offersItem.setOnAction(event -> {
-            Main.offerSecondaryStatic.setValue(deal.getSecondaryCurrencyID());
-            Main.tabPaneStatic.getSelectionModel().select(2);
+            UIManager.getInstance().openOffers(deal.getSecondaryCurrencyID());
         });
 
         MenuItem buyItem = new MenuItem("Open Buy in Browser");
@@ -39,8 +38,8 @@ class DealContextMenu extends ContextMenu {
         String buyPercentage = String.valueOf(TradeManager.getInstance().getCurrencyValuePercentage(deal.getBuyAmount(), deal.getPrimaryCurrencyID(), deal.getSecondaryCurrencyID()));
         String sellPercentage = String.valueOf(TradeManager.getInstance().getCurrencyValuePercentage(deal.getSellAmount(), deal.getPrimaryCurrencyID(), deal.getSecondaryCurrencyID()));
 
-        MenuItem buyValueItem = new MenuItem("Market Buy Value: " + Main.prettyFloat(deal.getcValue() * deal.getBuyAmount()) + "c" + " (" + buyPercentage + ")");
-        MenuItem sellValueItem = new MenuItem("Market Sell Value: " + Main.prettyFloat(deal.getcValue() * deal.getSellAmount()) + "c" + " (" + sellPercentage + ")");
+        MenuItem buyValueItem = new MenuItem("Market Buy Value: " + UIManager.prettyFloat(deal.getcValue() * deal.getBuyAmount()) + "c" + " (" + buyPercentage + ")");
+        MenuItem sellValueItem = new MenuItem("Market Sell Value: " + UIManager.prettyFloat(deal.getcValue() * deal.getSellAmount()) + "c" + " (" + sellPercentage + ")");
 
         MenuItem updateItem = new MenuItem("Update Currency");
         updateItem.setOnAction(event -> TradeManager.getInstance().updateOffersForCurrency(deal.getSecondaryCurrencyID(), true));

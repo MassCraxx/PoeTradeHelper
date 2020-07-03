@@ -22,15 +22,16 @@ public class LogTailer implements Runnable {
 
     public void stopRunning() {
         running = false;
-        if(listener != null){
+        if (listener != null) {
             listener.onShutdown();
         }
     }
 
     int skipped = 0;
+
     @Override
     public void run() {
-        if(logFile == null || !logFile.exists()){
+        if (logFile == null || !logFile.exists()) {
             LogManager.getInstance().log(getClass(), "LogTail could not be started, path not found: " + logFile);
             stopRunning();
             return;
@@ -52,7 +53,7 @@ public class LogTailer implements Runnable {
                     readWriteFileAccess.seek(lastKnownPosition);
                 } else if (fileLength < lastKnownPosition) {
                     // Fix for programs rewriting whole file...
-                    LogManager.getInstance().log(getClass(), "LogFile got smaller, skipping read. (" + fileLength + " < " + lastKnownPosition+")");
+                    LogManager.getInstance().log(getClass(), "LogFile got smaller, skipping read. (" + fileLength + " < " + lastKnownPosition + ")");
                     skipped++;
                 } else if (fileLength > lastKnownPosition) {
                     skipped = 0;

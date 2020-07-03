@@ -7,6 +7,7 @@ import de.crass.poetradehelper.model.CurrencyID;
 import de.crass.poetradehelper.model.OverlayConfig;
 import de.crass.poetradehelper.model.ResponseButton;
 import de.crass.poetradehelper.parser.TradeManager;
+import javafx.application.Platform;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -106,7 +107,8 @@ public class OverlayFrame extends JFrame {
                     if (currencyID != null && Main.thisToForeground(3)) {
                         int amount = Integer.parseInt(m.group(1));
                         TradeManager.getInstance().updateCurrencyValues(false);
-                        //TODO: Fill value text boxes
+                        CurrencyID finalCurrencyID = currencyID;
+                        Platform.runLater(() -> UIManager.getInstance().fillCurrencyValues(amount, finalCurrencyID, null, null));
                     }
                 }
             }

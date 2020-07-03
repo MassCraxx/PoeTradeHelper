@@ -1,6 +1,5 @@
 package de.crass.poetradehelper.ui;
 
-import de.crass.poetradehelper.Main;
 import de.crass.poetradehelper.model.CurrencyDeal;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -16,8 +15,7 @@ import javafx.scene.text.Text;
 
 import java.io.IOException;
 
-import static de.crass.poetradehelper.Main.prettyFloat;
-import static de.crass.poetradehelper.Main.setImage;
+import static de.crass.poetradehelper.ui.UIManager.prettyFloat;
 
 /**
  * Created by mcrass on 19.07.2018.
@@ -84,7 +82,7 @@ public class PlayerTradeCell extends javafx.scene.control.ListCell<CurrencyDeal>
 //            root.setBorder(new Border(new BorderStroke(Color.BLACK,
 //                    BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(2))));
 
-            setImage(deal.getSecondaryCurrencyID().getID() + ".png", currencyIcon);
+            UIManager.setImage(deal.getSecondaryCurrencyID().getID() + ".png", currencyIcon);
 
             float buy = deal.getBuyAmount();
             float sell = deal.getSellAmount();
@@ -125,9 +123,9 @@ public class PlayerTradeCell extends javafx.scene.control.ListCell<CurrencyDeal>
             // Set icons
             if (buy > 0 && pBuy > 0) {
                 if (pBuy > 0 && pBuy >= buy) {
-                    setImage(pBuy == buy ? "neut.png" : "nok.png", buyTendency);
+                    UIManager.setImage(pBuy == buy ? "neut.png" : "nok.png", buyTendency);
                 } else {
-                    setImage("ok.png", buyTendency);
+                    UIManager.setImage("ok.png", buyTendency);
                 }
                 buyTendency.setCache(true);
                 buyTendency.setCacheHint(CacheHint.SPEED);
@@ -146,9 +144,9 @@ public class PlayerTradeCell extends javafx.scene.control.ListCell<CurrencyDeal>
 
             if (sell > 0 && pSell > 0) {
                 if (pSell > 0 && pSell <= sell) {
-                    setImage(pSell == sell ? "neut.png" : "nok.png", sellTendency);
+                    UIManager.setImage(pSell == sell ? "neut.png" : "nok.png", sellTendency);
                 } else {
-                    setImage("ok.png", sellTendency);
+                    UIManager.setImage("ok.png", sellTendency);
                 }
                 sellTendency.setCache(true);
                 sellTendency.setCacheHint(CacheHint.SPEED);
@@ -181,8 +179,7 @@ public class PlayerTradeCell extends javafx.scene.control.ListCell<CurrencyDeal>
             setOnMouseClicked(mouseEvent -> {
                 if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
                     if (mouseEvent.getClickCount() == 2) {
-                        Main.offerSecondaryStatic.setValue(deal.getSecondaryCurrencyID());
-                        Main.tabPaneStatic.getSelectionModel().select(2);
+                       UIManager.getInstance().openOffers(deal.getSecondaryCurrencyID());
                     }
                 }
             });

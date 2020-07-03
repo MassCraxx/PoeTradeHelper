@@ -28,6 +28,8 @@ import java.util.regex.Pattern;
 
 //IDEA: Notify on tendency change - Check after parsing every deal for tendency check? / Store tendency in deal?
 public class PoeLogReader implements FileListener {
+    private static PoeLogReader instance;
+
     private static final String bestVoiceEver = "ScanSoft Daniel_Full_22kHz";
 
     private String[] knownNames = {
@@ -85,10 +87,20 @@ public class PoeLogReader implements FileListener {
     private boolean notifyCurrencyRequests = PropertyManager.getInstance().getBooleanProp("notify_currency", true);
     private boolean notifyTradeRequests = PropertyManager.getInstance().getBooleanProp("notify_trade", true);
 
-    public PoeLogReader(Listener listener) {
+    public PoeLogReader() {
+        init();
+    }
+
+    public static PoeLogReader getInstance() {
+        if (instance == null) {
+            instance = new PoeLogReader();
+        }
+        return instance;
+    }
+
+    public void setListener(Listener listener) {
         this.listener = listener;
 
-        init();
     }
 
     private void init() {
@@ -608,6 +620,9 @@ public class PoeLogReader implements FileListener {
             executorService = Executors.newFixedThreadPool(4);
         }
         logTailer = new LogTailer(file, true, this);
+        if (listener != null) {
+            listener.onLogTailStarted();
+        }
         executorService.execute(logTailer);
     }
 
@@ -693,7 +708,7 @@ public class PoeLogReader implements FileListener {
     public void onShutdown() {
         isRunning = false;
         if (listener != null) {
-            listener.onShutDown();
+            listener.onLogTailShutDown();
         }
 
         if (speechProcesses != null && !speechProcesses.isEmpty()) {
@@ -705,8 +720,8 @@ public class PoeLogReader implements FileListener {
     }
 
     public interface Listener {
-        void onStarted();
+        void onLogTailStarted();
 
-        void onShutDown();
+        void onLogTailShutDown();
     }
 }

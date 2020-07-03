@@ -1,6 +1,5 @@
 package de.crass.poetradehelper.ui;
 
-import de.crass.poetradehelper.Main;
 import de.crass.poetradehelper.PropertyManager;
 import de.crass.poetradehelper.model.CurrencyDeal;
 import de.crass.poetradehelper.parser.PoeTradeApiParser;
@@ -16,9 +15,6 @@ import javafx.scene.text.Text;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import static de.crass.poetradehelper.Main.prettyFloat;
-import static de.crass.poetradehelper.Main.setImage;
 
 /**
  * Created by mcrass on 19.07.2018.
@@ -79,7 +75,7 @@ public class MarketCell<T> extends javafx.scene.control.ListCell<CurrencyDeal> {
             }
 
             String url = deal.getSecondaryCurrencyID().getID() + ".png";
-            setImage(url, currencyIcon);
+            UIManager.setImage(url, currencyIcon);
             currencyIcon.setCache(true);
             currencyIcon.setCacheHint(CacheHint.SPEED);
 
@@ -87,16 +83,16 @@ public class MarketCell<T> extends javafx.scene.control.ListCell<CurrencyDeal> {
             float sell = deal.getSellAmount();
 
             timestamp.setText(timeFormat.format(new Date(deal.getTimestamp())));
-            String offersTextString = prettyFloat(deal.getOffers());
+            String offersTextString = UIManager.prettyFloat(deal.getOffers());
             if (PropertyManager.getInstance().getCurrentWebParser().equals(PoeTradeApiParser.IDENTIFIER)
                     && deal.getOffers() == PoeTradeApiParser.OFFER_FETCH_AMOUNT * 2) {
                 offersTextString = ">" + offersTextString;
             }
             offersText.setText(offersTextString);
-            buyOffer.setText(prettyFloat(buy, true, true));
-            sellOffer.setText(prettyFloat(sell, true, true));
-            diff.setText(prettyFloat((deal.getDiff()), true, false));
-            diffValue.setText(prettyFloat((deal.getDiffValue()), false, false) + "c");
+            buyOffer.setText(UIManager.prettyFloat(buy, true, true));
+            sellOffer.setText(UIManager.prettyFloat(sell, true, true));
+            diff.setText(UIManager.prettyFloat((deal.getDiff()), true, false));
+            diffValue.setText(UIManager.prettyFloat((deal.getDiffValue()), false, false) + "c");
 
             setGraphic(root);
 
@@ -105,8 +101,7 @@ public class MarketCell<T> extends javafx.scene.control.ListCell<CurrencyDeal> {
             setOnMouseClicked(mouseEvent -> {
                 if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
                     if (mouseEvent.getClickCount() == 2) {
-                        Main.offerSecondaryStatic.setValue(deal.getSecondaryCurrencyID());
-                        Main.tabPaneStatic.getSelectionModel().select(2);
+                        UIManager.getInstance().openOffers(deal.getSecondaryCurrencyID());
                     }
                 }
             });

@@ -233,7 +233,7 @@ public class PropertyManager {
         if (list == null || list.isEmpty()) {
             return "";
         }
-        return Main.join(list);
+        return join(list);
     }
 
     public List<String> stringToList(String s) {
@@ -325,7 +325,7 @@ public class PropertyManager {
         this.filterMultipleTransactionDeals = filterMultipleTransactionDeals;
     }
 
-    ObservableList<CurrencyID> getPrimaryCurrencyList() {
+    public ObservableList<CurrencyID> getPrimaryCurrencyList() {
         return primaryCurrencyList;
     }
 
@@ -385,7 +385,19 @@ public class PropertyManager {
         return windowHeight;
     }
 
-    interface UICallback {
+    public interface UICallback {
         void onPropChanged(String key, String value);
+    }
+
+    public static String join(Collection<?> col) {
+        StringBuilder result = new StringBuilder();
+
+        for (Iterator<?> var3 = col.iterator(); var3.hasNext(); result.append((String) var3.next())) {
+            if (result.length() != 0) {
+                result.append(",");
+            }
+        }
+
+        return result.toString();
     }
 }
