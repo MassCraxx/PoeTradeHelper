@@ -36,7 +36,7 @@ public class OverlayFrame extends JFrame {
 
     private JFrame markerFrame;
 
-    private boolean persistPosition = PropertyManager.getInstance().getBooleanProp("overlay_persist_pos", true);
+    private boolean persistPosition = PropertyManager.getInstance().getBooleanProp("overlay_persist_pos", false);
     private boolean showMarkerOnEnter = PropertyManager.getInstance().getBooleanProp("overlay_marker_on_enter", false);
 
     public OverlayFrame(OverlayConfig config, boolean in, String playerName, String item, String price, int x, int y, String stashTab, int stashX, int stashY, String msg) {
@@ -140,13 +140,16 @@ public class OverlayFrame extends JFrame {
         JButton trade = getButton("T", e -> trade(playerName));
         JButton kick = getButton("-", e -> {
             //FIXME will only work with first accountname
-            String ownPlayer = PropertyManager.getInstance().getPlayerList().get(0);
             if (!in) {
-                if (ownPlayer != null && !ownPlayer.isEmpty()) {
-                    kick(ownPlayer);
-                } else {
-                    LogManager.getInstance().log(getClass(), "You must set a player account in the settings to leave a party.");
+                List<String> playerList = PropertyManager.getInstance().getPlayerList();
+                if (playerList != null && !playerList.isEmpty()) {
+                    String ownPlayer = playerList.get(0);
+                    if (ownPlayer != null && !ownPlayer.isEmpty()) {
+                        kick(ownPlayer);
+                        return;
+                    }
                 }
+                LogManager.getInstance().log(getClass(), "You must set a player account in the settings to leave a party.");
             } else {
                 kick(playerName);
             }

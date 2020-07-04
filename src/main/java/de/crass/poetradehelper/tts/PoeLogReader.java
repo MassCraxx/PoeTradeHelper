@@ -45,6 +45,7 @@ public class PoeLogReader implements FileListener {
     private String[] inTestMessages = {
             "2020/04/28 16:11:55 10434343 acf [INFO Client 11664] @From <=‡----> FREE_Space: Hi, I would like to buy your Dusk Creed Small Cluster Jewel listed for 15 chaos in Delirium (stash tab \"xc\"; position: left 5, top 4)",
             "2020/04/15 20:48:45 31274312 acf [INFO Client 13456] @From Legion_undead: Hi, I'd like to buy your 1 Exalted Orb for my 740 Cartographer's Chisel in Delirium.",
+            "2020/07/04 05:52:23 28471828 b5c [INFO Client 10428] @From <EXILIÖ> HarvestWhiter: Hi, I would like to buy your Vaal Orb in Harvest (stash tab \"$$$\"; position: left 28, top 1)"
     };
     private String[] outTestMessages = {
             "2020/04/14 00:28:54 32415359 acf [INFO Client 1944] @To Critikills: Hi, I would like to buy your level 19 0% Multistrike Support listed for 5 chaos in Delirium (stash tab \"cheap 2\"; position: left 2, top 5)",
@@ -82,7 +83,7 @@ public class PoeLogReader implements FileListener {
 
     private Pattern tradePattern = Pattern.compile("@.+ (.+):.+your (.+) listed for (\\d.+) i.+\"(.+)\".+left (\\d+).+top (\\d+).+");
     private Pattern currencyPattern = Pattern.compile("@.+ (.+):.+r (\\d+ .+) for my (\\d+ .+) i.+");
-    private Pattern unpricedTradePattern = Pattern.compile("@.+ (.+):.+your (.+) i.+\"(.+)\".+left (\\d+).+top (\\d+).+");
+    private Pattern unpricedTradePattern = Pattern.compile("@.+ (.+):.+your (.+)() i.+\"(.+)\".+left (\\d+).+top (\\d+)\\)\\s?(.*)");
 
     private boolean notifyCurrencyRequests = PropertyManager.getInstance().getBooleanProp("notify_currency", true);
     private boolean notifyTradeRequests = PropertyManager.getInstance().getBooleanProp("notify_trade", true);
@@ -142,8 +143,14 @@ public class PoeLogReader implements FileListener {
                 }
 
                 if (showOverlay) {
+                    String price = "Open Offer";
+                    if (matcher.group(3) != null && !matcher.group(3).isEmpty()) {
+                        price = matcher.group(3);
+                    } else if (matcher.groupCount() >= 7 && !matcher.group(7).isEmpty()) {
+                        price = matcher.group(7);
+                    }
                     String msg = matcher.group(0).substring(matcher.group(0).indexOf(":") + 2);
-                    OverlayManager.getInstance().showNotificationOverlay(in, matcher.group(1), matcher.group(2), matcher.group(3), stashTab, x, y, msg);
+                    OverlayManager.getInstance().showNotificationOverlay(in, matcher.group(1), matcher.group(2), price, stashTab, x, y, msg);
                 }
             }
         }

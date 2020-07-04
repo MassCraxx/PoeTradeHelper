@@ -252,7 +252,6 @@ public class UIManager implements TradeManager.DealParseListener, PropertyManage
 
     public UIManager() {
         instance = this;
-        System.out.println("UIManager init!");
     }
 
     public static UIManager getInstance() {
@@ -548,7 +547,14 @@ public class UIManager implements TradeManager.DealParseListener, PropertyManage
         valueTable.getColumns().clear();
         valueTable.getColumns().addAll(column, column2);
 
-        updateValuesButton.setOnAction(event -> tradeManager.updateCurrencyValues(true));
+        updateValuesButton.setOnAction(event -> {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    tradeManager.updateCurrencyValues(true);
+                }
+            });
+        });
 
         valueInputCB.setItems(currencies);
         valueInputCB.setValue(CurrencyID.EXALTED);
