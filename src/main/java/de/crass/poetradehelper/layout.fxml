@@ -6,6 +6,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
+
 <SplitPane fx:id="splitPane" dividerPositions="0.825" orientation="VERTICAL" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.crass.poetradehelper.ui.UIManager">
    <items>
         <TabPane fx:id="tabPane" maxHeight="1.7976931348623157E308" tabClosingPolicy="UNAVAILABLE">
@@ -121,23 +122,27 @@
                               <content>
                                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                        <children>
-                                          <AnchorPane layoutX="46.0" layoutY="24.6" prefHeight="402.0" prefWidth="250.0" AnchorPane.bottomAnchor="15.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="5.0">
+                                          <AnchorPane layoutX="46.0" layoutY="24.6" prefWidth="270.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="5.0">
                                              <children>
-                                                        <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Player Accounts" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                                <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="75.0">
-                                                   <children>
-                                                              <ListView fx:id="playerListView" />
-                                                              <Button fx:id="removePlayerBtn" mnemonicParsing="false" prefHeight="11.0" prefWidth="270.0" text="Remove" />
-                                                   </children>
-                                                </VBox>
+                                                        <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Player" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                                 <HBox AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
                                                    <children>
-                                                              <TextField fx:id="playerField" prefHeight="31.0" promptText="Add character name" HBox.hgrow="ALWAYS">
+                                                              <TextField fx:id="playerField" prefHeight="25.0" promptText="Add Account Name" HBox.hgrow="ALWAYS">
                                                          <HBox.margin>
-                                                            <Insets right="5.0" />
+                                                            <Insets right="10.0" />
                                                          </HBox.margin>
                                                       </TextField>
-                                                              <Button fx:id="addPlayerButton" mnemonicParsing="false" prefHeight="31.0" prefWidth="35.0" text="+" />
+                                                      <Button fx:id="refreshPlayerBtn" maxHeight="1.7976931348623157E308" mnemonicParsing="false" prefWidth="80.0" text="Refresh" HBox.hgrow="ALWAYS" />
+                                                   </children>
+                                                </HBox>
+                                                <HBox layoutY="75.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="75.0">
+                                                   <children>
+                                                      <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Character">
+                                                         <HBox.margin>
+                                                            <Insets right="10.0" top="5.0" />
+                                                         </HBox.margin>
+                                                      </Text>
+                                                      <ComboBox fx:id="characterCB" maxWidth="1.7976931348623157E308" prefHeight="25.0" HBox.hgrow="ALWAYS" />
                                                    </children>
                                                 </HBox>
                                              </children>
@@ -151,13 +156,26 @@
                                           <AnchorPane fx:id="autoUpdateLayout" layoutX="416.0" layoutY="22.0" prefWidth="270.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="10.0">
                                              <children>
                                                         <CheckBox fx:id="autoUpdate" mnemonicParsing="false" text="Enable Periodic Updates" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="25.0" />
-                                                <Slider fx:id="updateSlider" blockIncrement="5.0" majorTickUnit="15.0" max="65.0" min="5.0" minorTickCount="1" value="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="85.0" />
-                                                <Label fx:id="updateTime" text="5 min" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="81.0" />
+                                                <HBox layoutX="-3.0" layoutY="81.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                                                   <children>
+                                                      <Slider fx:id="updateSlider" blockIncrement="5.0" majorTickUnit="15.0" max="65.0" min="5.0" minorTickCount="1" value="5.0" HBox.hgrow="ALWAYS">
+                                                         <HBox.margin>
+                                                            <Insets right="5.0" />
+                                                         </HBox.margin>
+                                                      </Slider>
+                                                      <Label fx:id="updateTime" text="5 min" />
+                                                   </children>
+                                                </HBox>
                                                 <CheckBox fx:id="autoUpdatePlayerOffers" layoutY="19.0" mnemonicParsing="false" text="Always include player offers" AnchorPane.topAnchor="50.0" />
                                                 <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" text="Auto Updating" AnchorPane.topAnchor="0.0" />
                                              </children>
                                           </AnchorPane>
-                                          <Button fx:id="resetWindowBtn" layoutX="29.6" layoutY="103.6" mnemonicParsing="false" prefHeight="26.0" prefWidth="270.0" text="Reset Window Size" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="80.0" />
+                                          <AnchorPane layoutX="19.600000381469727" layoutY="89.5999984741211" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="80.0">
+                                             <children>
+                                                <Button fx:id="resetWindowBtn" mnemonicParsing="false" prefHeight="25.0" prefWidth="270.0" text="Reset Window Size" AnchorPane.topAnchor="25.0" />
+                                                <Text fill="#d8d8d8" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="UI" AnchorPane.topAnchor="0.0" />
+                                             </children>
+                                          </AnchorPane>
                                        </children>
                                     </AnchorPane>
                               </content>
@@ -192,7 +210,7 @@
                                           </AnchorPane>
                                           <AnchorPane layoutX="353.6" layoutY="189.6" prefHeight="50.0" prefWidth="270.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="200.0">
                                              <children>
-                                                <Text id="text-id" fill="#d8d8d8" layoutX="42.0" layoutY="11.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Web Parsing" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                <Text id="text-id" fill="#d8d8d8" layoutX="42.0" layoutY="11.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text-id" text="Data Source" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                                 <ComboBox fx:id="webParsingCB" layoutY="31.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />
                                              </children>
                                           </AnchorPane>

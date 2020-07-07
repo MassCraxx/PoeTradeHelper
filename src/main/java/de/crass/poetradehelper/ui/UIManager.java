@@ -24,12 +24,13 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
@@ -46,8 +47,9 @@ import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
-import java.util.*;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 public class UIManager implements TradeManager.DealParseListener, PropertyManager.UICallback, PoeNinjaParser.PoeNinjaListener, PoeLogReader.Listener {
     private static UIManager instance;
@@ -122,12 +124,6 @@ public class UIManager implements TradeManager.DealParseListener, PropertyManage
     private ComboBox<String> webParsingCB;
 
     @FXML
-    private Button addPlayerButton;
-
-    @FXML
-    private Button removePlayerBtn;
-
-    @FXML
     private ComboBox<String> leagueCB;
 
     @FXML
@@ -143,13 +139,16 @@ public class UIManager implements TradeManager.DealParseListener, PropertyManage
     private TextField playerField;
 
     @FXML
+    private ComboBox<String> characterCB;
+
+    @FXML
+    private Button refreshPlayerBtn;
+
+    @FXML
     private Button updateButton;
 
     @FXML
     private CheckBox filterOutOfStock;
-
-    @FXML
-    private ListView<String> playerListView;
 
     @FXML
     private Button addCurrencyFilterBtn;
@@ -659,20 +658,34 @@ public class UIManager implements TradeManager.DealParseListener, PropertyManage
         restoreCurrencyFilterBtn.setTooltip(new Tooltip("Restore default currency list"));
         restoreCurrencyFilterBtn.setOnAction(event -> PropertyManager.getInstance().resetFilterList());
 
-        ObservableList<String> playerList = PropertyManager.getInstance().getPlayerList();
-        playerListView.setItems(playerList);
-        playerListView.setTooltip(new Tooltip("Offers from account in this list will be shown in PlayerOverview"));
+        String player = PropertyManager.getInstance().getPlayerAccount();
+        playerField.setTooltip(new Tooltip("Offers from account in this field will be shown in PlayerOverview"));
+        playerField.setText(player);
 
-        addPlayerButton.setTooltip(new Tooltip("Add an account name from the text field to the list"));
-        addPlayerButton.setOnAction(event -> {
-            String newPlayer = playerField.getText();
-            if (!newPlayer.isEmpty() && !playerList.contains(newPlayer))
-                playerList.add(newPlayer);
-            playerField.setText("");
+        refreshPlayerBtn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                String player = playerField.getText();
+                if (player != null && !player.isEmpty()) {
+                    PropertyManager.getInstance().setPlayerAccount(player);
+                    tradeManager.updateCharacter(player);
+                    if (!tradeManager.getCharacterList().isEmpty() && (characterCB.getValue() == null || characterCB.getValue().isEmpty())) {
+                        characterCB.setValue(tradeManager.getCharacterList().get(0));
+                    }
+                } else {
+                    LogManager.getInstance().log(getClass(), "Insert your Account name to retrieve your players for this league.");
+                }
+            }
         });
 
-        removePlayerBtn.setTooltip(new Tooltip("Remove selected player from list"));
-        removePlayerBtn.setOnAction(event -> playerList.remove(playerListView.getFocusModel().getFocusedItem()));
+        characterCB.setItems(tradeManager.getCharacterList());
+        characterCB.setValue(PropertyManager.getInstance().getPlayerCharacter());
+        characterCB.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                PropertyManager.getInstance().setPlayerCharacter(characterCB.getValue());
+            }
+        });
 
         leagueCB.setTooltip(new Tooltip("Set Path of Exile league"));
         leagueCB.setItems(tradeManager.getLeagueList());
@@ -680,7 +693,7 @@ public class UIManager implements TradeManager.DealParseListener, PropertyManage
 
         leagueCB.setOnAction(event -> PropertyManager.getInstance().setLeague(leagueCB.getValue()));
 
-        removePlayerBtn.setTooltip(new Tooltip("Reset Window to default size"));
+        resetWindowBtn.setTooltip(new Tooltip("Reset Window and Overlay to defaults"));
         resetWindowBtn.setOnAction(event -> {
             Main.currentStage.setWidth(PropertyManager.defaultWindowWidth);
             Main.currentStage.setHeight(PropertyManager.defaultWindowHeight);
@@ -965,8 +978,10 @@ public class UIManager implements TradeManager.DealParseListener, PropertyManage
     private void resetUI() {
         currencyList.setPlaceholder(new Label("No deals to show."));
         Label label = new Label("No player offers found.");
-        if (PropertyManager.getInstance().getPlayerList().isEmpty()) {
-            label = new Label("Add your poe in-game account name to the list in Settings -> General to evaluate your current offers.");
+        if (PropertyManager.getInstance().getPlayerAccount().isEmpty()) {
+            label = new Label("To evaluate your current offers, add your Path of Exile account name in the Settings tab,\nrefresh and select your character from the list.");
+            label.setPadding(new Insets(0,10,0,10));
+            label.setTextOverrun(OverrunStyle.ELLIPSIS);
         }
         playerDealList.setPlaceholder(label);
 

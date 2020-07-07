@@ -139,15 +139,11 @@ public class OverlayFrame extends JFrame {
         JButton hideout = getButton("H", e -> hideout(playerName));
         JButton trade = getButton("T", e -> trade(playerName));
         JButton kick = getButton("-", e -> {
-            //FIXME will only work with first accountname
             if (!in) {
-                List<String> playerList = PropertyManager.getInstance().getPlayerList();
-                if (playerList != null && !playerList.isEmpty()) {
-                    String ownPlayer = playerList.get(0);
-                    if (ownPlayer != null && !ownPlayer.isEmpty()) {
-                        kick(ownPlayer);
-                        return;
-                    }
+                String playerAccount = PropertyManager.getInstance().getPlayerCharacter();
+                if (playerAccount != null && !playerAccount.isEmpty()) {
+                    kick(playerAccount);
+                    return;
                 }
                 LogManager.getInstance().log(getClass(), "You must set a player account in the settings to leave a party.");
             } else {

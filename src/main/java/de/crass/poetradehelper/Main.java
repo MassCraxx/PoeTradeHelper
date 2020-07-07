@@ -27,7 +27,6 @@ import javafx.stage.Stage;
 import java.awt.*;
 import java.net.URI;
 
-@SuppressWarnings("unchecked")
 public class Main extends Application{
 
     public static final String title = "PoeTradeHelper";

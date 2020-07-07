@@ -34,7 +34,8 @@ public class PropertyManager {
     public static final String EXCESSIVE_TRESHOLD = "filter_excessive_treshold";
     public static final String CURRENCY_LIST = "secondary_currency_list";
     public static final String PRIMARY_CURRENCY_LIST = "primary_currency_list";
-    public static final String PLAYER_LIST = "player_list";
+    private static final String PLAYER_ACCOUNT = "player_account";
+    private static final String PLAYER_CHARACTER = "player_character";
     public static final String POE_PATH = "poe_path";
     public static final String VOICE_VOLUME = "voice_volume";
     public static final String VOICE_SPEAKER = "voice_speaker";
@@ -63,7 +64,6 @@ public class PropertyManager {
     // Current Values
     private ObservableList<CurrencyID> currencyFilterList;
     private ObservableList<CurrencyID> primaryCurrencyList;
-    private ObservableList<String> playerList;
     private ObservableList<String> ignoredPlayers;
 
     private CurrencyID primaryCurrency;
@@ -106,7 +106,6 @@ public class PropertyManager {
         currentLeague = appProps.getProperty(LEAGUE_KEY, defaultLeague);
         currencyFilterList = FXCollections.observableArrayList(stringToCurrencyList(appProps.getProperty(CURRENCY_LIST, appProps.getProperty("currency_list",defaultCurrencyFilterString))));
         primaryCurrencyList = FXCollections.observableArrayList(stringToCurrencyList(appProps.getProperty(PRIMARY_CURRENCY_LIST, defaultPrimaryCurrencyString)));
-        playerList = FXCollections.observableArrayList(stringToList(appProps.getProperty(PLAYER_LIST, null)));
         primaryCurrency = CurrencyID.getByTradeID(appProps.getProperty(PRIMARY_CURRENCY, defaultPrimary));
 
         filterNoStockInfo = Boolean.parseBoolean(appProps.getProperty(FILTER_NOAPI, defaultFilterStockOffers));
@@ -125,7 +124,6 @@ public class PropertyManager {
         appProps.setProperty(LEAGUE_KEY, getCurrentLeague());
         appProps.setProperty(CURRENCY_LIST, currencyListToString(currencyFilterList));
         appProps.setProperty(PRIMARY_CURRENCY_LIST, currencyListToString(primaryCurrencyList));
-        appProps.setProperty(PLAYER_LIST, listToString(playerList));
         appProps.setProperty(PRIMARY_CURRENCY, primaryCurrency.getTradeID());
 
         appProps.setProperty(FILTER_NOAPI, String.valueOf(filterNoStockInfo));
@@ -167,9 +165,22 @@ public class PropertyManager {
         this.primaryCurrency = primaryCurrency;
     }
 
-    public ObservableList<String> getPlayerList() {
-        return playerList;
+    public String getPlayerAccount() {
+        return getProp(PLAYER_ACCOUNT, "");
     }
+
+    public void setPlayerAccount(String account) {
+        setProp(PLAYER_ACCOUNT, account);
+    }
+
+    public String getPlayerCharacter() {
+        return getProp(PLAYER_CHARACTER, "");
+    }
+
+    public void setPlayerCharacter(String player) {
+        setProp(PLAYER_CHARACTER, player);
+    }
+
 
     public boolean getFilterNoStockInfo() {
         return filterNoStockInfo;
@@ -384,8 +395,8 @@ public class PropertyManager {
     public double getWindowHeight() {
         return windowHeight;
     }
-
     public interface UICallback {
+
         void onPropChanged(String key, String value);
     }
 

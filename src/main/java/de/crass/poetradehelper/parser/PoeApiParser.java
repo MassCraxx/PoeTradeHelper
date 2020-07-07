@@ -17,9 +17,11 @@ import java.net.UnknownHostException;
  */
 class PoeApiParser {
     private final static String leagueParseURL = "http://api.pathofexile.com/leagues";
+    private final static String accountParseURL = "https://www.pathofexile.com/character-window/get-characters";
     private final static String leagueParams = "?type=main&compact=1";
 
     private ObservableList<String> currentLeagues = FXCollections.observableArrayList();
+    private ObservableList<String> currentChars = FXCollections.observableArrayList();
 
     PoeApiParser() {
         updateLeagues();
@@ -97,9 +99,47 @@ class PoeApiParser {
     }
 
     ObservableList<String> getCurrentLeagues() {
-//        if (currentLeagues.isEmpty()) {
-//            updateLeagues();
-//        }
         return currentLeagues;
+    }
+
+    ObservableList<String> fetchChars(String accountName) {
+        String query = "?accountName=" + accountName;
+        try {
+            String response = HttpManager.getInstance().get(accountParseURL, query);
+            if (response.startsWith("[")) {
+
+                currentChars.clear();
+                JSONArray chars = new JSONArray(response);
+                for (Object character : chars) {
+                    if (character instanceof JSONObject) {
+                        if (PropertyManager.getInstance().getCurrentLeague().equalsIgnoreCase(((JSONObject) character).getString("league")))
+                            currentChars.add(((JSONObject) character).getString("name"));
+                    }
+                }
+            } else if (response.startsWith("{")) {
+                JSONObject data = new JSONObject(response);
+                if (!data.isNull("error")) {
+                    String msg = ((JSONObject) data.get("error")).getString("message");
+                    if ("Forbidden".equalsIgnoreCase(msg)) {
+                        JOptionPane.showMessageDialog(null, "Your account must be public to share character names.\nAlternatively set player_name in app.properties before you start the app.");
+                    } else {
+                        LogManager.getInstance().log(getClass(), "Fetching characters failed! " + msg);
+                    }
+                } else {
+                    LogManager.getInstance().log(getClass(), "Unexpected json response on fetching characters.");
+                }
+            } else {
+                LogManager.getInstance().log(getClass(), "Invalid response on fetching characters:\n" + response);
+            }
+        } catch (IOException e) {
+            LogManager.getInstance().log(getClass(), "Error while fetching Account! " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return currentChars;
+    }
+
+    public ObservableList<String> getCharacters() {
+        return currentChars;
     }
 }

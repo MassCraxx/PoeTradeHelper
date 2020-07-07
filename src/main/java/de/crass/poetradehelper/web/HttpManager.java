@@ -2,6 +2,7 @@ package de.crass.poetradehelper.web;
 
 import de.crass.poetradehelper.LogManager;
 import okhttp3.*;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -72,6 +73,20 @@ public class HttpManager {
             return null;
         }
         return new JSONObject(json);
+    }
+
+    public JSONArray getJsonArray(String fetchURL, String params) throws IOException, JSONException {
+        String json = get(fetchURL, params);
+        if (json == null || json.isEmpty()) {
+            LogManager.getInstance().log(getClass(), "Response from " + fetchURL + " was empty! Maybe the page is offline, check your internet connectivity");
+            return null;
+        }
+        if (json.startsWith("[")) {
+            return new JSONArray(json);
+        } else {
+            LogManager.getInstance().log(getClass(), "Response from " + fetchURL + " was no JSONArray!");
+            return null;
+        }
     }
 
     private String readAll(String url) throws IOException {

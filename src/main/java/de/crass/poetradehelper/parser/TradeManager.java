@@ -535,6 +535,14 @@ public class TradeManager implements PoeTradeWebParser.OfferParseListener {
         return poeApiParser.getCurrentLeagues();
     }
 
+    public ObservableList<String> getCharacterList() {
+        return poeApiParser.getCharacters();
+    }
+
+    public ObservableList<String> updateCharacter(String account) {
+        return poeApiParser.fetchChars(account);
+    }
+
     public void updateCurrencyValues(boolean forceUpdate) {
         poeNinjaParser.fetchRates(PropertyManager.getInstance().getCurrentLeague(), forceUpdate);
     }
