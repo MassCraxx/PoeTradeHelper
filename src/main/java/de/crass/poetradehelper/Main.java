@@ -30,7 +30,7 @@ import java.net.URI;
 public class Main extends Application{
 
     public static final String title = "PoeTradeHelper";
-    public static final String versionText = "v0.9-SNAPSHOT";
+    public static final String versionText = "v0.9";
 
     public static Stage currentStage;
 
