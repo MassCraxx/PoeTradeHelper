@@ -979,9 +979,8 @@ public class UIManager implements TradeManager.DealParseListener, PropertyManage
         currencyList.setPlaceholder(new Label("No deals to show."));
         Label label = new Label("No player offers found.");
         if (PropertyManager.getInstance().getPlayerAccount().isEmpty() && PropertyManager.getInstance().getPlayerCharacter().isEmpty()) {
-            label = new Label("To evaluate your current offers, add your Path of Exile account name in the Settings tab,\nrefresh and select your character from the list.");
+            label = new Label("To evaluate your current offers, add your Path of Exile account name in the Settings tab.");
             label.setPadding(new Insets(0,10,0,10));
-            label.setTextOverrun(OverrunStyle.ELLIPSIS);
         }
         playerDealList.setPlaceholder(label);
 
