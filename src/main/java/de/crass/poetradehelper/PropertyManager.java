@@ -8,9 +8,9 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.*;
 
 /**
@@ -23,7 +23,7 @@ public class PropertyManager {
     public final static boolean offlineMode = false;
 
     private Properties appProps;
-    private String propFilename = "app.properties";
+    private final String propFilename = "app.properties";
 
     // KEYS
     public static final String LEAGUE_KEY = "league";
@@ -50,7 +50,7 @@ public class PropertyManager {
     public static final Double defaultWindowHeight = 640.0;
     public static final String defaultLeague = null;
 
-    private final String defaultPrimary = "exalted";
+    private final String defaultPrimary = "divine";
     private final String defaultPoePath = "C:\\Program Files (x86)\\Grinding Gear Games\\Path of Exile\\";
 
     private final String defaultFilterStockOffers = "false";
@@ -58,8 +58,8 @@ public class PropertyManager {
     private final String defaultFilterExcessive = "true";
     private final String defaultExcessiveTreshold = "65";
 
-    private final String defaultCurrencyFilterString = "fusing,vaal,chisel,gcp,scour,alch,alt";
-    private final String defaultPrimaryCurrencyString = "mirror,mirror-shard,exalted,blessing-chayula,divine,exalted-shard";
+    private final String defaultCurrencyFilterString = "exalted,gcp";
+    private final String defaultPrimaryCurrencyString = "mirror,mirror-shard,exalted,blessing-chayula,divine,exalted-shard,chaos";
 
     // Current Values
     private ObservableList<CurrencyID> currencyFilterList;
@@ -96,7 +96,7 @@ public class PropertyManager {
         File propFile = new File(propFilename);
         if (propFile.exists() && propFile.canRead()) {
             try {
-                appProps.load(new FileInputStream(propFile));
+                appProps.load(Files.newInputStream(propFile.toPath()));
             } catch (IOException e) {
                 LogManager.getInstance().log(getClass(), "Could not read properties from disk! File may be corrupted...");
             }

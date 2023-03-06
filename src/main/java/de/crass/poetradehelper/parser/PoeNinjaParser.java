@@ -108,8 +108,11 @@ public class PoeNinjaParser {
         for (Object currencyDetailsObject : idArray) {
             if (currencyDetailsObject instanceof JSONObject) {
                 JSONObject currencyDetails = (JSONObject) currencyDetailsObject;
-                if (currencyDetails.get("tradeId") != null && currencyDetails.getInt("poeTradeId") > 0 && !currencyDetails.get("tradeId").equals(JSONObject.NULL)) {
+                if (!currencyDetails.isNull("tradeId") && !currencyDetails.isNull("id") && currencyDetails.getInt("id") > 0 && !currencyDetails.get("tradeId").equals(JSONObject.NULL)) {
                     new CurrencyID(currencyDetails).store();
+                } else if (currencyDetails.has("name")) {
+                    // Probably deprecated league items - ignore
+                    //LogManager.getInstance().log(getClass(), currencyDetails.getString("name") + " had no tradeId!");
                 }
             }
         }

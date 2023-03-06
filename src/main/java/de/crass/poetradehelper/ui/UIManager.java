@@ -8,7 +8,6 @@ import de.crass.poetradehelper.model.CurrencyID;
 import de.crass.poetradehelper.model.CurrencyOffer;
 import de.crass.poetradehelper.parser.PoeNinjaParser;
 import de.crass.poetradehelper.parser.PoeTradeApiParser;
-import de.crass.poetradehelper.parser.PoeTradeWebParser;
 import de.crass.poetradehelper.parser.TradeManager;
 import de.crass.poetradehelper.tts.PoeLogReader;
 import javafx.application.Platform;
@@ -552,7 +551,7 @@ public class UIManager implements TradeManager.DealParseListener, PropertyManage
                 public void run() {
                     tradeManager.updateCurrencyValues(true);
                 }
-            });
+            }).start();
         });
 
         valueInputCB.setItems(currencies);
@@ -683,7 +682,11 @@ public class UIManager implements TradeManager.DealParseListener, PropertyManage
         characterCB.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                PropertyManager.getInstance().setPlayerCharacter(characterCB.getValue());
+                if (characterCB != null && characterCB.getValue() != null){
+                    PropertyManager.getInstance().setPlayerCharacter(characterCB.getValue());
+                } else {
+                    PropertyManager.getInstance().setPlayerCharacter("");
+                }
             }
         });
 
@@ -701,7 +704,7 @@ public class UIManager implements TradeManager.DealParseListener, PropertyManage
             OverlayManager.getInstance().setOverlayLocation(new Point(-1, -1));
         });
 
-        webParsingCB.setItems(FXCollections.observableArrayList(PoeTradeWebParser.IDENTIFIER, PoeTradeApiParser.IDENTIFIER));
+        webParsingCB.setItems(FXCollections.observableArrayList(PoeTradeApiParser.IDENTIFIER));
         String defaultParser = PropertyManager.getInstance().getCurrentWebParser();
         if (defaultParser.equals(PoeTradeApiParser.IDENTIFIER)) {
             filterWithoutStockInfo.setSelected(true);
@@ -882,11 +885,15 @@ public class UIManager implements TradeManager.DealParseListener, PropertyManage
             PropertyManager.getInstance().setFilterNoStockInfo(false);
             filterOutOfStock.setDisable(true);
             filterWithoutStockInfo.setDisable(true);
+            filterOutOfStock.setVisible(false);
+            filterWithoutStockInfo.setVisible(false);
         } else {
             filterOutOfStock.setSelected(false);
             filterWithoutStockInfo.setSelected(false);
             filterOutOfStock.setDisable(false);
             filterWithoutStockInfo.setDisable(false);
+            filterOutOfStock.setVisible(true);
+            filterWithoutStockInfo.setVisible(true);
         }
         tradeManager.setWebParser(newValue);
         resetUiItems();
@@ -1100,5 +1107,10 @@ public class UIManager implements TradeManager.DealParseListener, PropertyManage
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void setImageUrl(String imageUrl, ImageView view) {
+        final Image image = new Image(imageUrl);
+        Platform.runLater(() -> view.setImage(image));
     }
 }

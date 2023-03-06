@@ -74,8 +74,13 @@ public class MarketCell<T> extends javafx.scene.control.ListCell<CurrencyDeal> {
 
             }
 
-            String url = deal.getSecondaryCurrencyID().getID() + ".png";
-            UIManager.setImage(url, currencyIcon);
+            if (deal.getSecondaryCurrencyID().getIconUrl() != null && !deal.getSecondaryCurrencyID().getIconUrl().isEmpty()){
+                UIManager.setImageUrl(deal.getSecondaryCurrencyID().getIconUrl(), currencyIcon);
+            } else {
+                String url = deal.getSecondaryCurrencyID().getTradeID() + ".png";
+                UIManager.setImage(url, currencyIcon);
+            }
+
             currencyIcon.setCache(true);
             currencyIcon.setCacheHint(CacheHint.SPEED);
 

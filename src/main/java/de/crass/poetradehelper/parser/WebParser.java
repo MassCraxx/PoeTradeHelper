@@ -56,8 +56,6 @@ public abstract class WebParser {
         }
     }
 
-
-
     void doUpdate(List<CurrencyID> currencyList, boolean clear) {
         try {
             updating = true;

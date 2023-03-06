@@ -7,28 +7,38 @@ import java.util.Random;
 import java.util.Set;
 
 public class CurrencyID {
-    public static CurrencyID ALCHEMY = new CurrencyID(3, "alch", "Orb of Alchemy");
-    public static CurrencyID CHAOS = new CurrencyID(4, "chaos", "Chaos Orb");
-    public static CurrencyID EXALTED = new CurrencyID(6, "exalted", "Exalted Orb");
-    public static CurrencyID REGAL = new CurrencyID(14, "regal", "Regal Orb");
+    public static CurrencyID CHAOS = new CurrencyID(1, "chaos", "Chaos Orb");
+    public static CurrencyID EXALTED = new CurrencyID(2, "exalted", "Exalted Orb");
+    public static CurrencyID DIVINE = new CurrencyID(3, "divine", "Divine Orb");
+    public static CurrencyID ALCHEMY = new CurrencyID(4, "alch", "Orb of Alchemy");
+    public static CurrencyID REGAL = new CurrencyID(7, "regal", "Regal Orb");
 
     private int id;
-    private String tradeID;
-    private String displayName;
-    private int stackSize = 0;
-
+    private final String tradeID;
+    private final String displayName;
+    private final String iconUrl;
     static Set<CurrencyID> values = new HashSet<>();
 
-    public CurrencyID(JSONObject object){
-        id = object.getInt("poeTradeId");
+    public CurrencyID(JSONObject object) {
+        id = object.getInt("id");
         displayName = object.getString("name");
         tradeID = object.getString("tradeId");
+        if (!object.isNull("icon")) {
+            iconUrl = object.getString("icon");
+        } else {
+            iconUrl = null;
+        }
     }
 
     private CurrencyID(int ID, String tradeID, String displayName) {
+        this(ID, tradeID, displayName, null);
+    }
+
+    private CurrencyID(int ID, String tradeID, String displayName, String iconUrl) {
         id = ID;
         this.tradeID = tradeID;
         this.displayName = displayName;
+        this.iconUrl = iconUrl;
     }
 
     public void store(){
@@ -37,6 +47,10 @@ public class CurrencyID {
 
     public int getID() {
         return id;
+    }
+
+    public String getIconUrl() {
+        return iconUrl;
     }
 
     public static CurrencyID get(int ID) {
@@ -53,6 +67,8 @@ public class CurrencyID {
             return EXALTED;
         } else if(ID.equals(CHAOS.tradeID)){
             return CHAOS;
+        } else if(ID.equals(DIVINE.tradeID)){
+            return DIVINE;
         }
 
         for (CurrencyID id : getValues()) {
@@ -117,12 +133,11 @@ public class CurrencyID {
         return id;
     }
 
+    // FIXME Fetch from online sounce - now only works for 20stack items and predefined.
     public int getStackSize() {
-        // FIXME only works for 20stack items and predefined
+        int stackSize = 20;
         if (CurrencyID.CHAOS.equals(this) || CurrencyID.EXALTED.equals(this) || CurrencyID.ALCHEMY.equals(this) || CurrencyID.REGAL.equals(this)) {
             stackSize = 10;
-        } else if (stackSize == 0) {
-            stackSize = 20;
         }
 
         return stackSize;

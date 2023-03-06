@@ -52,12 +52,22 @@ public class HttpManager {
             LogManager.getInstance().debug(getClass(), "Response Code for " + url + " was " + response.code());
         }
         if (!response.isSuccessful()) {
-            if ("Not Allowed".equalsIgnoreCase(response.message()) && response.code() == 405) {
-                String tinyUrl = url.substring(0, url.indexOf('/', 9));
-                LogManager.getInstance().log(getClass(), "Request failed! " + tinyUrl + " may be under maintenance.");
+            JSONObject result = new JSONObject(response.body().string());
+            if (!result.isNull("error")) {
+                String msg = ((JSONObject) result.get("error")).getString("message");
+                LogManager.getInstance().log(getClass(), "Request failed! " + msg);
             } else {
-                LogManager.getInstance().log(getClass(), "Post to " + url + " was not successful! " + response.message());
+                // fallback feedback
+                if (response.code() == 405 || "Not Allowed".equalsIgnoreCase(response.message())) {
+                    String tinyUrl = url.substring(0, url.indexOf('/', 9));
+                    LogManager.getInstance().log(getClass(), "Request failed! " + tinyUrl + " may be under maintenance.");
+                } else if (response.code() == 429) {
+                    LogManager.getInstance().log(getClass(), "Request failed! Too many requests!");
+                } else {
+                    LogManager.getInstance().log(getClass(), "Post to " + url + " was not successful! " + response.message());
+                }
             }
+
             return null;
         }
 

@@ -17,6 +17,10 @@ import java.util.regex.Pattern;
 
 import static de.crass.poetradehelper.PropertyManager.offlineMode;
 
+/**
+ * @deprecated The page went offline.
+ */
+@Deprecated
 public class PoeTradeWebParser extends WebParser{
     public static final String IDENTIFIER = "poe.trade";
 

@@ -116,6 +116,9 @@ class PoeApiParser {
                             currentChars.add(((JSONObject) character).getString("name"));
                     }
                 }
+                if (currentChars.isEmpty()) {
+                    LogManager.getInstance().log(getClass(), "No characters found for league " + PropertyManager.getInstance().getCurrentLeague());
+                }
             } else if (response.startsWith("{")) {
                 JSONObject data = new JSONObject(response);
                 if (!data.isNull("error")) {
@@ -129,7 +132,8 @@ class PoeApiParser {
                     LogManager.getInstance().log(getClass(), "Unexpected json response on fetching characters.");
                 }
             } else {
-                LogManager.getInstance().log(getClass(), "Invalid response on fetching characters:\n" + response);
+                //LogManager.getInstance().log(getClass(), "Invalid response on fetching characters:\n" + response);
+                LogManager.getInstance().log(getClass(), "Player account '" + accountName + "' could not be found.");
             }
         } catch (IOException e) {
             LogManager.getInstance().log(getClass(), "Error while fetching Account! " + e.getMessage());
